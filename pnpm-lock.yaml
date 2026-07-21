@@ -17,6 +17,9 @@ importers:
       '@erp/shared':
         specifier: workspace:*
         version: link:../packages/shared
+      '@supabase/supabase-js':
+        specifier: ^2.47.10
+        version: 2.110.7
       hono:
         specifier: ^4.6.14
         version: 4.12.31

@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { api } from './lib/api'
 import { SystemAdministration } from './modules/SystemAdministration'
+import { GeneralLedger } from './modules/GeneralLedger'
 
 // The 12 ERP modules. Phase 1 fills in System Administration; later phases fill the rest.
 const MODULES = [
@@ -85,9 +86,10 @@ export function App() {
           </div>
         </header>
         <section style={{ padding: 24, color: '#334155', overflowY: 'auto' }}>
-          {active === 'System Administration'
-            ? <SystemAdministration entityId={entityId} onEntitiesChanged={loadEntities} />
-            : <p>This module is built in its phase — see CLAUDE.md and the phase prompts.</p>}
+          {active === 'System Administration' && <SystemAdministration entityId={entityId} onEntitiesChanged={loadEntities} />}
+          {active === 'General Ledger' && <GeneralLedger entityId={entityId} />}
+          {active !== 'System Administration' && active !== 'General Ledger' &&
+            <p>This module is built in its phase — see CLAUDE.md and the phase prompts.</p>}
         </section>
       </main>
     </div>
