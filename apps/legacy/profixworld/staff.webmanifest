@@ -1,0 +1,28 @@
+{
+ "name": "ProFix Staff",
+ "short_name": "Staff",
+ "start_url": "/staff.html?src=pwa",
+ "scope": "/staff.html",
+ "display": "standalone",
+ "background_color": "#F6F7F9",
+ "theme_color": "#0E9F6E",
+ "icons": [
+  {
+   "src": "/staff-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "/staff-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ],
+ "id": "/staff.html?v=2026-07",
+ "categories": [
+  "business",
+  "productivity"
+ ]
+}

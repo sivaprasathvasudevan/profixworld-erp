@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E9F6E">
+<link rel="manifest" href="/staff.webmanifest">
+<script src="/profix-scan.js"></script>
+<link rel="apple-touch-icon" href="/staff-192.png">
+<title>ProFix Staff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#FF6A2B,#E11D2A);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--card:#fff;--ok:#0E9F6E;--line:#E7E9EE;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;align-items:center;justify-content:space-between}
+.top .brand{font-weight:800;font-size:18px;letter-spacing:.2px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:480px;margin:0 auto;padding:16px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input{width:100%;min-height:52px;font:inherit;font-size:18px;font-weight:700;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;letter-spacing:1px}
+input:focus{outline:2px solid #FF6A2B;outline-offset:1px;border-color:transparent}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.4px}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border:0;border-radius:14px;font:inherit;font-size:16px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff}
+.btn:disabled{opacity:.55}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+/* signature: the punch dial */
+.dialWrap{display:flex;flex-direction:column;align-items:center;padding:26px 0 18px}
+.dial{width:230px;height:230px;border-radius:50%;border:0;cursor:pointer;color:#fff;background:var(--grad);box-shadow:0 14px 34px rgba(225,29,42,.32),inset 0 -6px 18px rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .12s;font:inherit}
+.dial:active{transform:scale(.97)}
+.dial.out{background:linear-gradient(135deg,#1F2430,#3A4152);box-shadow:0 14px 34px rgba(31,36,48,.32),inset 0 -6px 18px rgba(0,0,0,.2)}
+.dial .big{font-size:22px;font-weight:800;letter-spacing:.3px}
+.dial .timer{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.dial .sub{font-size:12px;opacity:.9}
+.pulse{animation:pu 2.4s ease-in-out infinite}
+@keyframes pu{0%,100%{box-shadow:0 14px 34px rgba(225,29,42,.32)}50%{box-shadow:0 14px 46px rgba(225,29,42,.5)}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.stat:last-child{border:0}
+.stat b{font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:8px;margin:4px 0 14px}
+.tabs button{flex:1;min-height:44px;border:0;border-radius:12px;font:inherit;font-weight:800;font-size:14px;background:#fff;color:var(--mut);box-shadow:0 1px 3px rgba(20,25,40,.07);cursor:pointer}
+.tabs button.on{background:var(--grad);color:#fff}
+.row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border:0}
+.pill{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap;align-self:center}
+.pill.open{background:#FDEBE6;color:#E11D2A}
+.pill.ok{background:#E6F6EF;color:#0E9F6E}
+.pill.pay{background:#EDEFF5;color:#5A6272}
+.tot{display:flex;gap:10px;margin-top:12px}
+.tot .card{flex:1;margin:0;text-align:center;padding:12px}
+.tot .n{font-size:20px;font-weight:800}
+.tot .l{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hide{display:none!important}
+.skel{height:54px;border-radius:12px;background:linear-gradient(90deg,#EDEFF3 25%,#F7F8FA 50%,#EDEFF3 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:10px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--mut);padding:26px 10px;font-size:14px}
+.monthNav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.monthNav button{border:1.5px solid var(--line);background:#fff;border-radius:10px;min-width:44px;min-height:40px;font-size:18px;cursor:pointer}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6A2B;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9" data-t="staffTitle">Staff</span></div>
+  <div style="display:flex;gap:8px">
+    <button id="langBtn" aria-label="Language">த</button>
+    <button id="installBtn">📲</button>
+    <button id="outBtn" class="hide" data-t="logout">Log out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- LOGIN -->
+  <section id="vLogin">
+    <div class="card">
+      <h2 data-t="loginTitle">Staff sign in</h2>
+      <p class="mut" data-t="loginSub">Enter the staff code and PIN given by the shop.</p>
+      <label for="code" data-t="codeLbl">Staff code</label>
+      <input id="code" autocomplete="username" autocapitalize="characters" placeholder="RAVI1">
+      <label for="pin" data-t="pinLbl">PIN</label>
+      <input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="••••">
+      <div style="height:16px"></div>
+      <button class="btn" id="loginBtn" data-t="loginBtn">Sign in</button>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="vHome" class="hide">
+    <div class="card" style="padding-top:12px">
+      <div class="mut" id="hello"></div>
+      <div class="dialWrap">
+        <button class="dial pulse" id="dial" aria-live="polite">
+          <span class="big" id="dialBig">Clock IN</span>
+          <span class="timer hide" id="dialTimer">0:00:00</span>
+          <span class="sub" id="dialSub"></span>
+        </button>
+      </div>
+      <div class="stat"><span data-t="todayHrs">Today's hours</span><b id="todaySecs">0:00</b></div>
+      <div class="stat"><span data-t="delMode">🛵 Delivery mode (share live location)</span>
+        <button id="delToggle" class="btn ghost" style="width:auto;min-height:40px;padding:0 16px;font-size:13px" aria-pressed="false" data-t="delOff">OFF</button>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button id="tabA" class="on" data-t="tabAtt">Attendance</button>
+      <button id="tabI" data-t="tabInc">Incentives</button>
+    </div>
+
+    <section id="paneA">
+      <div class="card">
+        <div class="monthNav">
+          <button id="mPrev" aria-label="Previous month">‹</button>
+          <b id="mLabel"></b>
+          <button id="mNext" aria-label="Next month">›</button>
+        </div>
+        <div id="attList"></div>
+        <div class="tot">
+          <div class="card"><div class="n" id="tDays">0</div><div class="l" data-t="days">Days</div></div>
+          <div class="card"><div class="n" id="tHours">0:00</div><div class="l" data-t="hours">Hours</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="paneI" class="hide">
+      <div class="card">
+        <div id="incList"></div>
+        <div class="tot">
+          <div class="card"><div class="n" id="iAsg">₹0</div><div class="l" data-t="assigned">Assigned</div></div>
+          <div class="card"><div class="n" id="iPaid">₹0</div><div class="l" data-t="paid">Paid</div></div>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<div class="card" style="margin-top:12px">
+        <h2 data-t="confirmDel">✅ Confirm handover</h2>
+        <p class="mut" data-t="otpHint">At the door, ask the customer for their 4-digit code and enter it. This proves the right person received it.</p>
+        <label data-t="orderIdLbl">Order ID (last 6, from the order)</label>
+        <input id="otpOrderId" placeholder="e.g. 3F9A2C" autocapitalize="characters" style="text-transform:uppercase">
+        <label data-t="codeLbl2">Customer's 4-digit code</label>
+        <input id="otpCode" inputmode="numeric" maxlength="4" placeholder="••••">
+        <div style="height:10px"></div>
+        <button class="btn" id="otpVerify" data-t="verifyBtn">Verify & mark delivered</button>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY = "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+// ---------- i18n (EN / Tamil) ----------
+const T = {
+ en:{staffTitle:"Staff",logout:"Log out",loginTitle:"Staff sign in",loginSub:"Enter the staff code and PIN given by the shop.",codeLbl:"Staff code",pinLbl:"PIN",loginBtn:"Sign in",clockIn:"Clock IN",clockOut:"Clock OUT",onShift:"On shift since",todayHrs:"Today's hours",tabAtt:"Attendance",tabInc:"Incentives",days:"Days",hours:"Hours",assigned:"Assigned",paid:"Paid",noAtt:"No attendance this month yet.",noInc:"No incentives yet. Keep going! 💪",inAt:"In",outAt:"Out",openNow:"On shift",inOk:"Clocked in. Have a great shift! 🟢",outOk:"Clocked out. Shift:",err:"Something went wrong — try again",tapIn:"Tap to start your shift",tapOut:"Tap to end your shift",delMode:"🛵 Delivery mode (share live location)",delOn:"ON",delOff:"OFF",delNeedShift:"Clock in first, then start delivery mode",delStarted:"Sharing location with the shop 🛵",confirmDel:"✅ Confirm handover",otpHint:"At the door, ask the customer for their 4-digit code and enter it. This proves the right person received it.",orderIdLbl:"Order ID (last 6, from the order)",codeLbl2:"Customer\u2019s 4-digit code",verifyBtn:"Verify & mark delivered",otpOk:"Delivered ✓ verified",otpBad:"Wrong code — check with the customer",otpNeed:"Enter order ID and code"},
+ ta:{staffTitle:"பணியாளர்",logout:"வெளியேறு",loginTitle:"பணியாளர் உள்நுழைவு",loginSub:"கடை கொடுத்த குறியீடு மற்றும் PIN-ஐ உள்ளிடவும்.",codeLbl:"பணியாளர் குறியீடு",pinLbl:"PIN",loginBtn:"உள்நுழைக",clockIn:"பணி தொடங்கு",clockOut:"பணி முடி",onShift:"பணியில் —",todayHrs:"இன்றைய நேரம்",tabAtt:"வருகை",tabInc:"ஊக்கத்தொகை",days:"நாட்கள்",hours:"மணி",assigned:"ஒதுக்கியது",paid:"வழங்கியது",noAtt:"இந்த மாதம் வருகை இல்லை.",noInc:"இன்னும் ஊக்கத்தொகை இல்லை. தொடருங்கள்! 💪",inAt:"வருகை",outAt:"வெளியேற்றம்",openNow:"பணியில்",inOk:"பணி தொடங்கியது! 🟢",outOk:"பணி முடிந்தது. நேரம்:",err:"பிழை — மீண்டும் முயற்சிக்கவும்",tapIn:"பணியைத் தொடங்க தட்டவும்",tapOut:"பணியை முடிக்க தட்டவும்",delMode:"🛵 டெலிவரி பயன்முறை (இடத்தை பகிர்)",delOn:"இயக்கம்",delOff:"நிறுத்தம்",delNeedShift:"முதலில் பணியைத் தொடங்கவும்",delStarted:"கடையுடன் இடம் பகிரப்படுகிறது 🛵",confirmDel:"✅ ஒப்படைப்பை உறுதிசெய்",otpHint:"வாடிக்கையாளரிடம் 4-இலக்க குறியீட்டைக் கேட்டு உள்ளிடவும்.",orderIdLbl:"ஆர்டர் ஐடி (கடைசி 6)",codeLbl2:"4-இலக்க குறியீடு",verifyBtn:"சரிபார்த்து டெலிவரி",otpOk:"டெலிவரி ✓ உறுதி",otpBad:"தவறான குறியீடு",otpNeed:"ஐடி மற்றும் குறியீடு உள்ளிடவும்"}
+};
+let lang = localStorage.getItem("px_staff_lang") || "en";
+const t = k => (T[lang] && T[lang][k]) || T.en[k] || k;
+function applyLang(){
+  document.querySelectorAll("[data-t]").forEach(el=>{ el.textContent = t(el.dataset.t); });
+  document.getElementById("langBtn").textContent = lang==="en" ? "த" : "EN";
+  renderDial(); renderAtt(); renderInc();
+}
+
+// ---------- state ----------
+let CODE = localStorage.getItem("px_staff_code") || "";
+let PIN  = sessionStorage.getItem("px_staff_pin") || "";
+let STATUS = null;              // {name, role, open_in, today_seconds}
+let mY, mM;                     // month view
+let attRows = [], incRows = [];
+let tickTimer = null, baseSecs = 0, baseAt = 0;
+let delOn = false, delTimer = null;
+async function delPing(){
+  if(!delOn || !STATUS || !STATUS.open_in) return;
+  const g = await geo();
+  if(g.lat==null) return;
+  try{ await rpc("staff_ping_location",{p_code:CODE,p_pin:PIN,p_lat:g.lat,p_lng:g.lng}); }catch(e){}
+}
+function setDelMode(on){
+  delOn = on;
+  const b = $("delToggle");
+  b.textContent = on ? t("delOn") : t("delOff");
+  b.setAttribute("aria-pressed", on);
+  b.style.background = on ? "var(--grad)" : "";
+  b.style.color = on ? "#fff" : "";
+  b.style.border = on ? "0" : "";
+  if(delTimer) clearInterval(delTimer);
+  if(on){
+    if(!STATUS || !STATUS.open_in){ toast(t("delNeedShift")); delOn=false; b.textContent=t("delOff"); b.setAttribute("aria-pressed","false"); b.style.background=""; b.style.color=""; b.style.border=""; return; }
+    delPing(); delTimer = setInterval(delPing, 60000);
+    toast(t("delStarted"));
+  }
+}
+
+const $ = id => document.getElementById(id);
+const toast = m => { const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2600); };
+const buzz = () => { try{navigator.vibrate && navigator.vibrate(10);}catch(e){} };
+const hms = s => { s=Math.max(0,Math.floor(s)); const h=Math.floor(s/3600),m=Math.floor(s%3600/60); return h+":"+String(m).padStart(2,"0"); };
+const hmsFull = s => { s=Math.max(0,Math.floor(s)); const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return h+":"+String(m).padStart(2,"0")+":"+String(x).padStart(2,"0"); };
+const fdt = d => new Date(d).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+const fday = d => new Date(d).toLocaleDateString([], {day:"numeric",month:"short"});
+
+async function rpc(fn, args){
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw error;
+  return data;
+}
+function geo(){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res({});
+    const done = p => res(p ? {lat:p.coords.latitude,lng:p.coords.longitude} : {});
+    navigator.geolocation.getCurrentPosition(done, ()=>res({}), {timeout:5000,maximumAge:60000});
+  });
+}
+
+// ---------- views ----------
+function show(view){ $("vLogin").classList.toggle("hide", view!=="login"); $("vHome").classList.toggle("hide", view!=="home"); $("outBtn").classList.toggle("hide", view!=="home"); }
+
+async function login(){
+  const code = $("code").value.trim(), pin = $("pin").value.trim();
+  if(!code || !pin) return toast(t("err"));
+  $("loginBtn").disabled = true;
+  try{
+    STATUS = await rpc("staff_status", {p_code:code, p_pin:pin});
+    CODE = code; PIN = pin;
+    localStorage.setItem("px_staff_code", code);
+    sessionStorage.setItem("px_staff_pin", pin);
+    enterHome();
+  }catch(e){ toast(e.message || t("err")); }
+  $("loginBtn").disabled = false;
+}
+function logout(){
+  PIN=""; sessionStorage.removeItem("px_staff_pin");
+  STATUS=null; if(tickTimer)clearInterval(tickTimer);
+  $("pin").value=""; show("login");
+}
+
+function enterHome(){
+  show("home");
+  $("hello").textContent = "👋 " + STATUS.name + " · " + STATUS.role;
+  const now = new Date(); mY = now.getFullYear(); mM = now.getMonth()+1;
+  renderDial(); startTick(); loadMonth(); loadInc();
+}
+
+function renderDial(){
+  if(!STATUS) return;
+  const open = !!STATUS.open_in;
+  const dial = $("dial");
+  dial.classList.toggle("out", open);
+  dial.classList.toggle("pulse", !open);
+  $("dialBig").textContent = open ? t("clockOut") : t("clockIn");
+  $("dialTimer").classList.toggle("hide", !open);
+  $("dialSub").textContent = open ? (t("onShift")+" "+fdt(STATUS.open_in)) : t("tapIn");
+}
+function startTick(){
+  if(tickTimer) clearInterval(tickTimer);
+  baseSecs = Number(STATUS.today_seconds||0); baseAt = Date.now();
+  const tick = ()=>{
+    const extra = STATUS.open_in ? (Date.now()-baseAt)/1000 : 0;
+    $("todaySecs").textContent = hms(baseSecs+extra);
+    if(STATUS.open_in) $("dialTimer").textContent = hmsFull((Date.now()-new Date(STATUS.open_in).getTime())/1000);
+  };
+  tick(); tickTimer = setInterval(tick, 1000);
+}
+
+async function punch(){
+  const dial = $("dial"); dial.disabled = true; buzz();
+  try{
+    const g = await geo();
+    if(STATUS.open_in){
+      const r = await rpc("staff_clock_out", {p_code:CODE,p_pin:PIN,p_lat:g.lat??null,p_lng:g.lng??null});
+      toast(t("outOk")+" "+hms(r.seconds));
+    }else{
+      await rpc("staff_clock_in", {p_code:CODE,p_pin:PIN,p_lat:g.lat??null,p_lng:g.lng??null,p_device:navigator.userAgent.slice(0,110)});
+      toast(t("inOk"));
+    }
+    STATUS = await rpc("staff_status", {p_code:CODE,p_pin:PIN});
+    renderDial(); startTick(); loadMonth();
+  }catch(e){ toast(e.message || t("err")); }
+  dial.disabled = false;
+}
+
+// ---------- attendance ----------
+async function loadMonth(){
+  $("attList").innerHTML = '<div class="skel"></div><div class="skel"></div>';
+  try{ attRows = await rpc("staff_month", {p_code:CODE,p_pin:PIN,p_year:mY,p_month:mM}) || []; }
+  catch(e){ attRows=[]; toast(e.message||t("err")); }
+  renderAtt();
+}
+function renderAtt(){
+  if(!$("mLabel")) return;
+  $("mLabel").textContent = new Date(mY, mM-1, 1).toLocaleDateString([], {month:"long",year:"numeric"});
+  const list = $("attList"); if(!list) return;
+  if(!attRows.length){ list.innerHTML = '<div class="empty">'+t("noAtt")+'</div>'; $("tDays").textContent="0"; $("tHours").textContent="0:00"; return; }
+  let secs=0; const days=new Set();
+  list.innerHTML = attRows.map(r=>{
+    const open = !r.clock_out;
+    const dur = ((open?Date.now():new Date(r.clock_out).getTime()) - new Date(r.clock_in).getTime())/1000;
+    if(!open) secs+=dur;
+    days.add(new Date(r.clock_in).toDateString());
+    return '<div class="row"><div><b>'+fday(r.clock_in)+'</b><div class="mut">'+t("inAt")+' '+fdt(r.clock_in)+(open?'':' · '+t("outAt")+' '+fdt(r.clock_out))+'</div></div>'+
+      (open?'<span class="pill open">'+t("openNow")+'</span>':'<b style="align-self:center">'+hms(dur)+'</b>')+'</div>';
+  }).join("");
+  $("tDays").textContent = days.size;
+  $("tHours").textContent = hms(secs);
+}
+
+// ---------- incentives ----------
+async function loadInc(){
+  try{ incRows = await rpc("staff_my_incentives", {p_code:CODE,p_pin:PIN}) || []; }
+  catch(e){ incRows=[]; }
+  renderInc();
+}
+function renderInc(){
+  const list = $("incList"); if(!list) return;
+  if(!incRows.length){ list.innerHTML = '<div class="empty">'+t("noInc")+'</div>'; $("iAsg").textContent="₹0"; $("iPaid").textContent="₹0"; return; }
+  let asg=0, paid=0;
+  list.innerHTML = incRows.map(r=>{
+    if(r.status==="paid") paid+=r.amount; else asg+=r.amount;
+    return '<div class="row"><div><b>₹'+r.amount.toLocaleString("en-IN")+'</b><div class="mut">'+r.reason+(r.note?' · '+r.note:'')+' · '+fday(r.created_at)+'</div></div>'+
+      '<span class="pill '+(r.status==="paid"?"ok":"pay")+'">'+(r.status==="paid"?t("paid"):t("assigned"))+'</span></div>';
+  }).join("");
+  $("iAsg").textContent = "₹"+asg.toLocaleString("en-IN");
+  $("iPaid").textContent = "₹"+paid.toLocaleString("en-IN");
+}
+
+// ---------- wiring ----------
+$("loginBtn").addEventListener("click", login);
+$("pin").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+$("dial").addEventListener("click", punch);
+$("outBtn").addEventListener("click", logout);
+$("otpVerify").addEventListener("click", async ()=>{
+  const short=$("otpOrderId").value.trim().toLowerCase(), code=$("otpCode").value.trim();
+  if(!short||!code) return toast(t("otpNeed"));
+  $("otpVerify").disabled=true; buzz();
+  try{
+    await rpc("order_verify_otp_staff",{p_code:CODE,p_pin:PIN,p_short:short,p_otp:code});
+    toast(t("otpOk")); $("otpOrderId").value=""; $("otpCode").value="";
+  }catch(e){ toast(e.message||t("otpBad")); }
+  $("otpVerify").disabled=false;
+});
+$("delToggle").addEventListener("click", ()=>{ buzz(); setDelMode(!delOn); });
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden && delTimer){ /* keep timer; browser throttles naturally */ } });
+$("langBtn").addEventListener("click", ()=>{ lang = lang==="en"?"ta":"en"; localStorage.setItem("px_staff_lang",lang); applyLang(); });
+$("tabA").addEventListener("click", ()=>{ $("tabA").classList.add("on");$("tabI").classList.remove("on");$("paneA").classList.remove("hide");$("paneI").classList.add("hide"); });
+$("tabI").addEventListener("click", ()=>{ $("tabI").classList.add("on");$("tabA").classList.remove("on");$("paneI").classList.remove("hide");$("paneA").classList.add("hide"); });
+$("mPrev").addEventListener("click", ()=>{ mM--; if(mM<1){mM=12;mY--;} loadMonth(); });
+$("mNext").addEventListener("click", ()=>{ mM++; if(mM>12){mM=1;mY++;} loadMonth(); });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && STATUS && PIN){ rpc("staff_status",{p_code:CODE,p_pin:PIN}).then(s=>{STATUS=s;renderDial();startTick();}).catch(()=>{}); }});
+
+// boot
+$("code").value = CODE;
+applyLang();
+if(CODE && PIN){
+  rpc("staff_status",{p_code:CODE,p_pin:PIN}).then(s=>{STATUS=s;enterHome();}).catch(()=>show("login"));
+}else show("login");
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

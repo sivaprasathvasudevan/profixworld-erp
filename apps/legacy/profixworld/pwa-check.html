@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ProFix — App Install Check</title>
+<style>
+  :root{--o:#FF6A2B;--g:#16A34A;--r:#DC2626;--ink:#111827;--mut:#6B7280;--bg:#F6F7F9}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:20px;padding-bottom:48px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--mut);font-size:14px;margin-bottom:20px}
+  .card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:16px;margin-bottom:14px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #F3F4F6;font-size:14px}
+  .row:last-child{border:0}
+  .k{color:var(--mut)}
+  .v{font-weight:600;text-align:right;word-break:break-all}
+  .ok{color:var(--g)} .bad{color:var(--r)}
+  button{width:100%;border:0;border-radius:12px;padding:15px;font-size:16px;font-weight:700;color:#fff;background:var(--o);margin-top:8px}
+  button.grey{background:#374151}
+  button:disabled{opacity:.5}
+  .verdict{border-radius:14px;padding:16px;margin-bottom:14px;font-weight:600}
+  .verdict.good{background:#DCFCE7;border:1px solid #86EFAC;color:#14532D}
+  .verdict.warn{background:#FEF3C7;border:1px solid #FCD34D;color:#78350F}
+  .verdict.bad{background:#FEE2E2;border:1px solid #FCA5A5;color:#7F1D1D}
+  ol{padding-left:20px;font-size:14px;color:#374151}
+</style>
+</head>
+<body>
+
+<h1>ProFix — App Install Check</h1>
+<div class="sub">Open this page on the phone that can't install the app.</div>
+
+<div id="verdict" class="verdict warn">Checking…</div>
+
+<div class="card">
+  <div class="row"><span class="k">Install prompt offered by Chrome</span><span class="v" id="bip">waiting…</span></div>
+  <div class="row"><span class="k">Running as installed app</span><span class="v" id="std">–</span></div>
+  <div class="row"><span class="k">Service worker cache</span><span class="v" id="cache">–</span></div>
+  <div class="row"><span class="k">Owner manifest (from network)</span><span class="v" id="net">–</span></div>
+  <div class="row"><span class="k">Owner manifest (what your browser uses)</span><span class="v" id="sw">–</span></div>
+  <div class="row"><span class="k">Browser</span><span class="v" id="ua">–</span></div>
+</div>
+
+<div class="card">
+  <b>Reset ProFix on this phone</b>
+  <div class="sub" style="margin:6px 0 0">Clears the old cached app data that is blocking the install. It does not delete anything on the server, and you will not lose any orders or data.</div>
+  <button id="nuke">🧹 Reset ProFix on this phone</button>
+  <button id="go" class="grey">Open ProFix Owner →</button>
+</div>
+
+<div class="card">
+  <b>If Chrome still won't install</b>
+  <ol>
+    <li>Home screen → long-press <b>every</b> old ProFix icon → Uninstall.</li>
+    <li>Come back here and tap <b>Reset ProFix on this phone</b>.</li>
+    <li>Close Chrome completely (swipe it out of recent apps), reopen it.</li>
+    <li>Open <b>profixworld.com/owner</b> and tap 📲 Install.</li>
+  </ol>
+</div>
+
+<script>
+var deferred = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferred = e;
+  set('bip', 'YES — Chrome will install', true);
+  verdict('good', '✅ Chrome IS offering the install. Go to profixworld.com/owner and tap 📲 Install — you will get a real "ProFix Owner" app icon.');
+});
+
+function set(id, txt, good){
+  var el = document.getElementById(id);
+  el.textContent = txt;
+  if (good === true) el.className = 'v ok';
+  if (good === false) el.className = 'v bad';
+}
+function verdict(kind, msg){
+  var v = document.getElementById('verdict');
+  v.className = 'verdict ' + kind; v.textContent = msg;
+}
+
+var ua = navigator.userAgent;
+var ul = ua.toLowerCase();
+var inApp = ul.indexOf('; wv') > -1 || ul.indexOf('fban') > -1 || ul.indexOf('fbav') > -1
+         || ul.indexOf('fb_iab') > -1 || ul.indexOf('instagram') > -1 || ul.indexOf('micromessenger') > -1;
+var isChrome = /Chrome/i.test(ua) && !/SamsungBrowser|Firefox|FxiOS|EdgA/i.test(ua) && !inApp;
+set('ua', inApp ? 'IN-APP BROWSER (WhatsApp etc.)' : (isChrome ? 'Chrome ✓' : ua.slice(0, 40)), inApp ? false : isChrome);
+
+if (inApp) {
+  verdict('bad', '❌ You opened this from inside another app (like WhatsApp). An in-app browser can ONLY make a shortcut — never a real app. Open profixworld.com/owner directly in Chrome, then tap 📲 Install.');
+  var btn = document.createElement('button');
+  btn.textContent = '➡️ Reopen in Chrome';
+  btn.onclick = function(){
+    location.href = 'intent://' + location.host + '/owner.html#Intent;scheme=https;package=com.android.chrome;end';
+  };
+  document.getElementById('verdict').after(btn);
+}
+
+var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+set('std', standalone ? 'YES — already installed' : 'no (browser tab)');
+
+// which SW cache is this phone actually holding?
+if (window.caches) {
+  caches.keys().then(function(k){
+    var v = k.filter(function(x){ return /profix/i.test(x); }).join(', ') || 'none';
+    var fresh = /v11|v1[2-9]|v[2-9]\d/.test(v);
+    set('cache', v, fresh ? true : (v === 'none' ? undefined : false));
+  });
+}
+
+// the manifest as the SERVER has it
+fetch('/owner.webmanifest', { cache: 'no-store' })
+  .then(function(r){ return r.json(); })
+  .then(function(d){ set('net', 'id=' + d.id + '  scope=' + d.scope, !!d.id); })
+  .catch(function(){ set('net', 'failed to fetch', false); });
+
+// the manifest as THIS BROWSER sees it (may come from the service worker cache)
+fetch('/owner.webmanifest')
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    var stale = !d.id || d.scope === '/';
+    set('sw', (d.id ? 'id=' + d.id + '  scope=' + d.scope : 'OLD — no id, scope=/'), !stale);
+    if (stale) verdict('bad', '❌ Your phone is still using the OLD cached app info. That is exactly why Chrome will not install it. Tap "Reset ProFix on this phone" below, then try again.');
+  })
+  .catch(function(){ set('sw', 'failed', false); });
+
+setTimeout(function(){
+  if (!deferred) {
+    var el = document.getElementById('bip');
+    if (el.textContent === 'waiting…') {
+      set('bip', 'NO', false);
+      if (standalone) {
+        verdict('good', '✅ You are already inside the installed app. Look for the ProFix icon on your home screen.');
+      } else if (document.getElementById('verdict').className.indexOf('bad') === -1) {
+        verdict('warn', '⚠️ Chrome is not offering the install — almost always because an OLD ProFix app is still installed on this phone. Uninstall every ProFix icon from your home screen, then tap "Reset ProFix on this phone" below.');
+      }
+    }
+  }
+}, 6000);
+
+document.getElementById('nuke').addEventListener('click', function(){
+  var b = this; b.disabled = true; b.textContent = 'Cleaning…';
+  var jobs = [];
+  if (window.caches) jobs.push(caches.keys().then(function(ks){
+    return Promise.all(ks.map(function(k){ return caches.delete(k); }));
+  }));
+  if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){
+    return Promise.all(rs.map(function(r){ return r.unregister(); }));
+  }));
+  Promise.all(jobs).then(function(){
+    b.textContent = '✅ Done — reloading';
+    setTimeout(function(){ location.reload(true); }, 900);
+  });
+});
+
+document.getElementById('go').addEventListener('click', function(){
+  location.href = '/owner.html';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>ProFix — Manage Products</title>
+<style>
+  :root{
+    --red:#E11D2A; --orange:#FF6A2B; --ink:#171821; --muted:#6B7180; --line:#EAECF0;
+    --bg:#F6F7F9; --card:#fff; --ok:#12A150; --grad:linear-gradient(135deg,#FF6A2B,#E11D2A);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .hide{display:none!important}
+  a{color:var(--red)}
+  /* login */
+  .login{min-height:100dvh;display:grid;place-items:center;padding:24px}
+  .lcard{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px 26px;width:100%;max-width:390px;box-shadow:0 20px 50px -24px rgba(20,20,40,.25)}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .mark{width:38px;height:38px;border-radius:11px;background:var(--grad);display:grid;place-items:center;flex:0 0 auto}
+  .mark svg{width:20px;height:20px;fill:#fff}
+  .brand b{font-size:1.25rem;font-weight:800}.brand b span{color:var(--red)}
+  .lcard h1{font-size:1.05rem;margin:14px 0 3px}
+  .lcard p{color:var(--muted);font-size:.9rem;margin-bottom:16px}
+  label{display:block;font-size:.82rem;font-weight:700;color:var(--muted);margin:12px 0 5px}
+  input,select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-family:inherit;font-size:.95rem;outline:0;background:#fff;color:var(--ink)}
+  input:focus,select:focus{border-color:var(--red)}
+  .btn{border:0;border-radius:11px;padding:12px 16px;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;transition:transform .15s,opacity .15s}
+  .btn:active{transform:scale(.98)} .btn:disabled{opacity:.55;cursor:default}
+  .btn.primary{background:var(--grad);color:#fff;width:100%;margin-top:18px}
+  .btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .lerr{color:var(--red);font-size:.84rem;font-weight:600;margin-top:10px;min-height:18px;text-align:center}
+  /* app */
+  .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .row{max-width:940px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .top .brand b{font-size:1.05rem}
+  .grow{flex:1}
+  .wrap{max-width:940px;margin:0 auto;padding:16px 16px 80px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .search{flex:1;min-width:200px;position:relative}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2}
+  .search input{padding-left:38px}
+  .count{font-size:.85rem;color:var(--muted);font-weight:700}
+  .cat{margin:18px 0 8px;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .prow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
+  .prow.dirty{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,43,.12)}
+  .pmain{min-width:0}
+  .pmain .nm{border:1px solid transparent;border-radius:8px;padding:5px 7px;font-weight:800;font-size:.98rem;width:100%;margin:-5px -7px 2px;background:transparent}
+  .pmain .nm:focus{border-color:var(--line);background:#fff}
+  .pfields{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .fld{display:flex;flex-direction:column;gap:3px}
+  .fld label{margin:0;font-size:.68rem}
+  .fld input{width:110px;padding:7px 9px;font-size:.9rem}
+  .fld.brand input{width:150px}
+  .fld.price input{width:96px}.fld.stock input{width:80px}
+  .stockpill{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:800;padding:4px 9px;border-radius:20px;margin-top:2px}
+  .stockpill.in{background:#E7F7EE;color:var(--ok)} .stockpill.out{background:#FDE7E9;color:var(--red)}
+  .pacts{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .mini{border:0;border-radius:9px;padding:8px 12px;font-weight:800;font-size:.82rem;cursor:pointer;font-family:inherit}
+  .mini.save{background:var(--grad);color:#fff}
+  .mini.save:disabled{background:#EDEFF3;color:#A6ACBB;cursor:default}
+  .mini.del{background:#fff;border:1px solid var(--line);color:var(--muted)}
+  .rowstate{font-size:.72rem;font-weight:700;color:var(--ok);min-height:14px;text-align:right}
+  .empty{text-align:center;color:var(--muted);padding:40px 0}
+  .fabadd{position:fixed;right:18px;bottom:18px;z-index:30}
+  .fabadd button{background:var(--grad);color:#fff;border:0;border-radius:30px;padding:14px 20px;font-weight:800;font-size:.95rem;box-shadow:0 12px 26px -8px rgba(225,29,42,.5);cursor:pointer;display:flex;align-items:center;gap:8px}
+  .fabadd svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.4}
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(15,15,25,.5);z-index:40;display:none;align-items:flex-end;justify-content:center}
+  .scrim.open{display:flex}
+  .sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:20px 18px 26px;max-height:92dvh;overflow:auto}
+  @media(min-width:560px){.scrim{align-items:center}.sheet{border-radius:20px}}
+  .sheet h2{font-size:1.1rem;margin-bottom:4px}
+  .sheet .sub{color:var(--muted);font-size:.88rem;margin-bottom:8px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-size:.9rem;font-weight:600;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .loader{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:-4px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="lcard">
+    <div class="brand"><span class="mark"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span><b>Pro<span>Fix</span></b></div>
+    <h1>Manage products</h1>
+    <p>Edit prices, stock, and add or remove items. Changes go live on the store instantly.</p>
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="username" placeholder="venky@profix.com">
+    <label>Password</label>
+    <input id="pass" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button class="btn primary" id="loginBtn" onclick="doLogin()">Log in</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app hide">
+  <div class="top">
+    <div class="row">
+      <span class="mark"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span>
+      <div class="brand"><b>Pro<span style="color:var(--red)">Fix</span> Manage</b></div>
+      <span class="grow"></span>
+      <button class="btn ghost" onclick="doLogout()" style="padding:9px 14px">Log out</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="search" placeholder="Search a product…" oninput="render()">
+      </div>
+      <span class="count" id="count">—</span>
+      <button class="btn ghost" onclick="openImport()" style="padding:9px 14px">⬆ Bulk import (CSV)</button>
+    </div>
+    <div id="list"><div class="empty">Loading…</div></div>
+  </div>
+  <div class="fabadd"><button onclick="openAdd()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Add product</button></div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="scrim" id="addScrim">
+  <div class="sheet">
+    <h2>Add a product</h2>
+    <p class="sub">It appears on the store right away. Add a photo later in the Photos tool.</p>
+    <label>Product name</label>
+    <input id="a_name" placeholder="e.g. Fast Charger 20W">
+    <div class="g2">
+      <div><label>Brand</label><input id="a_brand" placeholder="e.g. TREAMS (or leave blank)"></div>
+      <div><label>Category</label><select id="a_cat"></select></div>
+    </div>
+    <div class="g2">
+      <div><label>Price ₹ (blank = Enquire)</label><input id="a_price" type="number" inputmode="numeric" placeholder="299"></div>
+      <div><label>Stock (units)</label><input id="a_stock" type="number" inputmode="numeric" placeholder="10" value="10"></div>
+    </div>
+    <label>Compatible with (optional · comma-separated models, blank = fits all)</label>
+    <input id="a_compat" placeholder="e.g. iPhone 15, Galaxy A54">
+    <button class="btn primary" id="addBtn" onclick="addProduct()">Add product</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeAdd()">Cancel</button>
+    <div class="lerr" id="aerr"></div>
+  </div>
+</div>
+
+<!-- CSV IMPORT MODAL -->
+<div class="scrim" id="impScrim">
+  <div class="sheet">
+    <h2>Bulk import products</h2>
+    <p class="sub">Upload or paste CSV with columns <b>name,brand,category,price,stock</b>. First row = headers. Blank price = "Enquire". New categories are created automatically. Imports as the shop's own products (published).</p>
+    <input id="csvFile" type="file" accept=".csv,text/csv" onchange="fileToBox(event)" style="margin-bottom:8px">
+    <label>…or paste CSV here</label>
+    <textarea id="csvText" rows="5" placeholder="name,brand,category,price,stock&#10;Fast Charger 20W,TREAMS,Wall Chargers,299,10&#10;3-in-1 Cable,RD,Cables,199,25" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-family:monospace;font-size:.85rem;outline:0;resize:vertical"></textarea>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="previewImport()">Preview</button>
+    <div id="impPreview" style="margin-top:12px"></div>
+    <div class="lerr" id="ierr"></div>
+    <button class="btn primary" id="impBtn" onclick="doImport()" style="display:none">Import products</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="closeImport()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG = {
+  SUPABASE_URL:  "https://toxwbjofyglbyjanxmzv.supabase.co",
+  SUPABASE_ANON: "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0"
+};
+const $=id=>document.getElementById(id);
+let sb, PRODUCTS=[], CATS={}, CATLIST=[], term="";
+
+/* ---- boot / auth ---- */
+(function boot(){
+  const s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=()=>{ sb=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON);
+    sb.auth.getSession().then(({data})=>{ if(data.session) showApp(); });
+  };
+  s.onerror=()=>{ $("lerr").textContent="Couldn't load. Check your connection."; };
+  document.head.appendChild(s);
+})();
+
+async function doLogin(){
+  const email=$("email").value.trim(), password=$("pass").value;
+  if(!email||!password){ $("lerr").textContent="Enter email and password."; return; }
+  $("loginBtn").disabled=true; $("loginBtn").innerHTML='<span class="loader"></span>'; $("lerr").textContent="";
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  $("loginBtn").disabled=false; $("loginBtn").textContent="Log in";
+  if(error){ $("lerr").textContent = /confirm/i.test(error.message)?"Email not confirmed — confirm the user in Supabase.":"Wrong email or password."; return; }
+  showApp();
+}
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+
+function showApp(){ $("login").classList.add("hide"); $("app").classList.remove("hide"); loadAll(); }
+
+/* ---- load ---- */
+async function loadAll(){
+  const [{data:cats},{data:prods,error}] = await Promise.all([
+    sb.from("store_categories").select("*").order("sort_order",{ascending:true}),
+    sb.from("store_products").select("*")
+  ]);
+  if(error){ $("list").innerHTML='<div class="empty">Couldn\'t load products. '+error.message+'</div>'; return; }
+  CATLIST = cats||[];
+  CATS = Object.fromEntries(CATLIST.map(c=>[c.id,c.name]));
+  $("a_cat").innerHTML = CATLIST.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+  PRODUCTS = (prods||[]).sort((a,b)=> (CATS[a.category_id]||"").localeCompare(CATS[b.category_id]||"") || a.name.localeCompare(b.name));
+  render();
+  _lastFresh=Date.now();
+}
+/* freshness: refetch products when the tab regains focus / reconnects after >60s stale */
+let _lastFresh=Date.now();
+function _freshTick(){ if(!sb||document.visibilityState!=="visible") return; if(Date.now()-_lastFresh<60000) return; _lastFresh=Date.now(); loadAll(); }
+document.addEventListener("visibilitychange",_freshTick);
+window.addEventListener("online",_freshTick);
+
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function parseTags(s){ const a=(s||"").split(",").map(x=>x.trim()).filter(Boolean); return a.length?a:null; }
+
+function render(){
+  term=($("search").value||"").toLowerCase().trim();
+  const list=PRODUCTS.filter(p=> !term || (p.name+" "+(p.brand||"")).toLowerCase().includes(term));
+  $("count").textContent = PRODUCTS.length+" products"+(term?` · ${list.length} shown`:"");
+  if(!list.length){ $("list").innerHTML='<div class="empty">No products match.</div>'; return; }
+  let html="", lastCat=null;
+  list.forEach(p=>{
+    const cat=CATS[p.category_id]||"Other";
+    if(cat!==lastCat){ html+=`<div class="cat">${cat}</div>`; lastCat=cat; }
+    const inStock=(p.stock||0)>0;
+    html+=`<div class="prow" id="row-${p.id}">
+      <div class="pmain">
+        <input class="nm" value="${esc(p.name)}" oninput="dirty('${p.id}')" data-f="name">
+        <div class="pfields">
+          <div class="fld brand"><label>Brand</label><input value="${esc(p.brand||"")}" oninput="dirty('${p.id}')" data-f="brand"></div>
+          <div class="fld price"><label>Price ₹</label><input type="number" inputmode="numeric" value="${p.price!=null?p.price:""}" placeholder="Enquire" oninput="dirty('${p.id}')" data-f="price"></div>
+          <div class="fld stock"><label>Stock</label><input type="number" inputmode="numeric" value="${p.stock!=null?p.stock:0}" oninput="dirty('${p.id}')" data-f="stock"></div>
+          <div class="fld compat" style="flex-basis:100%"><label>Compatible with (comma-separated models · blank = fits all)</label><input value="${esc((p.compat||[]).join(", "))}" placeholder="e.g. iPhone 15, Galaxy A54 — or blank for universal" oninput="dirty('${p.id}')" data-f="compat"></div>
+        </div>
+        <span class="stockpill ${inStock?'in':'out'}" id="pill-${p.id}">${inStock?'● In stock':'○ Out of stock'}</span>
+      </div>
+      <div class="pacts">
+        <button class="mini save" id="save-${p.id}" onclick="saveRow('${p.id}')" disabled>Save</button>
+        <button class="mini del" onclick="delProduct('${p.id}','${esc(p.name).replace(/'/g,"")}')">Delete</button>
+        <div class="rowstate" id="rs-${p.id}"></div>
+      </div>
+    </div>`;
+  });
+  $("list").innerHTML=html;
+}
+
+function dirty(id){
+  const row=$("row-"+id); if(row) row.classList.add("dirty");
+  const s=$("save-"+id); if(s) s.disabled=false;
+  const rs=$("rs-"+id); if(rs) rs.textContent="";
+  // live-update stock pill
+  const stockInput=document.querySelector(`#row-${id} input[data-f="stock"]`);
+  if(stockInput){ const inStock=(parseInt(stockInput.value,10)||0)>0; const pill=$("pill-"+id);
+    if(pill){ pill.className="stockpill "+(inStock?"in":"out"); pill.textContent=inStock?"● In stock":"○ Out of stock"; } }
+}
+
+async function saveRow(id){
+  const row=$("row-"+id); if(!row) return;
+  const get=f=>row.querySelector(`[data-f="${f}"]`).value;
+  const name=get("name").trim();
+  if(!name){ toast("Name can't be empty"); return; }
+  const priceRaw=get("price").trim();
+  const patch={
+    name,
+    brand:get("brand").trim()||null,
+    price: priceRaw===""?null:Math.max(0,parseInt(priceRaw,10)||0),
+    stock: Math.max(0,parseInt(get("stock").trim(),10)||0),
+    compat: parseTags(get("compat"))
+  };
+  const btn=$("save-"+id); btn.disabled=true; btn.innerHTML='<span class="loader"></span>';
+  const { error } = await sb.from("store_products").update(patch).eq("id",id);
+  btn.textContent="Save";
+  if(error){ toast("Couldn't save — "+ (/(policy|denied|permission)/i.test(error.message)?"run the manage-RLS SQL":"try again")); btn.disabled=false; return; }
+  const p=PRODUCTS.find(x=>x.id===id); if(p) Object.assign(p,patch);
+  row.classList.remove("dirty");
+  const rs=$("rs-"+id); if(rs){ rs.textContent="Saved ✓"; setTimeout(()=>{ if(rs.textContent==="Saved ✓") rs.textContent=""; },2500); }
+}
+
+/* ---- add ---- */
+function openAdd(){ $("aerr").textContent=""; ["a_name","a_brand","a_price","a_compat"].forEach(i=>{ const e=$(i); if(e) e.value=""; }); $("a_stock").value="10"; $("addScrim").classList.add("open"); }
+function closeAdd(){ $("addScrim").classList.remove("open"); }
+async function addProduct(){
+  const name=$("a_name").value.trim();
+  if(!name){ $("aerr").textContent="Enter a product name."; return; }
+  const priceRaw=$("a_price").value.trim();
+  const rec={
+    name,
+    brand:$("a_brand").value.trim()||null,
+    category_id:$("a_cat").value,
+    price: priceRaw===""?null:Math.max(0,parseInt(priceRaw,10)||0),
+    stock: Math.max(0,parseInt($("a_stock").value.trim(),10)||0),
+    compat: parseTags($("a_compat").value),
+    image_url:null
+  };
+  const btn=$("addBtn"); btn.disabled=true; btn.innerHTML='<span class="loader"></span>'; $("aerr").textContent="";
+  const { data, error } = await sb.from("store_products").insert(rec).select();
+  btn.disabled=false; btn.textContent="Add product";
+  if(error){ $("aerr").textContent = /(policy|denied|permission)/i.test(error.message)?"Permission denied — run the manage-RLS SQL first.":("Couldn't add — "+error.message); return; }
+  if(data&&data[0]) PRODUCTS.push(data[0]);
+  PRODUCTS.sort((a,b)=> (CATS[a.category_id]||"").localeCompare(CATS[b.category_id]||"") || a.name.localeCompare(b.name));
+  closeAdd(); render(); toast("Product added ✓");
+}
+
+/* ---- delete ---- */
+async function delProduct(id,name){
+  if(!confirm(`Delete "${name}"? This removes it from the store. (You can add it back later.)`)) return;
+  const { error } = await sb.from("store_products").delete().eq("id",id);
+  if(error){ toast("Couldn't delete — "+ (/(policy|denied|permission)/i.test(error.message)?"run the manage-RLS SQL":"try again")); return; }
+  PRODUCTS = PRODUCTS.filter(p=>p.id!==id);
+  render(); toast("Deleted");
+}
+
+/* ---- CSV bulk import ---- */
+let IMPORT_ROWS=[];
+function openImport(){ $("ierr").textContent=""; $("csvText").value=""; $("csvFile").value=""; $("impPreview").innerHTML=""; $("impBtn").style.display="none"; IMPORT_ROWS=[]; $("impScrim").classList.add("open"); }
+function closeImport(){ $("impScrim").classList.remove("open"); }
+function fileToBox(e){ const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ $("csvText").value=r.result; previewImport(); }; r.readAsText(f); }
+function parseCSV(text){
+  const rows=[]; let i=0, field="", row=[], inQ=false; text=String(text||"").replace(/\r/g,"");
+  while(i<text.length){ const c=text[i];
+    if(inQ){ if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else inQ=false; } else field+=c; }
+    else { if(c==='"') inQ=true; else if(c===','){ row.push(field); field=""; } else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=""; } else field+=c; }
+    i++;
+  }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.some(x=>String(x).trim()!==""));
+}
+function previewImport(){
+  $("ierr").textContent=""; $("impBtn").style.display="none"; IMPORT_ROWS=[];
+  const rows=parseCSV($("csvText").value);
+  if(rows.length<2){ $("impPreview").innerHTML='<div class="empty" style="padding:16px 0">Need a header row + at least one product.</div>'; return; }
+  const head=rows[0].map(h=>String(h).trim().toLowerCase());
+  const ix=n=>head.indexOf(n);
+  const iName=ix("name"), iBrand=ix("brand"), iCat=ix("category"), iPrice=ix("price"), iStock=ix("stock");
+  if(iName<0){ $("ierr").textContent="CSV needs a 'name' column."; $("impPreview").innerHTML=""; return; }
+  for(let r=1;r<rows.length;r++){
+    const c=rows[r]; const name=(c[iName]||"").trim(); if(!name) continue;
+    const priceRaw=iPrice>=0?(c[iPrice]||"").trim():"";
+    IMPORT_ROWS.push({
+      name,
+      brand: iBrand>=0?((c[iBrand]||"").trim()||null):null,
+      category: iCat>=0?((c[iCat]||"").trim()||"Other"):"Other",
+      price: priceRaw===""?null:Math.max(0,parseInt(priceRaw,10)||0),
+      stock: iStock>=0?Math.max(0,parseInt((c[iStock]||"").trim(),10)||0):0
+    });
+  }
+  if(!IMPORT_ROWS.length){ $("impPreview").innerHTML='<div class="empty" style="padding:16px 0">No valid rows found.</div>'; return; }
+  const body=IMPORT_ROWS.slice(0,50).map(p=>`<tr><td style="padding:5px 7px">${esc(p.name)}</td><td style="padding:5px 7px;color:var(--muted)">${esc(p.brand||"—")}</td><td style="padding:5px 7px">${esc(p.category)}</td><td style="padding:5px 7px;text-align:right">${p.price==null?"Enquire":"₹"+p.price}</td><td style="padding:5px 7px;text-align:right">${p.stock}</td></tr>`).join("");
+  $("impPreview").innerHTML=`<div style="font-weight:800;font-size:.85rem;margin-bottom:6px">${IMPORT_ROWS.length} product${IMPORT_ROWS.length===1?"":"s"} ready</div>
+    <div style="overflow:auto;max-height:230px;border:1px solid var(--line);border-radius:10px"><table style="width:100%;border-collapse:collapse;font-size:.82rem">
+    <thead><tr style="background:var(--bg);font-weight:800"><td style="padding:6px 7px">Name</td><td style="padding:6px 7px">Brand</td><td style="padding:6px 7px">Category</td><td style="padding:6px 7px;text-align:right">Price</td><td style="padding:6px 7px;text-align:right">Stock</td></tr></thead>
+    <tbody>${body}</tbody></table></div>${IMPORT_ROWS.length>50?'<div style="font-size:.75rem;color:var(--muted);margin-top:4px">Showing first 50 · all '+IMPORT_ROWS.length+' will import.</div>':""}`;
+  $("impBtn").textContent="Import "+IMPORT_ROWS.length+" product"+(IMPORT_ROWS.length===1?"":"s");
+  $("impBtn").style.display="block";
+}
+async function ensureCategory(name){
+  const found=CATLIST.find(c=>(c.name||"").toLowerCase()===name.toLowerCase());
+  if(found) return found.id;
+  const { data, error } = await sb.from("store_categories").insert({name, sort_order:(CATLIST.length+1)*10}).select();
+  if(error||!data||!data[0]) throw new Error("category '"+name+"': "+(error?error.message:"failed"));
+  CATLIST.push(data[0]); CATS[data[0].id]=data[0].name; return data[0].id;
+}
+async function doImport(){
+  if(!IMPORT_ROWS.length) return;
+  const btn=$("impBtn"); btn.disabled=true; btn.innerHTML='<span class="loader"></span>'; $("ierr").textContent="";
+  try{
+    // resolve/create categories
+    const catMap={};
+    for(const nm of [...new Set(IMPORT_ROWS.map(r=>r.category))]){ catMap[nm.toLowerCase()]=await ensureCategory(nm); }
+    // owner_id/published default in DB (null / true) — no need to set explicitly
+    const recs=IMPORT_ROWS.map(r=>({ name:r.name, brand:r.brand, category_id:catMap[r.category.toLowerCase()], price:r.price, stock:r.stock, image_url:null }));
+    const { data, error } = await sb.from("store_products").insert(recs).select();
+    if(error) throw error;
+    if(data&&data.length){ PRODUCTS.push(...data); PRODUCTS.sort((a,b)=> (CATS[a.category_id]||"").localeCompare(CATS[b.category_id]||"") || a.name.localeCompare(b.name)); }
+    $("a_cat").innerHTML = CATLIST.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+    closeImport(); render(); toast("Imported "+(data?data.length:IMPORT_ROWS.length)+" products ✓");
+  }catch(e){
+    $("ierr").textContent = /(policy|denied|permission)/i.test(e.message||"") ? "Permission denied — run the manage-RLS SQL first." : ("Import failed — "+(e.message||"try again"));
+  }
+  btn.disabled=false; btn.textContent="Import products";
+}
+
+/* ---- toast ---- */
+let tT;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("show"),2600); }
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+name = "profixworld-erp-api"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Non-secret vars (safe to commit). Secrets set via `wrangler secret put`.
+[vars]
+SUPABASE_URL = "https://toxwbjofyglbyjanxmzv.supabase.co"
+SUPABASE_JWKS_URL = "https://toxwbjofyglbyjanxmzv.supabase.co/auth/v1/.well-known/jwks.json"
+SUPABASE_JWT_ISSUER = "https://toxwbjofyglbyjanxmzv.supabase.co/auth/v1"
+
+# Secret (DO NOT commit): wrangler secret put SUPABASE_SERVICE_ROLE_KEY

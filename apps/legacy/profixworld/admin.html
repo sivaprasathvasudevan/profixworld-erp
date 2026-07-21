@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="manifest" href="/adminapp.webmanifest">
+<link rel="apple-touch-icon" href="/adminapp-192.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ProFix">
+<meta property="og:title" content="ProFix Admin">
+<meta property="og:description" content="ProFix staff console — orders, repairs, day-close.">
+<meta property="og:image" content="https://profixworld.com/og-cover.png">
+<meta property="og:url" content="https://profixworld.com/admin.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ProFix Admin">
+<meta name="twitter:image" content="https://profixworld.com/og-cover.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#E11D2A" />
+<title>ProFix Ops — Staff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E11D2A; --orange:#FF6A2B; --ink:#171821; --ink2:#3D4049; --muted:#7A7E89;
+  --bg:#F6F7F9; --card:#FFFFFF; --line:#ECEDF1; --line2:#E2E3E8;
+  --grad:linear-gradient(135deg,#FF6A2B,#E11D2A);
+  --green:#12A150; --green-soft:#E7F7EE; --blue:#2563EB; --purple:#7C3AED; --teal:#0EA5A5; --yellow:#FFC400;
+  --r:16px; --sans:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif; --ease:cubic-bezier(.2,.9,.3,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --sh:0 1px 2px rgba(20,22,30,.04),0 8px 24px -12px rgba(20,22,30,.12);
+  --navh:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.5;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit}
+.bgwrap{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,#FFF3EE,#F6F7F9 40%)}
+.blob{position:absolute;border-radius:50%;filter:blur(64px);opacity:.45}
+.b1{width:60vw;height:60vw;max-width:520px;max-height:520px;background:radial-gradient(circle,#FFC7A6,transparent 66%);top:-16vw;left:-12vw}
+.b2{width:52vw;height:52vw;max-width:480px;max-height:480px;background:radial-gradient(circle,#FFB3BC,transparent 68%);top:-6vw;right:-16vw}
+
+.btn{font-weight:700;font-size:.92rem;padding:.8rem 1.2rem;border-radius:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;transition:.15s var(--ease)}
+.btn-red{background:var(--grad);color:#fff;box-shadow:0 8px 20px -8px rgba(225,29,42,.5)}
+.btn-red:active{transform:scale(.98)}
+.btn-ghost{background:#fff;border:1.5px solid var(--line2);color:var(--ink)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* ---- login ---- */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:2rem 1.6rem;width:100%;max-width:380px}
+.brand{display:flex;align-items:center;gap:.55rem;font-weight:800;font-size:1.5rem;letter-spacing:-.03em;justify-content:center;margin-bottom:.3rem}
+.brand .mark{width:38px;height:38px;border-radius:11px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 14px -6px rgba(225,29,42,.5)}
+.brand .mark svg{width:20px;height:20px;fill:#fff}
+.brand b{color:var(--red)}
+.login-card .sub{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:1.4rem;font-weight:500}
+.field{margin-bottom:.8rem}
+.field label{display:block;font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:.3rem}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:11px;padding:.8rem .9rem;font-size:1rem;outline:none;transition:.15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);background:#fff}
+.err{color:var(--red);font-size:.82rem;font-weight:600;margin-top:.5rem;min-height:1em;text-align:center}
+
+/* ---- app shell ---- */
+.app{display:none}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:720px;margin:0 auto;padding:.6rem 14px;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.topbar .brand{font-size:1.1rem;margin:0}
+.topbar .brand .mark{width:28px;height:28px;border-radius:8px}
+.topbar .brand .mark svg{width:15px;height:15px}
+.tb-right{display:flex;gap:.4rem;align-items:center}
+.shift-chip{display:inline-flex;align-items:center;gap:.3rem;background:var(--bg);border:1px solid var(--line2);border-radius:20px;padding:.35rem .7rem;font-size:.78rem;font-weight:700;color:var(--ink2);cursor:pointer;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:none;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+.icon-btn svg{width:18px;height:18px;stroke:var(--ink2);fill:none;stroke-width:2}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px calc(var(--navh) + 28px)}
+.screen{display:none;animation:fade .25s var(--ease)}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sc-title{font-weight:800;font-size:1.25rem;letter-spacing:-.02em;margin:.2rem 0 .8rem}
+.sc-title small{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-top:.1rem}
+
+/* ---- bottom nav ---- */
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.bnav-in{max-width:720px;margin:0 auto;height:var(--navh);display:grid;grid-template-columns:repeat(5,1fr)}
+.nav-btn{border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;color:var(--muted);font-size:.68rem;font-weight:700;position:relative;padding-top:.2rem}
+.nav-btn svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2}
+.nav-btn.on{color:var(--red)}
+.nav-btn .dot{position:absolute;top:6px;right:calc(50% - 20px);min-width:16px;height:16px;line-height:16px;padding:0 4px;border-radius:8px;background:var(--red);color:#fff;font-size:.6rem;font-weight:800}
+
+/* ---- filter chips ---- */
+.fchips{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.5rem;margin-bottom:.4rem;scrollbar-width:none}
+.fchips::-webkit-scrollbar{display:none}
+.fchip{flex:0 0 auto;padding:.45rem .9rem;border-radius:20px;background:#fff;border:1px solid var(--line);font-size:.82rem;font-weight:700;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.fchip.active{background:var(--ink);color:#fff;border-color:transparent}
+
+/* ---- cards ---- */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:.95rem;margin-bottom:.7rem;animation:in .3s var(--ease)}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card.fresh{border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,106,43,.22),var(--sh)}
+.chead{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;margin-bottom:.35rem}
+.who{font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
+.meta{font-size:.75rem;color:var(--muted);margin-top:.1rem}
+.pill{font-size:.66rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:.28rem .55rem;border-radius:7px;white-space:nowrap}
+.p-new{background:#FFF1E5;color:#C2600A}
+.p-confirmed,.p-accepted{background:#E7EEFF;color:#2547B0}
+.p-packed,.p-preparing{background:#F0E9FE;color:#6B3FD4}
+.p-out_for_delivery,.p-picked_up,.p-in_progress{background:#DDF6F5;color:#0A7E79}
+.p-ready{background:#FFF7CC;color:#8A6D00}
+.p-delivered{background:var(--green-soft);color:var(--green)}
+.p-cancelled,.p-rejected{background:#F1F1F4;color:#8A8A96}
+.p-requested{background:#FFF1E5;color:#C2600A}
+.p-approved,.p-contacted{background:#E7EEFF;color:#2547B0}
+.p-refunded,.p-done{background:var(--green-soft);color:var(--green)}
+.items{background:var(--bg);border-radius:10px;padding:.6rem .75rem;font-size:.86rem;margin:.5rem 0;line-height:1.55}
+.items .it{display:flex;justify-content:space-between;gap:.5rem}
+.addr{font-size:.85rem;color:var(--ink2);margin:.45rem 0}
+.addr b{color:var(--ink)}
+.note-x{font-size:.8rem;color:var(--muted);margin:.35rem 0}
+.tot{font-weight:800;font-size:1.1rem;margin:.35rem 0 .1rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.tot small{font-weight:700;color:var(--muted);font-size:.7rem;background:var(--bg);padding:.15rem .5rem;border-radius:6px}
+.tot .codok{color:var(--green);font-size:.72rem;font-weight:800}
+.actrow{display:flex;gap:.5rem;margin:.6rem 0 .2rem;flex-wrap:wrap}
+.actrow a,.actrow button{flex:1 1 auto;min-width:calc(50% - .25rem);text-align:center;padding:.6rem;border-radius:11px;font-size:.84rem;font-weight:700;border:1.5px solid var(--line2);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.35rem}
+.actrow .call{background:#fff}
+.actrow .nav{background:#EAF2FF;border-color:#CADBFF;color:#1D4ED8}
+.actrow .cod{background:#fff}
+.actrow .cod.on{background:var(--green-soft);border-color:#BFE9CF;color:var(--green)}
+.steps{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.55rem}
+.step-btn{padding:.45rem .7rem;border-radius:9px;background:#fff;border:1.5px solid var(--line2);font-size:.78rem;font-weight:700;color:var(--ink2);cursor:pointer;transition:.12s}
+.step-btn:active{transform:scale(.95)}
+.step-btn.done{background:var(--green-soft);border-color:#BFE9CF;color:var(--green)}
+.step-btn.next{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 6px 14px -6px rgba(225,29,42,.4)}
+.step-btn.cancel{color:#b00;margin-left:auto}
+.eta-row{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:.55rem}
+.eta-cur{font-size:.76rem;font-weight:800;color:var(--ink2);margin-right:auto}
+.eta-cur.muted{color:var(--ink2);opacity:.55;font-weight:700}
+.eta-b{padding:.4rem .6rem;border-radius:8px;background:#fff;border:1.5px solid var(--line2);font-size:.74rem;font-weight:800;color:var(--ink2);cursor:pointer;font-family:inherit}
+.eta-b:active{transform:scale(.95)}
+.eta-b.clr{color:#b00;border-color:#f2c4c4}
+.otp-row{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem;margin-top:.55rem;padding:.5rem .6rem;background:#fff7e6;border:1.5px dashed #e6a23c;border-radius:10px}
+.otp-row.done{background:#e7f7ee;border:1.5px solid #7ec89b;color:#0a7e4a;font-weight:800;font-size:.82rem}
+.otp-lbl{font-size:.78rem;font-weight:800;color:#9a5b00}
+.otp-code{font-size:1.15rem;font-weight:900;letter-spacing:.16em;color:#5a3600;background:#fff;border-radius:7px;padding:.05em .4em;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.otp-hint{font-size:.7rem;color:#8a6b3a;margin-right:auto}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:.5rem 0}
+.set-row label{font-size:.82rem;font-weight:700;color:var(--ink2)}
+.set-row input{width:120px;text-align:right}
+#admQr svg{width:220px;height:220px}
+.mini-row{display:flex;gap:.5rem;margin-top:.55rem;align-items:center;font-size:.82rem;color:var(--ink2)}
+.del{margin-left:auto;background:none;border:none;color:var(--muted);font-size:.76rem;font-weight:600;cursor:pointer;text-decoration:underline}
+.quote-in{width:96px;background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:.4rem .5rem;font-size:.85rem;outline:none}
+
+.empty{text-align:center;color:var(--muted);padding:2.6rem 1rem;font-size:.92rem}
+.spin{width:34px;height:34px;border:3px solid var(--line2);border-top-color:var(--red);border-radius:50%;margin:2.6rem auto;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---- new order ---- */
+.search{position:relative;margin-bottom:.7rem}
+.search svg{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2.2}
+.search input{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;padding:.75rem .8rem .75rem 2.5rem;font-size:1rem;outline:none;box-shadow:var(--sh)}
+.search input:focus{border-color:var(--red)}
+.catrow{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
+.catrow::-webkit-scrollbar{display:none}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:.6rem;display:flex;flex-direction:column;gap:.35rem}
+.pcard .pimg{width:100%;aspect-ratio:1;border-radius:10px;background:var(--bg) center/cover no-repeat;display:grid;place-items:center;font-size:1.5rem;color:var(--line2)}
+.pcard .pname{font-weight:700;font-size:.84rem;line-height:1.25;min-height:2.1em}
+.pcard .pbrand{font-size:.7rem;color:var(--muted);font-weight:600;margin-top:-.2rem}
+.pcard .pfoot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:.3rem}
+.pcard .pprice{font-weight:800;font-size:.9rem}
+.pcard .padd{width:32px;height:32px;border-radius:9px;background:var(--grad);color:#fff;border:none;font-size:1.2rem;font-weight:700;cursor:pointer;display:grid;place-items:center;line-height:1}
+.pqty{display:flex;align-items:center;gap:.4rem}
+.pqty button{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line2);background:#fff;font-weight:800;cursor:pointer;font-size:1rem;line-height:1}
+.pqty b{min-width:16px;text-align:center;font-size:.9rem}
+
+/* cart */
+.cart{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:.9rem;margin-bottom:1rem}
+.cart h3{font-size:.95rem;font-weight:800;margin-bottom:.6rem;display:flex;justify-content:space-between}
+.citem{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px dashed var(--line)}
+.citem .cn{flex:1;font-size:.85rem;font-weight:600;line-height:1.2}
+.citem .cn small{display:block;color:var(--muted);font-weight:600;font-size:.72rem}
+.subtotal{display:flex;justify-content:space-between;font-weight:800;font-size:1.05rem;margin:.7rem 0}
+.hint{font-size:.75rem;color:var(--muted);margin-top:.5rem}
+
+/* today */
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}
+.tstat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1rem;box-shadow:var(--sh)}
+.tstat .n{font-weight:800;font-size:1.9rem;line-height:1;letter-spacing:-.02em}
+.tstat .l{font-size:.78rem;color:var(--muted);font-weight:700;margin-top:.35rem}
+.tstat.rev .n{color:var(--green)} .tstat.cod .n{color:var(--orange)} .tstat.pend .n{color:var(--red)}
+.tbig{background:var(--grad);color:#fff;border-radius:18px;padding:1.2rem;box-shadow:0 12px 30px -12px rgba(225,29,42,.6);margin-bottom:1rem}
+.tbig .n{font-weight:800;font-size:2.4rem;line-height:1} .tbig .l{font-weight:700;opacity:.9;margin-top:.2rem}
+.dc-split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;margin-bottom:1rem}
+.dc-split .s{background:#fff;border:1px solid var(--line);border-radius:14px;padding:.7rem .4rem;box-shadow:var(--sh);text-align:center}
+.dc-split .s .n{font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
+.dc-split .s .l{font-size:.68rem;color:var(--muted);font-weight:700;margin-top:.25rem}
+.rowline{display:flex;justify-content:space-between;gap:.5rem;padding:.5rem 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.rowline:last-child{border-bottom:none}
+.act2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1.1rem 0 .4rem}
+.act2 button{padding:.95rem;border-radius:13px;font-weight:800;font-size:.95rem;cursor:pointer;border:none}
+.act2 .cs{background:var(--grad);color:#fff;box-shadow:0 8px 20px -8px rgba(225,29,42,.5)}
+.act2 .cs:active{transform:scale(.98)}
+.act2 .ca{background:#fff;border:1.5px solid var(--line2);color:var(--ink)}
+.sec-h{font-weight:800;font-size:.95rem;margin:1.2rem 0 .5rem}
+.mv{display:flex;align-items:center;gap:.5rem;padding:.55rem .75rem;background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:.4rem;font-size:.84rem;box-shadow:var(--sh)}
+.mv .x{margin-left:auto;color:var(--muted);cursor:pointer;font-weight:800;border:none;background:none;font-size:1rem;padding:.1rem .3rem}
+.hintbox{background:#FFF4E5;border:1px solid #FFD8A8;color:#92520A;border-radius:12px;padding:.7rem .8rem;font-size:.8rem;margin-bottom:.7rem}
+.paybadge{font-size:.72rem;font-weight:800;background:var(--green-soft);color:var(--green);padding:.15rem .5rem;border-radius:6px}
+/* bottom sheet */
+.scrim{position:fixed;inset:0;background:rgba(20,22,30,.45);opacity:0;pointer-events:none;transition:.25s;z-index:200}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:201;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -10px 44px rgba(0,0,0,.22);transform:translateY(110%);transition:.32s var(--spring);padding:1rem 1.1rem calc(1.2rem + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+.sheet.open{transform:none}
+.sheet h3{font-size:1.1rem;font-weight:800;letter-spacing:-.01em}
+.sheet .sh-sub{font-size:.82rem;color:var(--muted);margin:.15rem 0 .9rem}
+.sheet .grip{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto .8rem}
+.pay3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.3rem}
+.pay3 button{padding:.85rem .3rem;border-radius:13px;border:1.5px solid var(--line2);background:#fff;font-weight:700;font-size:.88rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.25rem;color:var(--ink)}
+.pay3 button .em{font-size:1.35rem;line-height:1}
+.pay3 button.sel{border-color:var(--red);background:#FFF1EC;color:var(--red)}
+.seg{display:flex;gap:.4rem;margin-bottom:.8rem}
+.seg button{flex:1;padding:.65rem;border-radius:11px;border:1.5px solid var(--line2);background:#fff;font-weight:700;font-size:.86rem;cursor:pointer;color:var(--ink)}
+.seg button.sel{background:var(--ink);color:#fff;border-color:transparent}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 18px);transform:translateX(-50%) translateY(16px);z-index:300;background:var(--ink);color:#fff;padding:.75rem 1.2rem;border-radius:12px;font-size:.88rem;font-weight:700;opacity:0;pointer-events:none;transition:.3s var(--spring);box-shadow:0 12px 30px rgba(0,0,0,.3);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.alert{background:var(--grad)}
+.cfg{background:#FFF4E5;border:1px solid #FFD8A8;color:#92520A;border-radius:12px;padding:.9rem;font-size:.85rem;margin-bottom:1rem}
+</style>
+</head>
+<body>
+<div class="bgwrap"><span class="blob b1"></span><span class="blob b2"></span></div>
+
+<!-- LOGIN -->
+<div class="login" id="loginView">
+  <div class="login-card">
+    <div class="brand"><span class="mark"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span>Pro<b>Fix</b></div>
+    <div class="sub">Staff Operations</div>
+    <div id="cfgWarn"></div>
+    <form id="loginForm" onsubmit="doLogin(event)">
+      <div class="field"><label>Email</label><input name="email" type="email" required placeholder="you@profix…" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input name="password" type="password" required placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="btn btn-red" style="width:100%;margin-top:.4rem" id="loginBtn" type="submit">Sign in</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appView">
+  <div class="topbar">
+    <div class="topbar-in">
+      <div class="brand"><span class="mark"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span>Pro<b>Fix</b> <span style="font-weight:600;color:var(--muted);font-size:.78rem;margin-left:.15rem">Ops</span></div>
+      <div class="tb-right">
+        <button id="installBtn" style="display:none;background:#fff;color:#E11D2A;border:none;border-radius:999px;padding:.4rem .85rem;font-weight:800;font-size:.8rem;cursor:pointer;font-family:inherit">📲 Install</button>
+        <button class="shift-chip" onclick="editShift()" id="shiftChip" title="Who's on shift?">👤 Set shift</button>
+        <button class="icon-btn" id="bellBtn" onclick="enableStaffPush()" title="Enable order alerts"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></button>
+        <button class="icon-btn" onclick="counterScan()" title="Scan product / document / order"><svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><path d="M3 12h18"/></svg></button>
+        <button class="icon-btn" onclick="refresh()" title="Refresh"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+        <button class="icon-btn" onclick="logout()" title="Sign out"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- ORDERS -->
+    <section class="screen on" id="scOrders">
+      <div class="sc-title">Orders <small id="ordSub">Live feed · newest first</small></div>
+      <div class="fchips" id="ordChips"></div>
+      <div id="ordList"><div class="spin"></div></div>
+    </section>
+
+    <!-- NEW -->
+    <section class="screen" id="scNew">
+      <div class="sc-title">New order <small>Walk-in / phone-in · Cash on delivery</small></div>
+      <div class="cart" id="cartBox" style="display:none"></div>
+      <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="pSearch" placeholder="Search products…" oninput="renderProducts()"></div>
+      <div class="catrow fchips" id="catRow"></div>
+      <div class="pgrid" id="pGrid"><div class="spin"></div></div>
+    </section>
+
+    <!-- REPAIRS -->
+    <section class="screen" id="scRepairs">
+      <div class="sc-title">Repairs <small>Doorstep repair bookings</small></div>
+      <div class="fchips" id="repChips"></div>
+      <div id="repList"><div class="spin"></div></div>
+    </section>
+
+    <!-- TODAY -->
+    <section class="screen" id="scToday">
+      <div class="sc-title">Today <small id="todayDate"></small></div>
+      <div id="todayBox"><div class="spin"></div></div>
+    </section>
+
+    <!-- MORE: Returns · Mobile services · Approvals -->
+    <section class="screen" id="scMore">
+      <div class="sc-title">More <small>Returns · Mobile services · Partner approvals</small></div>
+      <div class="fchips" id="moreChips"></div>
+      <div id="moreList"><div class="spin"></div></div>
+    </section>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav" id="bnav" style="display:none">
+  <div class="bnav-in">
+    <button class="nav-btn on" id="nvOrders" onclick="setScreen('orders')"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>Orders</span><span class="dot" id="dotOrders" style="display:none">0</span></button>
+    <button class="nav-btn" id="nvNew" onclick="setScreen('new')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>New</span></button>
+    <button class="nav-btn" id="nvRepairs" onclick="setScreen('repairs')"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.3L3 18l3 3 6.4-6.3a4 4 0 0 0 5.3-5.4l-2.7 2.7-2.3-2.3z"/></svg><span>Repairs</span><span class="dot" id="dotRepairs" style="display:none">0</span></button>
+    <button class="nav-btn" id="nvToday" onclick="setScreen('today')"><svg viewBox="0 0 24 24"><path d="M4 5h16v16H4z"/><path d="M16 3v4M8 3v4M4 10h16"/></svg><span>Today</span></button>
+    <button class="nav-btn" id="nvMore" onclick="setScreen('more')"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span><span class="dot" id="dotMore" style="display:none">0</span></button>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"><div id="sheetBody"></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/profix-scan.js"></script>
+<script>
+/* ===== CONFIG (same Supabase project as the storefront) ===== */
+const CONFIG = {
+  SUPABASE_URL:  "https://toxwbjofyglbyjanxmzv.supabase.co",
+  SUPABASE_ANON: "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0",
+  WHATSAPP_CC:   "91",
+  VAPID_PUBLIC:  "BB0-K0YrOzP6LVLbMoXWUnahEbrDzhsAujEky2zU6o2Sp0kR5t_SEemOm9aOlvvoJhusfzLjt_RFe8PIlDOLpnU"
+};
+
+/* Order flow per spec: New -> Confirmed -> Packed -> Out for delivery -> Delivered.
+   Legacy admin values are aliased so old rows still slot into the flow. */
+const ORDER_FLOW  = [["new","New"],["confirmed","Confirmed"],["packed","Packed"],["out_for_delivery","Out for delivery"],["delivered","Delivered"]];
+const REPAIR_FLOW = [["new","New"],["picked_up","Picked up"],["in_progress","In progress"],["ready","Ready"],["delivered","Delivered"]];
+const STATUS_ALIAS = { accepted:"confirmed", preparing:"packed" };
+
+let sb, ORDERS=[], REPAIRS=[], PRODUCTS=[], CATS=[], SALES=[], CASH=[], REFUNDS=[], SERVICES=[], PENDING=[], SERVICE_PARTNERS=[], ISSUES=[];
+let screen="orders", ordFilter="active", repFilter="active", pCat="all", moreTab="returns";
+let shift = "";
+const SCHEMA = { orderCod:false, orderPaid:false, repairQuote:false, repairNotes:false, sales:false, cash:false, refunds:false, services:false, partners:false, issues:false, orderEta:false, settings:false, buyback:false, orderStaff:false, staff:false, daycloses:false, repairVisit:false, repairWalkIn:false, daycloseShop:false, shops:false, otp:false, ready:false };
+let STAFF=[], DAYCLOSES=[], SHOPS=[], dcShop="all";
+let BUYBACK=[];
+let SHOP = { id:1, delivery_fee:null, free_delivery_above:null, min_order:null, upi_vpa:"", upi_name:"" };
+const CONFIG_DEFAULTS = { delivery_fee:30, free_delivery_above:499, min_order:249 };
+const cart = {}; /* id -> {p, qty} */
+let sheetState = {}; /* transient state for the active bottom sheet */
+
+const $=id=>document.getElementById(id);
+const inr=n=>"₹"+Number(n||0).toLocaleString("en-IN");
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const telHref=p=>String(p||"").replace(/[^\d+]/g,"");
+const isToday=d=>{const x=new Date(d);const t=new Date();return x.getFullYear()===t.getFullYear()&&x.getMonth()===t.getMonth()&&x.getDate()===t.getDate();};
+const timeStr=d=>new Date(d).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+const norm=s=>STATUS_ALIAS[s]||s;
+const isDone=s=>{const n=norm(s);return n==="delivered"||n==="cancelled";};
+/* GST flat 18% inclusive (CGST 9% + SGST 9%) */
+const gstOf=A=>Math.round(Number(A||0)*18/118);
+const PAYLBL={cash:"Cash",upi:"UPI",card:"Card"};
+
+/* ---- notes model: free text · Map: url · [by:Name] · [codok] ---- */
+function parseNotes(raw){
+  const s = raw==null? "" : String(raw);
+  let map=null, by=null, cod=false, pay=null;
+  let m = s.match(/Map:\s*(https?:\/\/\S+)/i) || s.match(/(https?:\/\/[^\s·]*maps[^\s·]*)/i) || s.match(/(https?:\/\/[^\s·]*(?:goo\.gl|maps\.app)[^\s·]*)/i);
+  if(m) map=m[1];
+  const b = s.match(/\[by:([^\]]+)\]/i); if(b) by=b[1].trim();
+  if(/\[codok\]/i.test(s)) cod=true;
+  const pm = s.match(/\[pay:(cash|upi|card)\]/i); if(pm) pay=pm[1].toLowerCase();
+  let text = s
+    .replace(/Map:\s*https?:\/\/\S+/ig,"")
+    .replace(/\[by:[^\]]*\]/ig,"")
+    .replace(/\[codok\]/ig,"")
+    .replace(/\[pay:[^\]]*\]/ig,"")
+    .replace(/(^|\s)·(\s|$)/g," ")
+    .replace(/\s{2,}/g," ").trim().replace(/^[·\s]+|[·\s]+$/g,"").trim();
+  return { text, map, by, cod, pay, raw:s };
+}
+function buildNotes(o){
+  const parts=[];
+  if(o.text) parts.push(o.text);
+  if(o.map) parts.push("Map: "+o.map);
+  if(o.by) parts.push("[by:"+o.by+"]");
+  if(o.cod) parts.push("[codok]");
+  if(o.pay) parts.push("[pay:"+o.pay+"]");
+  return parts.join(" · ") || null;
+}
+
+/* ---- boot / auth ---- */
+if(!window.supabase){ $("cfgWarn").innerHTML='<div class="cfg">Couldn’t load the Supabase library — check your connection and refresh.</div>'; }
+else {
+  sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON);
+  shift = (localStorage.getItem("profix_shift")||"").trim();
+  sb.auth.getSession().then(({data})=>{ if(data.session) showApp(); });
+  sb.auth.onAuthStateChange((_e,session)=>{ if(session) showApp(); else showLogin(); });
+}
+
+async function doLogin(e){
+  e.preventDefault();
+  const f=e.target; $("loginErr").textContent=""; $("loginBtn").disabled=true; $("loginBtn").textContent="Signing in…";
+  const { error } = await sb.auth.signInWithPassword({ email:f.email.value.trim(), password:f.password.value });
+  $("loginBtn").disabled=false; $("loginBtn").textContent="Sign in";
+  if(error){ $("loginErr").textContent = error.message || "Sign-in failed"; return; }
+  showApp();
+}
+async function logout(){ await sb.auth.signOut(); }
+
+/* ---- web push: staff new-order alerts (works even when the app is closed) ---- */
+function urlB64ToU8(s){ const pad="=".repeat((4-s.length%4)%4); const b=(s+pad).replace(/-/g,"+").replace(/_/g,"/"); const raw=atob(b); const arr=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i); return arr; }
+function pushReady(){ return ("serviceWorker" in navigator)&&("PushManager" in window)&&("Notification" in window); }
+async function registerPushSW(){ if("serviceWorker" in navigator){ try{ await navigator.serviceWorker.register("/sw.js"); }catch(_){} } updateBell(); }
+async function updateBell(){ const b=$("bellBtn"); if(!b) return; if(!pushReady()){ b.style.display="none"; return; }
+  try{ const reg=await navigator.serviceWorker.ready; const sub=await reg.pushManager.getSubscription(); b.style.color=sub?"var(--green)":"var(--ink2)"; b.title=sub?"Order alerts ON":"Enable order alerts"; }catch(_){}
+}
+async function enableStaffPush(){
+  if(!pushReady()){ toast("Alerts aren't supported on this device"); return; }
+  const perm=await Notification.requestPermission(); if(perm!=="granted"){ toast("Allow notifications in your browser settings"); return; }
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToU8(CONFIG.VAPID_PUBLIC)});
+    const j=sub.toJSON();
+    const row={endpoint:sub.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,role:"staff",phone:null};
+    const { error }=await sb.from("push_subscriptions").upsert(row,{onConflict:"endpoint"});
+    if(error){ await sb.from("push_subscriptions").insert(row); }
+    updateBell(); toast("Order alerts ON 🔔 — you'll get a buzz for new orders");
+  }catch(e){ toast("Couldn't enable — "+(e.message||"run the push SQL first")); }
+}
+function showLogin(){ $("appView").style.display="none"; $("bnav").style.display="none"; $("loginView").style.display="grid"; }
+async function showApp(){
+  $("loginView").style.display="none"; $("appView").style.display="block"; $("bnav").style.display="block";
+  renderShift();
+  registerPushSW();
+  await detectSchema();
+  loadData(); subscribe();
+}
+
+/* ---- runtime schema feature-detect (authenticated) ---- */
+async function colExists(table,col){ const { error } = await sb.from(table).select(col).limit(1); return !error; }
+async function tableExists(table){ const { error } = await sb.from(table).select("id").limit(1); return !error; }
+async function detectSchema(){
+  try{
+    const [oc,op,rq,rn,sl,ch,rf,sv,pt,is,et,st,bb,os,sm,dc,rv,wi,ds,ps,ho] = await Promise.all([
+      colExists("store_orders","cod_collected"),
+      colExists("store_orders","paid_method"),
+      colExists("store_repairs","quote"),
+      colExists("store_repairs","notes"),
+      tableExists("store_sales"),
+      tableExists("store_cash"),
+      tableExists("store_refunds"),
+      tableExists("store_services"),
+      colExists("store_products","owner_id"),
+      tableExists("store_order_issues"),
+      colExists("store_orders","eta_at"),
+      tableExists("store_settings"),
+      tableExists("store_buyback"),
+      colExists("store_orders","delivery_staff_id"),
+      tableExists("staff_members"),
+      tableExists("store_daycloses"),
+      colExists("store_repairs","assigned_staff_id"),
+      colExists("store_repairs","is_walk_in"),
+      colExists("store_daycloses","shop_id"),
+      tableExists("profix_shops"),
+      colExists("store_orders","handover_otp")
+    ]);
+    SCHEMA.orderCod=oc; SCHEMA.orderPaid=op; SCHEMA.repairQuote=rq; SCHEMA.repairNotes=rn;
+    SCHEMA.sales=sl; SCHEMA.cash=ch; SCHEMA.refunds=rf; SCHEMA.services=sv; SCHEMA.partners=pt; SCHEMA.issues=is; SCHEMA.orderEta=et; SCHEMA.settings=st; SCHEMA.buyback=bb;
+    SCHEMA.orderStaff=os; SCHEMA.staff=sm; SCHEMA.daycloses=dc; SCHEMA.repairVisit=rv;
+    SCHEMA.repairWalkIn=wi; SCHEMA.daycloseShop=ds; SCHEMA.shops=ps; SCHEMA.otp=ho; SCHEMA.ready=true;
+  }catch(e){ SCHEMA.ready=true; }
+}
+
+/* ---- shift ---- */
+function renderShift(){ $("shiftChip").textContent = shift ? ("👤 "+shift) : "👤 Set shift"; }
+function editShift(){
+  const v = prompt("Who’s on shift? (your name — tagged onto orders you take/update)", shift||"");
+  if(v===null) return;
+  shift=v.trim(); localStorage.setItem("profix_shift",shift); renderShift(); toast(shift?("On shift: "+shift):"Shift cleared");
+}
+
+/* ---- data ---- */
+async function loadData(){
+  try{
+    const [o,r]=await Promise.all([
+      sb.from("store_orders").select("*").order("created_at",{ascending:false}),
+      sb.from("store_repairs").select("*").order("created_at",{ascending:false})
+    ]);
+    if(o.error) throw o.error;
+    ORDERS=o.data||[]; REPAIRS=r.data||[];
+    if(SCHEMA.sales){ try{ const s=await sb.from("store_sales").select("*").order("created_at",{ascending:false}); SALES=s.data||[]; }catch(e){} }
+    if(SCHEMA.cash){ try{ const c=await sb.from("store_cash").select("*").order("created_at",{ascending:false}); CASH=c.data||[]; }catch(e){} }
+    if(SCHEMA.refunds){ try{ const x=await sb.from("store_refunds").select("*").order("created_at",{ascending:false}); REFUNDS=x.data||[]; }catch(e){} }
+    if(SCHEMA.services){ try{ const x=await sb.from("store_services").select("*").order("created_at",{ascending:false}); SERVICES=x.data||[]; }catch(e){} }
+    if(SCHEMA.issues){ try{ const x=await sb.from("store_order_issues").select("*").eq("status","open").order("created_at",{ascending:false}); ISSUES=x.data||[]; }catch(e){} }
+    if(SCHEMA.settings){ try{ const x=await sb.from("store_settings").select("*").limit(1); if(x.data&&x.data[0]) SHOP={...SHOP,...x.data[0]}; }catch(e){} }
+    if(SCHEMA.buyback){ try{ const x=await sb.from("store_buyback").select("*").in("status",["new","quoted"]).order("created_at",{ascending:false}); BUYBACK=x.data||[]; }catch(e){} }
+    if(SCHEMA.staff){ try{ const x=await sb.from("staff_members").select("*"); STAFF=x.data||[]; }catch(e){} }
+    if(SCHEMA.shops){ try{ const x=await sb.from("profix_shops").select("*").order("id"); SHOPS=x.data||[]; }catch(e){} }
+    if(SCHEMA.daycloses){ try{ const x=await sb.from("store_daycloses").select("*").order("day",{ascending:false}).limit(60); DAYCLOSES=x.data||[]; }catch(e){} }
+    if(SCHEMA.partners){ try{ const x=await sb.from("store_products").select("id,name,brand,price,cost_price,stock,image_url,category_id,owner_id,published,partner_name").eq("published",false).not("owner_id","is",null).order("name"); PENDING=x.data||[]; }catch(e){}
+      try{ const sp=await sb.from("store_roles").select("user_id,partner_name").eq("kind","service"); SERVICE_PARTNERS=sp.data||[]; }catch(e){} }
+    if(!PRODUCTS.length) loadCatalogue();
+    renderAll();
+  }catch(err){
+    $("ordList").innerHTML='<div class="empty">Couldn’t load orders.<br><small>'+esc(err.message||"")+'</small></div>';
+  }
+}
+async function loadCatalogue(){
+  try{
+    const [p,c]=await Promise.all([
+      sb.from("store_products").select("id,name,brand,price,stock,image_url,category_id").order("name"),
+      sb.from("store_categories").select("id,name,sort_order").order("sort_order")
+    ]);
+    PRODUCTS=(p.data||[]); CATS=(c.data||[]);
+    renderCatRow(); renderProducts();
+  }catch(e){ $("pGrid").innerHTML='<div class="empty">Couldn’t load catalogue.</div>'; }
+}
+function refresh(){ loadData(); toast("Refreshed"); }
+
+let channel;
+function subscribe(){
+  if(channel) return;
+  channel = sb.channel("profix-ops")
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"store_orders"},p=>{
+       if(ORDERS.some(x=>x.id===p.new.id)) return;
+       ORDERS.unshift({...p.new,_fresh:true}); renderAll(); alertNew("🛍️ New order from "+(p.new.customer_name||"customer")+"!");
+    })
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"store_repairs"},p=>{
+       if(REPAIRS.some(x=>x.id===p.new.id)) return;
+       REPAIRS.unshift({...p.new,_fresh:true}); renderAll(); alertNew("🔧 New repair booking!");
+    })
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"store_refunds"},p=>{
+       if(REFUNDS.some(x=>x.id===p.new.id)) return;
+       REFUNDS.unshift(p.new); renderNav(); if(screen==="more") renderMore(); alertNew("↩️ New return/refund request");
+    })
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"store_services"},p=>{
+       if(SERVICES.some(x=>x.id===p.new.id)) return;
+       SERVICES.unshift(p.new); renderNav(); if(screen==="more") renderMore(); alertNew("📱 New mobile-service request");
+    })
+    .subscribe();
+}
+function alertNew(msg){ toast(msg,"alert"); ding(); try{ navigator.vibrate && navigator.vibrate([120,60,120]); }catch(e){} }
+function ding(){ try{ const a=new (window.AudioContext||window.webkitAudioContext)(); const o=a.createOscillator(); const g=a.createGain(); o.connect(g); g.connect(a.destination); o.type="sine"; o.frequency.value=880; g.gain.setValueAtTime(.0001,a.currentTime); g.gain.exponentialRampToValueAtTime(.25,a.currentTime+.02); g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.45); o.start(); o.stop(a.currentTime+.45);}catch(e){} }
+
+/* ---- screens ---- */
+function setScreen(s){
+  screen=s;
+  ["Orders","New","Repairs","Today","More"].forEach(n=>{
+    $("sc"+n).classList.toggle("on", n.toLowerCase()===s);
+    $("nv"+n).classList.toggle("on", n.toLowerCase()===s);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+  if(s==="today") renderToday();
+  if(s==="more") renderMore();
+}
+function renderAll(){ renderOrders(); renderRepairs(); renderToday(); renderNav(); if(screen==="more") renderMore(); }
+
+function renderNav(){
+  const oc=ORDERS.filter(o=>!isDone(o.status)).length;
+  const rc=REPAIRS.filter(o=>!isDone(o.status)).length;
+  const mc=REFUNDS.filter(r=>(r.status||"requested")==='requested').length + SERVICES.filter(s=>(s.status||"new")==='new').length + PENDING.length + ISSUES.length + BUYBACK.filter(b=>(b.status||"new")==='new').length;
+  const dO=$("dotOrders"), dR=$("dotRepairs"), dM=$("dotMore");
+  dO.textContent=oc; dO.style.display=oc?"block":"none";
+  dR.textContent=rc; dR.style.display=rc?"block":"none";
+  if(dM){ dM.textContent=mc; dM.style.display=mc?"block":"none"; }
+}
+
+/* ---- MORE: returns / mobile services / partner approvals ---- */
+function renderMore(){
+  const counts={issues:ISSUES.length, buyback:BUYBACK.filter(b=>(b.status||"new")==='new').length, returns:REFUNDS.filter(r=>(r.status||"requested")==='requested').length, services:SERVICES.filter(s=>(s.status||"new")==='new').length, approvals:PENDING.length};
+  $("moreChips").innerHTML=[["issues","Issues"],["buyback","Buy-back"],["returns","Returns"],["services","Mobile services"],["approvals","Approvals"],["settings","Settings"]]
+    .map(([k,l])=>`<button class="fchip ${moreTab===k?'active':''}" onclick="setMoreTab('${k}')">${l}${counts[k]?' ('+counts[k]+')':''}</button>`).join("");
+  if(moreTab==="issues") renderIssues(); else if(moreTab==="buyback") renderBuyback(); else if(moreTab==="returns") renderReturns(); else if(moreTab==="services") renderServices(); else if(moreTab==="settings") renderSettings(); else renderApprovals();
+}
+function setMoreTab(t){ moreTab=t; renderMore(); }
+
+/* ---- v3: order issues (refund / replacement requests from customers) ---- */
+function renderIssues(){
+  if(!SCHEMA.issues){ $("moreList").innerHTML='<div class="empty">Issues need the one-time DB update — run the v3 SQL to enable.</div>'; return; }
+  if(!ISSUES.length){ $("moreList").innerHTML='<div class="empty">No open issue requests. 🎉</div>'; return; }
+  $("moreList").innerHTML=ISSUES.map(x=>{
+    const o=ORDERS.find(z=>z.id===x.order_id);
+    const typeLbl={refund:"Refund",replacement:"Replacement",other:"Other"}[x.issue_type]||x.issue_type;
+    return `<div class="card">
+      <div class="chead"><div><div class="who">${esc(o?o.customer_name:"Customer")}</div>
+        <div class="meta">Order #${esc(String(x.order_id||"").slice(0,8))} · ${timeStr(x.created_at)}</div></div>
+        <span class="pill p-requested">${esc(typeLbl)}</span></div>
+      ${o?`<div class="items">${(o.items||[]).map(i=>`<div class="it"><span>${i.qty} × ${esc(i.name)}</span><span>${i.price!=null?inr(i.price*i.qty):"—"}</span></div>`).join("")}<div class="it" style="font-weight:800;margin-top:.3rem"><span>Order total</span><span>${inr(o.total)}</span></div></div>`:""}
+      ${x.message?`<div class="note-x">📝 ${esc(x.message)}</div>`:""}
+      <div class="actrow"><a class="call" href="tel:${esc(telHref(x.phone))}">📞 Call ${esc(x.phone||"")}</a></div>
+      <div class="steps"><button class="step-btn next" onclick="setIssue('${x.id}','resolved')">Resolved</button><button class="step-btn cancel" onclick="setIssue('${x.id}','rejected')">Rejected</button></div>
+    </div>`;
+  }).join("");
+}
+async function setIssue(id,status){
+  const idx=ISSUES.findIndex(z=>z.id===id); const prev=idx>=0?ISSUES[idx]:null;
+  if(idx>=0) ISSUES.splice(idx,1); renderMore(); renderNav();
+  const { error }=await sb.from("store_order_issues").update({status}).eq("id",id);
+  if(error){ if(prev){ ISSUES.push(prev); } renderMore(); renderNav(); toast("Update failed — "+error.message); return; }
+  toast("Issue "+status);
+}
+async function reloadIssues(){
+  if(!SCHEMA.issues||!sb) return;
+  try{ const x=await sb.from("store_order_issues").select("*").eq("status","open").order("created_at",{ascending:false}); ISSUES=x.data||[]; renderNav(); if(screen==="more"&&moreTab==="issues") renderIssues(); }catch(_){}
+}
+setInterval(reloadIssues, 60000);
+
+/* ---- B6: buy-back (trade-in) inbox ---- */
+const COND_LBL={likenew:"Like new",good:"Good",screen:"Screen issues",dead:"Not turning on"};
+function renderBuyback(){
+  if(!SCHEMA.buyback){ $("moreList").innerHTML='<div class="empty">Buy-back needs the one-time DB update — run the v3 SQL to enable.</div>'; return; }
+  if(!BUYBACK.length){ $("moreList").innerHTML='<div class="empty">No open buy-back requests. 🎉</div>'; return; }
+  $("moreList").innerHTML=BUYBACK.map(b=>{
+    const dev=`${esc(b.brand||"")} ${esc(b.model||"")}`.trim();
+    const age=b.age_months!=null?`${Math.round(b.age_months/12*10)/10} yr`:"—";
+    const wa="91"+String(b.phone||"").replace(/\D/g,"").slice(-10);
+    const quoteMsg=encodeURIComponent(`Hi ${b.customer_name||""}, thanks for your buy-back request for ${dev}. Based on the condition (${COND_LBL[b.condition]||b.condition}), we can offer ₹____. Reply to confirm — ProFix.`);
+    return `<div class="card">
+      <div class="chead"><div><div class="who">${esc(b.customer_name||"Customer")}</div>
+        <div class="meta">${timeStr(b.created_at)}</div></div>
+        <span class="pill p-${b.status==='quoted'?'requested':'new'}">${b.status==='quoted'?('Quoted'+(b.quote_amount?' ₹'+b.quote_amount:'')):'New'}</span></div>
+      <div class="items"><b>${dev||"Phone"}</b> — ${esc(COND_LBL[b.condition]||b.condition||"")} · ${age}${b.notes?`<br><span class="meta">📝 ${esc(b.notes)}</span>`:""}</div>
+      <div class="actrow">
+        <a class="call" href="tel:${esc(String(b.phone||"").replace(/[^\d+]/g,""))}">📞 Call ${esc(b.phone||"")}</a>
+        <a class="cod" href="https://wa.me/${wa}?text=${quoteMsg}" target="_blank" rel="noopener">💬 Quote on WhatsApp</a>
+      </div>
+      <div class="mini-row">Quote ₹: <input class="quote-in" type="number" inputmode="numeric" placeholder="amount" value="${b.quote_amount!=null?esc(b.quote_amount):''}" onchange="setBuybackQuote('${b.id}',this.value)"></div>
+      <div class="steps">
+        <button class="step-btn" onclick="setBuyback('${b.id}','quoted')">Mark quoted</button>
+        <button class="step-btn next" onclick="setBuyback('${b.id}','bought')">Bought</button>
+        <button class="step-btn cancel" onclick="setBuyback('${b.id}','rejected')">Reject</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+async function setBuybackQuote(id,v){
+  const val=v?Math.max(0,parseInt(v,10)||0):null;
+  const b=BUYBACK.find(x=>x.id===id); if(b) b.quote_amount=val;
+  const { error }=await sb.from("store_buyback").update({quote_amount:val}).eq("id",id);
+  if(error){ toast("Couldn't save quote — "+error.message); return; }
+  toast("Quote saved ✓");
+}
+async function setBuyback(id,status){
+  const idx=BUYBACK.findIndex(x=>x.id===id); const prev=idx>=0?BUYBACK[idx]:null;
+  if(status!=="quoted" && idx>=0) BUYBACK.splice(idx,1);       // bought/rejected leave the open inbox
+  else if(prev) prev.status="quoted";
+  renderMore(); renderNav();
+  const { error }=await sb.from("store_buyback").update({status}).eq("id",id);
+  if(error){ if(prev){ if(status!=="quoted") BUYBACK.push(prev); } renderMore(); renderNav(); toast("Update failed — "+error.message); return; }
+  toast("Buy-back "+status);
+}
+async function reloadBuyback(){
+  if(!SCHEMA.buyback||!sb) return;
+  try{ const x=await sb.from("store_buyback").select("*").in("status",["new","quoted"]).order("created_at",{ascending:false}); BUYBACK=x.data||[]; renderNav(); if(screen==="more"&&moreTab==="buyback") renderBuyback(); }catch(_){}
+}
+setInterval(reloadBuyback, 60000);
+
+/* ---- B2: WhatsApp notify templates (bilingual EN + TA) ---- */
+const NOTIFY={
+  confirmed:{en:"Hi {name}, your ProFix order is confirmed ✓ We'll deliver within 2–4 hours. Please keep cash ready.",ta:"வணக்கம் {name}, உங்கள் ProFix ஆர்டர் உறுதி செய்யப்பட்டது ✓ 2–4 மணி நேரத்தில் டெலிவரி செய்வோம். பணம் தயாராக வைக்கவும்."},
+  packed:{en:"Hi {name}, your order is packed and heading out shortly 📦",ta:"வணக்கம் {name}, உங்கள் ஆர்டர் பேக் ஆகிவிட்டது, விரைவில் புறப்படும் 📦"},
+  out_for_delivery:{en:"Hi {name}, your order is out for delivery 🛵{eta}",ta:"வணக்கம் {name}, உங்கள் ஆர்டர் டெலிவரிக்கு புறப்பட்டது 🛵{eta}"},
+  delivered:{en:"Hi {name}, your order is delivered ✓ Thank you for choosing ProFix! 7-day replacement on any defect.",ta:"வணக்கம் {name}, உங்கள் ஆர்டர் டெலிவரி ஆனது ✓ ProFix-ஐ தேர்ந்தெடுத்ததற்கு நன்றி! ஏதேனும் குறைபாட்டிற்கு 7 நாள் மாற்று."}
+};
+const RNOTIFY={
+  picked_up:{en:"Hi {name}, we've picked up your {device} for repair 🔧 We'll update you soon.",ta:"வணக்கம் {name}, உங்கள் {device} ரிப்பேருக்கு எடுத்துவிட்டோம் 🔧 விரைவில் தகவல் தருவோம்."},
+  in_progress:{en:"Hi {name}, your {device} repair is in progress ⚙️",ta:"வணக்கம் {name}, உங்கள் {device} ரிப்பேர் நடந்து கொண்டிருக்கிறது ⚙️"},
+  ready:{en:"Hi {name}, your {device} is repaired and ready ✓",ta:"வணக்கம் {name}, உங்கள் {device} ரிப்பேர் முடிந்து தயார் ✓"},
+  delivered:{en:"Hi {name}, your {device} has been returned. Thank you! 🙏",ta:"வணக்கம் {name}, உங்கள் {device} திரும்ப வழங்கப்பட்டது. நன்றி! 🙏"}
+};
+function fill(tpl,vars){ let s=tpl; for(const k in vars) s=s.split("{"+k+"}").join(vars[k]); return s; }
+function waLink(phone,msg){ return "https://wa.me/91"+String(phone||"").replace(/\D/g,"").slice(-10)+"?text="+encodeURIComponent(msg); }
+function notifyOrder(id){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  const st=norm(o.status); const tp=NOTIFY[st]; if(!tp){ toast("No message for this status"); return; }
+  let eta=""; if(st==="out_for_delivery" && SCHEMA.orderEta && o.eta_at) eta=" — arriving by "+etaStr(o.eta_at);
+  const name=(o.customer_name||"").split(" ")[0]||"there";
+  const msg=fill(tp.en,{name,eta})+"\n\n"+fill(tp.ta,{name,eta});
+  window.open(waLink(o.phone,msg),"_blank","noopener");
+}
+function notifyRepair(id){
+  const o=REPAIRS.find(x=>x.id===id); if(!o) return;
+  const st=norm(o.status); const tp=RNOTIFY[st]; if(!tp){ toast("No message for this status"); return; }
+  const name=(o.customer_name||"").split(" ")[0]||"there", device=o.device||"device";
+  const msg=fill(tp.en,{name,device})+"\n\n"+fill(tp.ta,{name,device});
+  window.open(waLink(o.phone,msg),"_blank","noopener");
+}
+
+/* ---- A2: shop settings editor (delivery fee / free-above / min order + UPI + theme) ---- */
+const THEME_LIST=[
+  ["classic","Classic","linear-gradient(120deg,#FF2A45,#FF7A1A)"],
+  ["monsoon","Monsoon","linear-gradient(120deg,#0EA5E9,#0E7490)"],
+  ["diwali","Diwali","linear-gradient(120deg,#7C3AED,#F59E0B)"],
+  ["pongal","Pongal","linear-gradient(120deg,#16A34A,#EAB308)"],
+  ["summer-sale","Summer Sale","linear-gradient(120deg,#EF4444,#F59E0B)"],
+  ["midnight","Midnight","linear-gradient(120deg,#0B1220,#2563EB)"]
+];
+async function saveTheme(name){
+  if(!SCHEMA.settings){ toast("Run the theme SQL first"); return; }
+  const { error } = await sb.from("store_settings").update({theme:name}).eq("id",SHOP.id||1);
+  if(error){ toast("Couldn't save theme — "+error.message); return; }
+  SHOP={...SHOP,theme:name}; toast("Theme live ✓"); renderSettings();
+}
+function renderSettings(){
+  if(!SCHEMA.settings){ $("moreList").innerHTML='<div class="empty">Settings need the one-time DB update — run the v3 SQL to enable.</div>'; return; }
+  const df=SHOP.delivery_fee!=null?SHOP.delivery_fee:CONFIG_DEFAULTS.delivery_fee;
+  const fa=SHOP.free_delivery_above!=null?SHOP.free_delivery_above:CONFIG_DEFAULTS.free_delivery_above;
+  const mo=SHOP.min_order!=null?SHOP.min_order:CONFIG_DEFAULTS.min_order;
+  $("moreList").innerHTML=`<div class="card">
+    <div class="chead"><div class="who">Delivery & pricing</div></div>
+    <div class="set-row"><label>Delivery fee (₹)</label><input id="setFee" class="quote-in" type="number" inputmode="numeric" min="0" value="${esc(df)}"></div>
+    <div class="set-row"><label>Free delivery above (₹)</label><input id="setFree" class="quote-in" type="number" inputmode="numeric" min="0" value="${esc(fa)}"></div>
+    <div class="set-row"><label>Minimum order (₹)</label><input id="setMin" class="quote-in" type="number" inputmode="numeric" min="0" value="${esc(mo)}"></div>
+    <div class="steps"><button class="step-btn next" id="setSaveBtn" onclick="saveSettings()">Save</button></div>
+    <div class="meta" style="margin-top:.5rem">Customers see these live at checkout (refresh on next visit/tab focus).</div>
+  </div>
+  <div class="card">
+    <div class="chead"><div class="who">Store theme</div></div>
+    <div class="meta" style="margin-bottom:.6rem">Recolors the live store for every customer within a minute — festivals & seasons. No redeploy.</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${THEME_LIST.map(([k,label,grad])=>`<button onclick="saveTheme('${k}')" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;border-radius:12px;border:2px solid ${(SHOP.theme||'classic')===k?'var(--red)':'var(--line)'};background:#fff;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--ink)"><span style="width:22px;height:22px;border-radius:6px;background:${grad};display:inline-block;flex:none"></span>${label}${(SHOP.theme||'classic')===k?' ✓':''}</button>`).join("")}</div>
+  </div>
+  <div class="card">
+    <div class="chead"><div class="who">UPI (for QR at delivery)</div></div>
+    <div class="mini-row">VPA: <b>${esc(SHOP.upi_vpa||"—")}</b></div>
+    <div class="mini-row">Name: <b>${esc(SHOP.upi_name||"—")}</b></div>
+    <div class="meta" style="margin-top:.4rem">UPI id is set in the SQL/settings row. Empty VPA hides all UPI QR features.</div>
+  </div>`;
+}
+async function saveSettings(){
+  const btn=$("setSaveBtn"); if(btn){ btn.disabled=true; btn.textContent="Saving…"; }
+  const patch={
+    delivery_fee:Math.max(0,parseInt($("setFee").value,10)||0),
+    free_delivery_above:Math.max(0,parseInt($("setFree").value,10)||0),
+    min_order:Math.max(0,parseInt($("setMin").value,10)||0)
+  };
+  const { error } = await sb.from("store_settings").update(patch).eq("id",SHOP.id||1);
+  if(btn){ btn.disabled=false; btn.textContent="Save"; }
+  if(error){ toast("Couldn't save — "+error.message); return; }
+  SHOP={...SHOP,...patch}; toast("Saved ✓");
+}
+
+/* ---- A3: UPI QR helpers (shared by order collect flow) ---- */
+function upiPayload(amount,shortid){
+  const pn=encodeURIComponent(SHOP.upi_name||"ProFix");
+  const tn=encodeURIComponent("ProFix order "+(shortid||""));
+  return `upi://pay?pa=${encodeURIComponent(SHOP.upi_vpa)}&pn=${pn}&am=${amount}&cu=INR&tn=${tn}`;
+}
+let _qrQ=null;
+function ensureQR(cb){
+  if(window.qrcode){ cb(); return; }
+  if(_qrQ){ _qrQ.push(cb); return; }
+  _qrQ=[cb];
+  const s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js";
+  s.onload=()=>{ const q=_qrQ; _qrQ=null; q.forEach(f=>{ try{ f(); }catch(_){} }); };
+  s.onerror=()=>{ _qrQ=null; const el=$("admQr"); if(el) el.innerHTML="QR unavailable"; };
+  document.head.appendChild(s);
+}
+function qrInto(text,el){ if(!el) return; try{ const qr=qrcode(0,"M"); qr.addData(text); qr.make(); el.innerHTML=qr.createSvgTag({cellSize:5,margin:2,scalable:true}); }catch(_){ el.innerHTML=""; } }
+function showAdminUpi(id){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  if(!SHOP.upi_vpa){ toast("No UPI id set — add it in Settings"); return; }
+  const amt=Math.max(0,Math.round(Number(o.total)||0));
+  const link=upiPayload(amt,String(o.id).slice(0,6));
+  openSheet(`<h3>UPI payment</h3><div class="sh-sub">${esc(o.customer_name||"Customer")} · ${inr(amt)}</div>
+    <div id="admQr" style="display:flex;justify-content:center;align-items:center;min-height:200px;margin:.6rem 0">Loading QR…</div>
+    <div style="text-align:center;font-size:.85rem">${esc(SHOP.upi_name||"ProFix")} · <b>${esc(SHOP.upi_vpa)}</b></div>
+    <div style="text-align:center;font-size:.78rem;color:var(--ink2);margin-top:.3rem">Customer scans to pay ${inr(amt)}</div>`);
+  ensureQR(()=>qrInto(link,$("admQr")));
+}
+
+function renderReturns(){
+  if(!SCHEMA.refunds){ $("moreList").innerHTML='<div class="empty">Returns need the one-time DB update — run the SQL to enable.</div>'; return; }
+  if(!REFUNDS.length){ $("moreList").innerHTML='<div class="empty">No return / refund requests.</div>'; return; }
+  $("moreList").innerHTML=REFUNDS.map(r=>{
+    const o=ORDERS.find(x=>x.id===r.order_id); const st=r.status||"requested";
+    const acts = st==="requested"
+      ? `<button class="step-btn next" onclick="setRefund('${r.id}','approved')">Approve</button><button class="step-btn cancel" onclick="setRefund('${r.id}','rejected')">Reject</button>`
+      : st==="approved"
+      ? `<button class="step-btn next" onclick="setRefund('${r.id}','refunded')">Mark refunded (cash returned)</button><button class="step-btn cancel" onclick="setRefund('${r.id}','rejected')">Reject</button>`
+      : "";
+    return `<div class="card">
+      <div class="chead"><div><div class="who">${esc(o?o.customer_name:"Customer")}</div>
+        <div class="meta">Order #${esc(String(r.order_id||"").slice(0,8))} · ${timeStr(r.created_at)}</div></div>
+        <span class="pill p-${esc(st)}">${esc(st)}</span></div>
+      ${o?`<div class="items">${(o.items||[]).map(i=>`<div class="it"><span>${i.qty} × ${esc(i.name)}</span><span>${i.price!=null?inr(i.price*i.qty):"—"}</span></div>`).join("")}<div class="it" style="font-weight:800;margin-top:.3rem"><span>Order total</span><span>${inr(o.total)}</span></div></div>`:""}
+      ${r.reason?`<div class="note-x">📝 ${esc(r.reason)}</div>`:""}
+      <div class="actrow"><a class="call" href="tel:${esc(telHref(r.phone))}">📞 Call ${esc(r.phone||"")}</a></div>
+      ${acts?`<div class="steps">${acts}</div>`:""}
+    </div>`;
+  }).join("");
+}
+async function setRefund(id,status){
+  const r=REFUNDS.find(x=>x.id===id); const prev=r?r.status:null; if(r) r.status=status; renderMore(); renderNav();
+  const { error }=await sb.from("store_refunds").update({status}).eq("id",id);
+  if(error){ if(r) r.status=prev; renderMore(); toast("Update failed — "+error.message); return; }
+  toast("Refund "+status);
+}
+
+function renderServices(){
+  if(!SCHEMA.services){ $("moreList").innerHTML='<div class="empty">Mobile services need the one-time DB update — run the SQL to enable.</div>'; return; }
+  if(!SERVICES.length){ $("moreList").innerHTML='<div class="empty">No mobile-service requests.</div>'; return; }
+  const SFLOW=[["new","New"],["contacted","Contacted"],["done","Done"]];
+  $("moreList").innerHTML=SERVICES.map(s=>{
+    const st=s.status||"new";
+    const steps=SFLOW.map(([k,l])=>`<button class="step-btn" ${k===st?'disabled style="opacity:.5"':''} onclick="setService('${s.id}','${k}')">${l}</button>`).join("");
+    return `<div class="card">
+      <div class="chead"><div><div class="who">${esc(s.customer_name||"Customer")}</div>
+        <div class="meta">${timeStr(s.created_at)}${s.preferred_slot?" · "+esc(s.preferred_slot):""}</div></div>
+        <span class="pill p-${esc(st)}">${esc(st)}</span></div>
+      <div class="items"><b>${esc(s.service_type||"Service")}</b>${s.operator?" · "+esc(s.operator):""}${s.current_number?"<br>Current no: "+esc(s.current_number):""}${s.notes?"<br><span class='meta'>"+esc(s.notes)+"</span>":""}</div>
+      <div class="actrow"><a class="call" href="tel:${esc(telHref(s.phone))}">📞 Call ${esc(s.phone||"")}</a></div>
+      <div class="steps">${steps}</div>
+    </div>`;
+  }).join("");
+}
+async function setService(id,status){
+  const s=SERVICES.find(x=>x.id===id); const prev=s?s.status:null; if(s) s.status=status; renderMore(); renderNav();
+  const { error }=await sb.from("store_services").update({status}).eq("id",id);
+  if(error){ if(s) s.status=prev; renderMore(); toast("Update failed — "+error.message); return; }
+  toast("Marked "+status);
+}
+
+function renderApprovals(){
+  if(!SCHEMA.partners){ $("moreList").innerHTML='<div class="empty">Partner products need the one-time DB update — run the SQL to enable.</div>'; return; }
+  if(!PENDING.length){ $("moreList").innerHTML='<div class="empty">No products awaiting approval.</div>'; return; }
+  $("moreList").innerHTML=PENDING.map(p=>{
+    const cost=(p.cost_price==null?null:p.cost_price), sell=(p.price==null?null:p.price);
+    return `<div class="card">
+    <div class="chead"><div><div class="who">${esc(p.name||"Product")}</div>
+      <div class="meta">${esc(p.brand||"")}${p.partner_name?" · by "+esc(p.partner_name):""} · stock ${p.stock==null?0:p.stock}</div></div>
+      <span class="pill p-new">Pending</span></div>
+    ${p.image_url?`<img src="${esc(p.image_url)}" alt="" style="width:82px;height:82px;object-fit:cover;border-radius:10px;margin:.3rem 0">`:""}
+    <div class="mini-row" style="flex-wrap:wrap;gap:.5rem .8rem">
+      <span>Supply: <b>${cost!=null?inr(cost):"—"}</b></span>
+      <span>Sell ₹ <input class="quote-in" id="appr-price-${p.id}" type="number" inputmode="numeric" value="${sell!=null?sell:""}" oninput="apprMargin('${p.id}',${cost==null?'null':cost})"></span>
+      <span id="appr-margin-${p.id}" style="font-weight:800;color:var(--green)">${marginStr(cost,sell)}</span>
+    </div>
+    <div class="steps"><button class="step-btn next" onclick="approveProduct('${p.id}',false)">Approve (publish)</button><button class="step-btn" onclick="approveProduct('${p.id}',true)">Move to shop</button></div>
+  </div>`;}).join("");
+}
+function marginStr(cost,sell){ if(cost==null||sell==null||isNaN(sell)) return ""; const m=sell-cost; return "margin "+inr(m)+(cost>0?" ("+Math.round(m/cost*100)+"%)":""); }
+function apprMargin(id,cost){ const inp=$("appr-price-"+id), sp=$("appr-margin-"+id); if(!inp||!sp) return; sp.textContent=marginStr(cost,parseInt(inp.value,10)); }
+async function approveProduct(id,toShop){
+  const inp=$("appr-price-"+id); const price = inp ? parseInt(inp.value,10) : NaN;
+  const patch = toShop ? {published:true, owner_id:null} : {published:true};
+  if(!isNaN(price)) patch.price=Math.max(0,price);
+  const { error }=await sb.from("store_products").update(patch).eq("id",id);
+  if(error){ toast("Failed — "+error.message); return; }
+  PENDING=PENDING.filter(x=>x.id!==id); renderMore(); renderNav(); toast(toShop?"Moved to shop ✓":"Approved & published ✓");
+}
+
+/* ---- ORDERS ---- */
+function renderOrders(){
+  $("ordChips").innerHTML=[["active","Active"],["delivered","Delivered"],["all","All"]]
+    .map(([k,l])=>`<button class="fchip ${ordFilter===k?'active':''}" onclick="setOrdFilter('${k}')">${l}</button>`).join("");
+  let list=ORDERS.slice();
+  if(ordFilter==="active") list=list.filter(o=>!isDone(o.status));
+  else if(ordFilter==="delivered") list=list.filter(o=>norm(o.status)==="delivered");
+  $("ordSub").textContent = list.length+" order"+(list.length===1?"":"s");
+  if(!list.length){ $("ordList").innerHTML='<div class="empty">No orders here.<br><small>New orders appear automatically with a chime.</small></div>'; return; }
+  $("ordList").innerHTML=list.map(orderCard).join("");
+}
+function setOrdFilter(f){ ordFilter=f; renderOrders(); }
+
+function codState(o){ return SCHEMA.orderCod ? !!o.cod_collected : parseNotes(o.notes).cod; }
+function paidMethod(o){ return SCHEMA.orderPaid ? (o.paid_method||null) : parseNotes(o.notes).pay; }
+function orderCard(o){
+  const n=parseNotes(o.notes);
+  const st=norm(o.status);
+  const items=(o.items||[]).map(i=>`<div class="it"><span>${i.qty} × ${esc(i.name)}</span><span>${i.price!=null?inr(i.price*i.qty):"Enquire"}</span></div>`).join("");
+  const cod=codState(o); const pm=paidMethod(o);
+  const navBtn = n.map ? `<a class="nav" href="${esc(n.map)}" target="_blank" rel="noopener">📍 Navigate</a>` : "";
+  const extra = n.text ? `<div class="note-x">📝 ${esc(n.text)}</div>` : "";
+  const byTag = n.by ? `<span class="meta"> · by ${esc(n.by)}</span>` : "";
+  return `<div class="card ${o._fresh?'fresh':''}">
+    <div class="chead"><div><div class="who">${esc(o.customer_name||"Customer")}</div>
+      <div class="meta">#${esc(String(o.id).slice(0,8))} · ${timeStr(o.created_at)}${byTag}</div></div>
+      <span class="pill p-${esc(st)}">${lbl(ORDER_FLOW,st)}</span></div>
+    <div class="items">${items||"—"}</div>
+    <div class="tot">${inr(o.total)} <small>${esc(o.payment_mode||"COD")}</small> ${cod?('<span class="paybadge">✓ '+(pm?("Paid · "+PAYLBL[pm]):"Collected")+'</span>'):''}</div>
+    <div class="addr">📍 <b>${esc(o.apartment||"")}</b>${o.apartment&&o.address?", ":""}${esc(o.address||"")}</div>
+    ${extra}
+    <div class="actrow">
+      <a class="call" href="tel:${esc(telHref(o.phone))}">📞 Call ${esc(o.phone||"")}</a>
+      ${navBtn}
+      ${SHOP.upi_vpa?`<button class="cod" onclick="showAdminUpi('${o.id}')">📲 UPI QR</button>`:""}
+      ${NOTIFY[st]?`<button class="cod" onclick="notifyOrder('${o.id}')">📱 Notify</button>`:""}
+      <button class="cod ${cod?'on':''}" onclick="toggleCod('${o.id}')">${cod?('✓ '+(pm?PAYLBL[pm]:"Collected")):'Mark COD collected'}</button>
+      ${st==="delivered"?`<button class="cod" onclick="printInvoice('${o.id}')">🧾 Invoice</button>`:""}
+    </div>
+    <div class="steps">${stepButtons(o,ORDER_FLOW,"setOrderStatus",st)}</div>
+    ${etaRow(o)}
+    ${staffRow(o)}
+    ${orderOtpRow(o)}
+    <div class="mini-row"><button class="del" onclick="del('store_orders','${o.id}')">delete</button></div>
+  </div>`;
+}
+function etaStr(ts){ const d=new Date(ts); return (isToday(ts)?"Today ":d.toLocaleDateString("en-IN",{day:"2-digit",month:"short"})+" ")+d.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"}); }
+function etaRow(o){
+  if(!SCHEMA.orderEta) return "";
+  const st=norm(o.status); if(st==="delivered"||st==="cancelled") return "";
+  const cur = o.eta_at ? `<span class="eta-cur">🚚 ${esc(etaStr(o.eta_at))}</span>` : `<span class="eta-cur muted">No delivery ETA</span>`;
+  return `<div class="eta-row">${cur}
+    <button class="eta-b" onclick="setEta('${o.id}',30)">+30m</button>
+    <button class="eta-b" onclick="setEta('${o.id}',60)">+1h</button>
+    <button class="eta-b" onclick="setEta('${o.id}',120)">+2h</button>
+    ${o.eta_at?`<button class="eta-b clr" onclick="setEta('${o.id}',0)">clear</button>`:""}</div>`;
+}
+async function setEta(id,mins){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  const val = mins ? new Date(Date.now()+mins*60000).toISOString() : null;
+  const prev=o.eta_at; o.eta_at=val; renderOrders();
+  const { error } = await sb.from("store_orders").update({eta_at:val}).eq("id",id);
+  if(error){ o.eta_at=prev; renderOrders(); toast("Couldn't set ETA — "+error.message); return; }
+  toast(val ? ("ETA set · "+etaStr(val)+" — customer sees it live") : "ETA cleared");
+}
+
+/* ---- delivery-staff assignment (out_for_delivery) ---- */
+function deliveryStaff(){
+  const active=(STAFF||[]).filter(s=>s.active!==false);
+  const del=active.filter(s=>String(s.role||"").toLowerCase()==="delivery");
+  return del.length?del:active;
+}
+function staffName(id){ const s=(STAFF||[]).find(x=>String(x.id)===String(id)); return s?s.name:null; }
+function staffRow(o){
+  if(!SCHEMA.orderStaff || norm(o.status)!=="out_for_delivery") return "";
+  const list=deliveryStaff(); if(!list.length) return "";
+  const cur=o.delivery_staff_id;
+  const chips=list.map(s=>`<button class="eta-b" ${String(cur)===String(s.id)?'style="background:var(--green);color:#fff;border-color:var(--green)"':''} onclick="assignStaff('${o.id}','${s.id}')">${esc(s.name)}</button>`).join("");
+  const who=cur?staffName(cur):null;
+  return `<div class="eta-row">${who?`<span class="eta-cur">🛵 ${esc(who)}</span>`:`<span class="eta-cur muted">Assign delivery</span>`}${chips}</div>`;
+}
+async function assignStaff(id,sid){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  const prev=o.delivery_staff_id; o.delivery_staff_id=(String(prev)===String(sid))?null:sid; renderOrders();
+  const { error }=await sb.from("store_orders").update({delivery_staff_id:o.delivery_staff_id}).eq("id",id);
+  if(error){ o.delivery_staff_id=prev; renderOrders(); toast("Couldn't assign — "+error.message); return; }
+  toast(o.delivery_staff_id?("Assigned to "+(staffName(o.delivery_staff_id)||"staff")+" 🛵"):"Unassigned");
+}
+
+/* ---- technician assignment for repairs (service-visit dispatch) ---- */
+const VISIT_LBL={assigned:"Assigned",on_the_way:"On the way",reached:"Reached",repaired:"Repaired",collected:"Collected"};
+function seniorTechs(){
+  const active=(STAFF||[]).filter(s=>s.active!==false);
+  const t=active.filter(s=>{ const sen=String(s.seniority||"").toLowerCase(), role=String(s.role||"").toLowerCase(); return sen==="senior"||sen==="lead"||role==="technician"; });
+  return { list: t.length?t:active, matched: t.length>0 };
+}
+function techRow(o){
+  if(!SCHEMA.repairVisit || isDone(o.status)) return "";
+  const { list, matched } = seniorTechs(); if(!list.length) return "";
+  const cur=o.assigned_staff_id, who=cur?staffName(cur):null, vs=o.visit_status;
+  const amt=(o.amount_collected!=null&&o.amount_collected!=="")?` · ₹${o.amount_collected} collected`:"";
+  const chips=list.map(s=>`<button class="eta-b" ${String(cur)===String(s.id)?'style="background:var(--green);color:#fff;border-color:var(--green)"':''} onclick="assignTech('${o.id}','${s.id}')">${esc(s.name)}${s.designation?" · "+esc(s.designation):""}</button>`).join("");
+  const head = who ? `<span class="eta-cur">🛠 ${esc(who)}${vs?" · "+(VISIT_LBL[vs]||vs):""}${amt}</span>` : `<span class="eta-cur muted">Assign tech</span>`;
+  const note = matched ? "" : `<div class="meta" style="margin-top:.3rem">no seniors marked yet — set Seniority in HR Registration</div>`;
+  return `<div class="eta-row">${head}${chips}</div>${note}`;
+}
+async function assignTech(id,sid){
+  const o=REPAIRS.find(x=>x.id===id); if(!o) return;
+  const prev=o.assigned_staff_id, pvs=o.visit_status, pat=o.visit_updated_at, now=new Date().toISOString();
+  o.assigned_staff_id=sid; o.visit_status="assigned"; o.visit_updated_at=now; renderRepairs();
+  const { error }=await sb.from("store_repairs").update({assigned_staff_id:sid,visit_status:"assigned",visit_updated_at:now}).eq("id",id);
+  if(error){ o.assigned_staff_id=prev; o.visit_status=pvs; o.visit_updated_at=pat; renderRepairs(); toast("Couldn't assign — "+error.message); return; }
+  toast("Assigned to "+(staffName(sid)||"tech")+" 🛠");
+}
+
+/* ---- printable GST invoice (delivered orders) ---- */
+function printInvoice(id){
+  const o=ORDERS.find(x=>x.id===id); if(!o){ toast("Order not found"); return; }
+  const GSTIN="33BCQPV3641B2ZK", SHOPN="ProFix", ADDR="Saravanampatti, Coimbatore 641035", PH="+91 95970 16448";
+  const total=Math.max(0,Math.round(Number(o.total)||0));
+  const cgst=Math.round(total*9/118), sgst=cgst, taxable=total-cgst-sgst;   // sums EXACTLY to total
+  const rows=(o.items||[]).map(i=>{ const amt=(i.price!=null?i.price*i.qty:0); return `<tr><td>${esc(i.name)}</td><td class="c">${i.qty}</td><td class="r">${i.price!=null?inr(i.price):"—"}</td><td class="r">${inr(amt)}</td></tr>`; }).join("");
+  const fm=String(o.notes||"").match(/delivery:\s*(\d+)/i); const fee=fm?parseInt(fm[1],10):0;
+  const inv="INV-"+String(o.id).replace(/-/g,"").slice(0,6).toUpperCase();
+  const dt=new Date(o.created_at).toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${inv}</title><style>
+    *{font-family:system-ui,Arial,sans-serif;color:#111;box-sizing:border-box}body{max-width:540px;margin:0 auto;padding:18px}
+    h1{font-size:1.25rem;margin:0}.muted{color:#666;font-size:.78rem;line-height:1.4}
+    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.85rem}
+    th,td{padding:6px 4px;border-bottom:1px solid #eee;text-align:left}
+    .c{text-align:center}.r{text-align:right}
+    .tot td{border:none;padding:3px 4px}.grand td{font-weight:800;font-size:1.05rem;border-top:2px solid #111;padding-top:7px}
+    .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:10px}
+    button{margin-top:14px;padding:.6rem 1.4rem;border:none;background:#111;color:#fff;border-radius:8px;font-size:1rem;cursor:pointer}
+    @media print{button{display:none}}
+  </style></head><body>
+    <div class="hd"><div><h1>${SHOPN}</h1><div class="muted">${esc(ADDR)}<br>${esc(PH)}<br>GSTIN: ${GSTIN}</div></div>
+      <div style="text-align:right"><b>TAX INVOICE</b><div class="muted">${inv}<br>${dt}</div></div></div>
+    <div style="margin:12px 0;font-size:.85rem"><b>Bill to:</b> ${esc(o.customer_name||"Customer")} · ${esc(o.phone||"")}<br>${esc(o.apartment||"")}${o.apartment&&o.address?", ":""}${esc(o.address||"")}</div>
+    <table><thead><tr><th>Item</th><th class="c">Qty</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead><tbody>${rows||'<tr><td colspan="4">—</td></tr>'}</tbody></table>
+    <table class="tot">
+      <tr><td>Taxable value</td><td class="r">${inr(taxable)}</td></tr>
+      <tr><td>CGST @ 9%</td><td class="r">${inr(cgst)}</td></tr>
+      <tr><td>SGST @ 9%</td><td class="r">${inr(sgst)}</td></tr>
+      ${fee?`<tr><td class="muted">(includes delivery ${inr(fee)})</td><td></td></tr>`:""}
+      <tr class="grand"><td>Grand total</td><td class="r">${inr(total)}</td></tr>
+    </table>
+    <div class="muted" style="margin-top:8px">Prices inclusive of GST @ 18% (CGST 9% + SGST 9%). Payment: ${esc(o.payment_mode||"COD")}. Thank you for shopping with ${SHOPN}!</div>
+    <div style="text-align:center"><button onclick="window.print()">🖨 Print</button></div>
+  </body></html>`;
+  const w=window.open("","_blank"); if(!w){ toast("Allow pop-ups to print the invoice"); return; }
+  w.document.write(html); w.document.close(); setTimeout(()=>{ try{ w.focus(); w.print(); }catch(_){} },450);
+}
+
+/* ---- REPAIRS ---- */
+function renderRepairs(){
+  $("repChips").innerHTML=[["active","Active"],["delivered","Done"],["all","All"]]
+    .map(([k,l])=>`<button class="fchip ${repFilter===k?'active':''}" onclick="setRepFilter('${k}')">${l}</button>`).join("")
+    + (SCHEMA.repairWalkIn?`<button class="fchip" style="margin-left:auto;background:var(--red);color:#fff;border-color:var(--red);font-weight:700" onclick="openWalkIn()">+ Walk-in repair</button>`:"");
+  let list=REPAIRS.slice();
+  if(repFilter==="active") list=list.filter(o=>!isDone(o.status));
+  else if(repFilter==="delivered") list=list.filter(o=>norm(o.status)==="delivered");
+  if(!list.length){ $("repList").innerHTML='<div class="empty">No repair bookings here.</div>'; return; }
+  $("repList").innerHTML=list.map(repairCard).join("");
+}
+function setRepFilter(f){ repFilter=f; renderRepairs(); }
+/* ---- walk-in repair quick-add (logging + technician dispatch into the unified system;
+   the Repair Desk (/crm) still handles detailed ticketing — IMEI, parts, etc.) ---- */
+function shopName(id){ const s=(SHOPS||[]).find(x=>String(x.id)===String(id)); return s?(s.name||("ProFix "+id)):("ProFix "+id); }
+function shopList(){ return SHOPS.length?SHOPS:[{id:1,name:"ProFix 1"},{id:2,name:"ProFix 2"},{id:3,name:"ProFix 3"}]; }
+function openWalkIn(){
+  if(!SCHEMA.repairWalkIn){ toast("Walk-in needs the DB update — run the SQL"); return; }
+  const techs=(typeof seniorTechs==="function")?seniorTechs().list:[];
+  const shopOpts=shopList().map(s=>`<option value="${s.id}">${esc(s.name||("ProFix "+s.id))}</option>`).join("");
+  const techOpts=`<option value="">— assign later —</option>`+techs.map(t=>`<option value="${t.id}">${esc(t.name)}${t.designation?" · "+esc(t.designation):""}</option>`).join("");
+  openSheet(`<h3 style="margin:.1rem 0 .7rem">🏬 Walk-in repair</h3>
+    <div class="set-row"><label>Customer name</label><input id="wiName" class="quote-in" placeholder="Name"></div>
+    <div class="set-row"><label>Phone (optional)</label><input id="wiPhone" class="quote-in" inputmode="numeric" placeholder="10-digit — enables customer tracking"></div>
+    <div class="set-row"><label>Device</label><input id="wiDevice" class="quote-in" placeholder="e.g. Redmi Note 12"></div>
+    <div class="set-row"><label>Issue</label><input id="wiIssue" class="quote-in" placeholder="What's wrong"></div>
+    <div class="set-row"><label>Shop</label><select id="wiShop" class="quote-in">${shopOpts}</select></div>
+    <div class="set-row"><label>Assign tech</label><select id="wiTech" class="quote-in">${techOpts}</select></div>
+    <div class="steps"><button class="step-btn next" id="wiSave" onclick="saveWalkIn()">Log walk-in</button></div>`);
+}
+async function saveWalkIn(){
+  const name=$("wiName").value.trim(), device=$("wiDevice").value.trim();
+  if(!name||!device){ toast("Name + device required"); return; }
+  const btn=$("wiSave"); if(btn){ btn.disabled=true; btn.textContent="Saving…"; }
+  const tech=$("wiTech").value||null;
+  const row={ customer_name:name, phone:$("wiPhone").value.trim()||null, device, issue:$("wiIssue").value.trim()||null,
+    status:"pending", is_walk_in:true, shop_id:parseInt($("wiShop").value,10)||null };
+  if(tech){ row.assigned_staff_id=tech; row.visit_status="assigned"; row.visit_updated_at=new Date().toISOString(); }
+  const { error }=await sb.from("store_repairs").insert(row);
+  if(btn){ btn.disabled=false; btn.textContent="Log walk-in"; }
+  if(error){ toast("Couldn't save — "+error.message); return; }
+  toast("Walk-in logged 🏬"+(tech?(" → "+(staffName(tech)||"tech")):"")); closeSheet(); loadData();
+}
+function repairQuoteVal(o){
+  if(SCHEMA.repairQuote) return o.quote??"";
+  if(SCHEMA.repairNotes){ const m=String(o.notes||"").match(/\[quote:(\d+)\]/); return m?m[1]:""; }
+  return null; /* not persistable */
+}
+function repairCard(o){
+  const st=norm(o.status);
+  const qv=repairQuoteVal(o);
+  const quoteRow = qv===null ? "" :
+    `<div class="mini-row">Quote: <input class="quote-in" type="number" inputmode="numeric" placeholder="₹" value="${esc(qv)}" onchange="setQuote('${o.id}',this.value)"></div>`;
+  return `<div class="card ${o._fresh?'fresh':''}">
+    <div class="chead"><div><div class="who">${esc(o.customer_name||"Customer")}</div>
+      <div class="meta">#${esc(String(o.id).slice(0,8))} · ${timeStr(o.created_at)}</div>
+      ${o.is_walk_in?`<div class="meta" style="color:var(--red);font-weight:700">🏬 Walk-in${o.shop_id?" · "+esc(shopName(o.shop_id)):""}</div>`:""}</div>
+      <span class="pill p-${esc(st)}">${lbl(REPAIR_FLOW,st)}</span></div>
+    <div class="items"><b>${esc(o.device||"Device")}</b> — ${esc(o.issue||"")}<br><span class="meta">Preferred: ${esc(o.preferred_slot||"—")}</span></div>
+    <div class="addr">📍 ${esc(o.address||"")}</div>
+    ${quoteRow}
+    ${SERVICE_PARTNERS.length?`<div class="mini-row">🔧 Refer to: <select class="quote-in" style="width:auto" onchange="assignRepair('${o.id}',this.value)"><option value="">— none —</option>${SERVICE_PARTNERS.map(sp=>`<option value="${sp.user_id}" ${o.assigned_partner===sp.user_id?'selected':''}>${esc(sp.partner_name)}</option>`).join("")}</select></div>`:""}
+    ${techRow(o)}
+    <div class="actrow"><a class="call" href="tel:${esc(telHref(o.phone))}">📞 Call ${esc(o.phone||"")}</a>${RNOTIFY[st]?`<button class="cod" onclick="notifyRepair('${o.id}')">📱 Notify</button>`:""}</div>
+    <div class="steps">${stepButtons(o,REPAIR_FLOW,"setRepairStatus",st)}</div>
+    ${repairOtpRow(o)}
+    <div class="mini-row"><button class="del" onclick="del('store_repairs','${o.id}')">delete</button></div>
+  </div>`;
+}
+
+function stepButtons(x,flow,fn,st){
+  const idx=flow.findIndex(([k])=>k===st);
+  const btns=flow.map(([k,l],i)=>{
+    const cls = i<idx?"done":(i===idx+1?"next":"");
+    const cur = i===idx;
+    return `<button class="step-btn ${cls}" ${cur?'disabled style="opacity:.5"':''} onclick="${fn}('${x.id}','${k}')">${i<idx?'✓ ':''}${l}</button>`;
+  }).join("");
+  const cancel = st==="cancelled" ? "" : `<button class="step-btn cancel" onclick="${fn}('${x.id}','cancelled')">Cancel</button>`;
+  return btns+cancel;
+}
+function lbl(flow,s){ const f=flow.find(([k])=>k===norm(s)); return f?f[1]:(s==="cancelled"?"Cancelled":s); }
+
+/* ---- bottom sheet ---- */
+function openSheet(html){ $("sheetBody").innerHTML='<div class="grip"></div>'+html; $("scrim").classList.add("open"); $("sheet").classList.add("open"); }
+function closeSheet(){ $("scrim").classList.remove("open"); $("sheet").classList.remove("open"); }
+function payBtn(m,em,l){ return `<button class="${sheetState.method===m?'sel':''}" onclick="pick('${m}')"><span class="em">${em}</span>${l}</button>`; }
+function pick(m){ sheetState.method=m; const map=['cash','upi','card']; document.querySelectorAll('#sheetBody .pay3 button').forEach((b,i)=>b.classList.toggle('sel',map[i]===m)); }
+
+/* ---- actions ---- */
+async function setOrderStatus(id,status){
+  if(status==='delivered'){ const o=ORDERS.find(x=>x.id===id); if(o && !codState(o)){ openPay(id,true); return; } }
+  await update("store_orders",id,{status});
+  if(status==='out_for_delivery' && SCHEMA.otp){ genOrderOtp(id); }
+}
+async function setRepairStatus(id,status){
+  await update("store_repairs",id,{status});
+  if(status==='ready' && SCHEMA.otp){ genRepairOtp(id); }
+}
+
+/* ---- Task 12: handover OTP (generate on dispatch / verify at counter) ---- */
+function orderOtpRow(o){
+  if(!SCHEMA.otp) return "";
+  const st=norm(o.status);
+  if(o.handover_verified_at) return `<div class="otp-row done">✅ Delivered — code verified</div>`;
+  if(st!=="out_for_delivery" && !o.handover_otp) return "";
+  const codeHTML = o.handover_otp
+    ? `<span class="otp-code">${esc(o.handover_otp)}</span><span class="otp-hint">customer must read this back</span>`
+    : `<button class="eta-b" onclick="genOrderOtp('${o.id}')">Generate code</button>`;
+  return `<div class="otp-row"><span class="otp-lbl">🔑 Handover code:</span> ${codeHTML}
+    <button class="eta-b" onclick="verifyOrderOtp('${o.id}')">Enter code</button></div>`;
+}
+function repairOtpRow(o){
+  if(!SCHEMA.otp) return "";
+  const st=norm(o.status);
+  if(o.handover_verified_at) return `<div class="otp-row done">✅ Collected — code verified</div>`;
+  if(st!=="ready" && !o.handover_otp) return "";
+  const codeHTML = o.handover_otp
+    ? `<span class="otp-code">${esc(o.handover_otp)}</span><span class="otp-hint">customer reads this back</span>`
+    : `<button class="eta-b" onclick="genRepairOtp('${o.id}')">Generate code</button>`;
+  return `<div class="otp-row"><span class="otp-lbl">🔑 Pickup code:</span> ${codeHTML}
+    <button class="eta-b" onclick="verifyRepairOtp('${o.id}')">Verify pickup</button></div>`;
+}
+async function genOrderOtp(id){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  if(o.handover_otp){ renderOrders(); return; }
+  try{
+    const { data, error } = await sb.rpc("order_make_otp",{p_order_id:id});
+    if(error) throw error;
+    o.handover_otp=data; renderOrders(); toast("Handover code: "+data+" — tell the customer");
+  }catch(e){ toast("Couldn't make code — "+(e&&e.message||e)); }
+}
+async function genRepairOtp(id){
+  const o=REPAIRS.find(x=>x.id===id); if(!o) return;
+  if(o.handover_otp){ renderRepairs(); return; }
+  try{
+    const { data, error } = await sb.rpc("repair_make_otp",{p_repair_id:id});
+    if(error) throw error;
+    o.handover_otp=data; renderRepairs(); toast("Pickup code: "+data+" — tell the customer");
+  }catch(e){ toast("Couldn't make code — "+(e&&e.message||e)); }
+}
+function verifyOrderOtp(id){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  openSheet(`<h3>Enter handover code</h3><div class="sh-sub">${esc(o.customer_name||"Customer")} · ask them to read their 4-digit code</div>
+    <input id="otpInput" class="quote-in" style="width:100%;font-size:1.5rem;text-align:center;letter-spacing:.35em" inputmode="numeric" maxlength="4" placeholder="0000">
+    <button class="btn btn-red" style="width:100%;margin-top:.9rem" onclick="confirmOrderOtp('${id}')">Verify &amp; mark delivered</button>`);
+  setTimeout(()=>{ const el=$("otpInput"); if(el) el.focus(); },160);
+}
+function verifyRepairOtp(id){
+  const o=REPAIRS.find(x=>x.id===id); if(!o) return;
+  openSheet(`<h3>Verify pickup code</h3><div class="sh-sub">${esc(o.customer_name||"Customer")} · ask them to read their 4-digit code</div>
+    <input id="otpInput" class="quote-in" style="width:100%;font-size:1.5rem;text-align:center;letter-spacing:.35em" inputmode="numeric" maxlength="4" placeholder="0000">
+    <button class="btn btn-red" style="width:100%;margin-top:.9rem" onclick="confirmRepairOtp('${id}')">Verify &amp; mark done</button>`);
+  setTimeout(()=>{ const el=$("otpInput"); if(el) el.focus(); },160);
+}
+async function confirmOrderOtp(id){
+  const el=$("otpInput"); const code=el?String(el.value).trim():"";
+  if(!/^\d{4}$/.test(code)){ toast("Enter the 4-digit code"); return; }
+  try{
+    const { error } = await sb.rpc("order_verify_otp",{p_order_id:id,p_otp:code});
+    if(error) throw error;
+    closeSheet();
+    const o=ORDERS.find(x=>x.id===id); if(o){ o.status="delivered"; o.handover_verified_at=new Date().toISOString(); }
+    renderAll(); toast("Delivered ✓ verified");
+  }catch(e){
+    const m=(e&&e.message)||String(e);
+    toast(/wrong code/i.test(m)?"Wrong code — not delivered":("Couldn't verify — "+m));
+  }
+}
+async function confirmRepairOtp(id){
+  const el=$("otpInput"); const code=el?String(el.value).trim():"";
+  if(!/^\d{4}$/.test(code)){ toast("Enter the 4-digit code"); return; }
+  try{
+    const { error } = await sb.rpc("repair_verify_otp",{p_repair_id:id,p_otp:code});
+    if(error) throw error;
+    closeSheet();
+    const o=REPAIRS.find(x=>x.id===id); if(o){ o.status="done"; o.handover_verified_at=new Date().toISOString(); }
+    renderAll(); toast("Pickup done ✓ verified");
+  }catch(e){
+    const m=(e&&e.message)||String(e);
+    toast(/wrong code/i.test(m)?"Wrong code — not collected":("Couldn't verify — "+m));
+  }
+}
+
+/* ---- Task 12: counter scanner (barcode-first intake) ---- */
+function counterScan(){
+  if(!window.ProFixScan){ toast("Scanner not loaded — reload the page"); return; }
+  ProFixScan.open({ title:"Scan product / document / order", onCode: routeScan });
+}
+function routeScan(raw){
+  const code=String(raw||"").trim(); if(!code) return;
+  const doc=code.match(/\b(PO|SL)-\d{4}-\d{4}\b/i);
+  if(doc){ location.href="https://profixworld.com/trade.html#q="+doc[0].toUpperCase(); return; }
+  if(/^https?:\/\//i.test(code)){ window.open(code,"_blank","noopener"); return; }
+  const pm=code.match(/\/p\/([\w-]+)/);
+  if(pm){ window.open("https://profixworld.com/p/"+pm[1],"_blank","noopener"); return; }
+  if(/^\d+$/.test(code)){ window.open("https://profixworld.com/p/"+code,"_blank","noopener"); return; }
+  toast("Scanned: "+code);
+}
+async function assignRepair(id,uid){
+  const o=REPAIRS.find(x=>x.id===id); const prev=o?o.assigned_partner:null; if(o) o.assigned_partner=uid||null;
+  const { error }=await sb.from("store_repairs").update({assigned_partner:uid||null}).eq("id",id);
+  if(error){ if(o) o.assigned_partner=prev; toast("Couldn't refer — "+error.message); return; }
+  toast(uid?"Referred to service centre ✓":"Referral removed");
+}
+
+/* Payment capture: default Cash. Marks cod_collected + paid_method (or notes fallback). */
+function openPay(id,alsoDeliver){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  sheetState={ id, alsoDeliver:!!alsoDeliver, method:'cash' };
+  openSheet(`<h3>How was it paid?</h3><div class="sh-sub">${esc(o.customer_name||"Customer")} · ${inr(o.total)}</div>
+    <div class="pay3">${payBtn('cash','💵','Cash')}${payBtn('upi','📲','UPI')}${payBtn('card','💳','Card')}</div>
+    <button class="btn btn-red" style="width:100%;margin-top:.9rem" onclick="confirmPay()">Confirm payment</button>`);
+}
+async function confirmPay(){
+  const { id, alsoDeliver, method } = sheetState; closeSheet();
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  const patch={}; const n=parseNotes(o.notes); let useNotes=false;
+  if(SCHEMA.orderCod) patch.cod_collected=true; else { n.cod=true; useNotes=true; }
+  if(SCHEMA.orderPaid) patch.paid_method=method; else { n.pay=method; useNotes=true; }
+  if(alsoDeliver) patch.status='delivered';
+  if(shift && !n.by){ n.by=shift; useNotes=true; }
+  if(useNotes) patch.notes=buildNotes(n);
+  await update("store_orders",id,patch,true);
+  toast("Marked paid · "+PAYLBL[method]);
+}
+function toggleCod(id){
+  const o=ORDERS.find(x=>x.id===id); if(!o) return;
+  if(!codState(o)){ openPay(id,false); return; }
+  const patch={}; const n=parseNotes(o.notes); let useNotes=false;
+  if(SCHEMA.orderCod) patch.cod_collected=false; else { n.cod=false; useNotes=true; }
+  if(SCHEMA.orderPaid) patch.paid_method=null; else { n.pay=null; useNotes=true; }
+  if(useNotes) patch.notes=buildNotes(n);
+  update("store_orders",id,patch,true); toast("Payment unmarked");
+}
+async function setQuote(id,v){
+  const val = v?Number(v):null;
+  if(SCHEMA.repairQuote){ await update("store_repairs",id,{quote:val},true); }
+  else if(SCHEMA.repairNotes){
+    const o=REPAIRS.find(x=>x.id===id); let notes=String(o&&o.notes||"").replace(/\s*\[quote:\d+\]/g,"");
+    if(val) notes=(notes+" [quote:"+val+"]").trim();
+    await update("store_repairs",id,{notes:notes||null},true);
+  }
+  if(val!=null) toast("Quote saved: "+inr(val));
+}
+async function update(table,id,patch,silent){
+  const arr = table==="store_orders"?ORDERS:REPAIRS;
+  const row = arr.find(x=>x.id===id); const prev = row?{...row}:null;
+  if(row){ Object.assign(row,patch); delete row._fresh; }
+  renderAll();
+  const { error } = await sb.from(table).update(patch).eq("id",id);
+  if(error){ if(row&&prev) Object.assign(row,prev); renderAll(); toast("Update failed — "+error.message); }
+  else if(!silent){ toast("Updated ✓"); }
+}
+async function del(table,id){
+  if(!confirm("Delete this entry permanently?")) return;
+  const { error } = await sb.from(table).delete().eq("id",id);
+  if(error){ toast("Delete failed — "+error.message); return; }
+  if(table==="store_orders") ORDERS=ORDERS.filter(x=>x.id!==id); else REPAIRS=REPAIRS.filter(x=>x.id!==id);
+  renderAll(); toast("Deleted");
+}
+
+/* ---- NEW ORDER ---- */
+function renderCatRow(){
+  const chips=[["all","All"]].concat(CATS.map(c=>[String(c.id),c.name]));
+  $("catRow").innerHTML=chips.map(([k,l])=>`<button class="fchip ${pCat===k?'active':''}" onclick="setPCat('${k}')">${esc(l)}</button>`).join("");
+}
+function setPCat(k){ pCat=k; renderCatRow(); renderProducts(); }
+function renderProducts(){
+  const q=($("pSearch").value||"").trim().toLowerCase();
+  let list=PRODUCTS.slice();
+  if(pCat!=="all") list=list.filter(p=>String(p.category_id)===pCat);
+  if(q) list=list.filter(p=>((p.name||"")+" "+(p.brand||"")).toLowerCase().includes(q));
+  if(!PRODUCTS.length){ $("pGrid").innerHTML='<div class="spin"></div>'; return; }
+  if(!list.length){ $("pGrid").innerHTML='<div class="empty">No products match.</div>'; return; }
+  $("pGrid").innerHTML=list.slice(0,120).map(p=>{
+    const c=cart[p.id];
+    const img=p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:"";
+    const foot = c
+      ? `<div class="pqty"><button onclick="cartStep('${p.id}',-1)">−</button><b>${c.qty}</b><button onclick="cartStep('${p.id}',1)">+</button></div>`
+      : `<button class="padd" onclick="cartStep('${p.id}',1)">+</button>`;
+    return `<div class="pcard">
+      <div class="pimg" ${img}>${p.image_url?"":"📦"}</div>
+      <div class="pname">${esc(p.name||"")}</div>
+      <div class="pbrand">${esc(p.brand||"")}</div>
+      <div class="pfoot"><span class="pprice">${p.price!=null?inr(p.price):"Enquire"}</span>${foot}</div>
+    </div>`;
+  }).join("");
+}
+function cartStep(id,d){
+  const p=PRODUCTS.find(x=>String(x.id)===String(id)); if(!p) return;
+  const c=cart[id]||{p,qty:0}; c.qty+=d;
+  if(c.qty<=0) delete cart[id]; else cart[id]=c;
+  renderProducts(); renderCart();
+}
+function cartItems(){ return Object.values(cart); }
+function cartTotal(){ return cartItems().reduce((a,c)=>a+((c.p.price!=null?c.p.price:0)*c.qty),0); }
+function renderCart(){
+  const items=cartItems();
+  const box=$("cartBox");
+  if(!items.length){ box.style.display="none"; box.innerHTML=""; return; }
+  box.style.display="block";
+  const rows=items.map(c=>`<div class="citem">
+      <div class="cn">${esc(c.p.name)}<small>${c.p.price!=null?inr(c.p.price):"Enquire"} each</small></div>
+      <div class="pqty"><button onclick="cartStep('${c.p.id}',-1)">−</button><b>${c.qty}</b><button onclick="cartStep('${c.p.id}',1)">+</button></div>
+      <div style="font-weight:800;min-width:64px;text-align:right">${c.p.price!=null?inr(c.p.price*c.qty):"—"}</div>
+    </div>`).join("");
+  box.innerHTML=`<h3><span>Cart</span><span>${items.length} item${items.length===1?"":"s"}</span></h3>
+    ${rows}
+    <div class="subtotal"><span>Subtotal</span><span>${inr(cartTotal())}</span></div>
+    <form id="newOrderForm" onsubmit="placeOrder(event)">
+      <div class="field"><label>Customer name *</label><input name="customer_name" required placeholder="Name"></div>
+      <div class="field"><label>Phone *</label><input name="phone" required type="tel" inputmode="tel" placeholder="10-digit mobile"></div>
+      <div class="field"><label>Flat / block no</label><input name="apartment" placeholder="e.g. B-204"></div>
+      <div class="field"><label>Apartment / area & landmark *</label><input name="address" required placeholder="e.g. Kshipta Apartments, Saravanampatti"></div>
+      <div class="field"><label>Map link (optional — paste Google Maps URL)</label><input name="maplink" placeholder="https://maps.google.com/?q=…"></div>
+      <div class="field"><label>Note (optional)</label><input name="note" placeholder="Anything to remember"></div>
+      <button class="btn btn-red" style="width:100%" id="placeBtn" type="submit">Place order · ${inr(cartTotal())} (COD)</button>
+      <div class="hint">Saved as a staff order (status: Confirmed, Cash on delivery)${shift?(" · by "+esc(shift)):""}.</div>
+    </form>`;
+}
+function extractMap(v){
+  const s=(v||"").trim(); if(!s) return null;
+  const m=s.match(/https?:\/\/\S+/); if(m) return m[0];
+  const ll=s.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/); if(ll) return "https://maps.google.com/?q="+ll[1]+","+ll[2];
+  return null;
+}
+async function placeOrder(e){
+  e.preventDefault();
+  const f=e.target;
+  const items=cartItems().map(c=>({product_id:c.p.id,name:c.p.name,qty:c.qty,price:c.p.price!=null?c.p.price:null}));
+  if(!items.length){ toast("Cart is empty"); return; }
+  const notes=buildNotes({ text:f.note.value.trim(), map:extractMap(f.maplink.value), by:shift||null, cod:false });
+  const order={
+    customer_name:f.customer_name.value.trim(),
+    phone:f.phone.value.trim(),
+    apartment:f.apartment.value.trim()||null,
+    address:f.address.value.trim(),
+    items, total:cartTotal(), payment_mode:"COD", status:"confirmed", notes
+  };
+  const btn=$("placeBtn"); btn.disabled=true; btn.textContent="Placing…";
+  const { data, error } = await sb.from("store_orders").insert(order).select();
+  btn.disabled=false;
+  if(error){ toast("Couldn’t place order — "+error.message); btn.textContent="Try again"; return; }
+  if(data&&data[0]&&!ORDERS.some(x=>x.id===data[0].id)) ORDERS.unshift(data[0]);
+  Object.keys(cart).forEach(k=>delete cart[k]);
+  renderCart(); renderProducts(); renderAll();
+  toast("Order placed ✓");
+  setScreen("orders");
+}
+
+/* ---- COUNTER SALE (day-sheet) ---- */
+function openCounterSale(){
+  if(!SCHEMA.sales){ toast("Run the SQL to enable counter sales"); return; }
+  sheetState={ method:'cash' };
+  openSheet(`<h3>＋ Counter sale</h3><div class="sh-sub">Walk-in purchase at the shop · GST 18% incl.</div>
+    <div class="field"><label>Amount (₹, incl. GST)</label><input id="csAmt" type="number" inputmode="numeric" placeholder="0"></div>
+    <div style="font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:.35rem">Paid by</div>
+    <div class="pay3">${payBtn('cash','💵','Cash')}${payBtn('upi','📲','UPI')}${payBtn('card','💳','Card')}</div>
+    <div class="field" style="margin-top:.8rem"><label>Note (optional)</label><input id="csNote" placeholder="e.g. tempered glass + case"></div>
+    <button class="btn btn-red" style="width:100%;margin-top:.3rem" id="csBtn" onclick="saveCounterSale()">Save sale</button>`);
+  setTimeout(()=>{ const el=$("csAmt"); if(el) el.focus(); },60);
+}
+async function saveCounterSale(){
+  const amt=Math.round(Number(($("csAmt").value)||0));
+  if(!amt||amt<=0){ toast("Enter an amount"); return; }
+  const row={ amount:amt, gst_amount:gstOf(amt), payment_method:sheetState.method, note:($("csNote").value||"").trim()||null, staff:shift||null };
+  $("csBtn").disabled=true; $("csBtn").textContent="Saving…";
+  const { data, error } = await sb.from("store_sales").insert(row).select();
+  closeSheet();
+  if(error){ toast("Couldn’t save — "+error.message); return; }
+  if(data&&data[0]) SALES.unshift(data[0]);
+  renderToday(); toast("Counter sale saved · "+inr(amt));
+}
+async function delSale(id){
+  if(!confirm("Delete this counter sale?")) return;
+  const { error } = await sb.from("store_sales").delete().eq("id",id);
+  if(error){ toast("Delete failed — "+error.message); return; }
+  SALES=SALES.filter(x=>x.id!==id); renderToday(); toast("Deleted");
+}
+
+/* ---- CASH movements (float in / expenses out) ---- */
+function openCash(){
+  if(!SCHEMA.cash){ toast("Run the SQL to enable the cash log"); return; }
+  sheetState={ direction:'out' };
+  openSheet(`<h3>Cash movement</h3><div class="sh-sub">Money out of / into the drawer</div>
+    <div class="seg" id="cashSeg"><button class="sel" onclick="pickDir('out')">Cash out</button><button onclick="pickDir('in')">Cash in</button></div>
+    <div class="field"><label>Amount (₹)</label><input id="cashAmt" type="number" inputmode="numeric" placeholder="0"></div>
+    <div class="field"><label>Reason</label><input id="cashReason" placeholder="e.g. tea + snacks / float added"></div>
+    <button class="btn btn-red" style="width:100%;margin-top:.3rem" id="cashBtn" onclick="saveCash()">Save</button>`);
+  setTimeout(()=>{ const el=$("cashAmt"); if(el) el.focus(); },60);
+}
+function pickDir(d){ sheetState.direction=d; const map=['out','in']; document.querySelectorAll('#cashSeg button').forEach((b,i)=>b.classList.toggle('sel',map[i]===d)); }
+async function saveCash(){
+  const amt=Math.round(Number(($("cashAmt").value)||0));
+  if(!amt||amt<=0){ toast("Enter an amount"); return; }
+  const row={ direction:sheetState.direction, amount:amt, reason:($("cashReason").value||"").trim()||null, staff:shift||null };
+  $("cashBtn").disabled=true; $("cashBtn").textContent="Saving…";
+  const { data, error } = await sb.from("store_cash").insert(row).select();
+  closeSheet();
+  if(error){ toast("Couldn’t save — "+error.message); return; }
+  if(data&&data[0]) CASH.unshift(data[0]);
+  renderToday(); toast((row.direction==='out'?"Cash out":"Cash in")+" · "+inr(amt));
+}
+async function delCash(id){
+  if(!confirm("Delete this cash entry?")) return;
+  const { error } = await sb.from("store_cash").delete().eq("id",id);
+  if(error){ toast("Delete failed — "+error.message); return; }
+  CASH=CASH.filter(x=>x.id!==id); renderToday(); toast("Deleted");
+}
+
+/* ---- TODAY = day close ---- */
+function renderToday(){
+  $("todayDate").textContent = new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
+  const tOrders=ORDERS.filter(o=>isToday(o.created_at));
+  const collected=tOrders.filter(o=>codState(o)||norm(o.status)==="delivered");
+  const tSales=SALES.filter(s=>isToday(s.created_at));
+  const tCash=CASH.filter(c=>isToday(c.created_at));
+
+  const orderRev=collected.reduce((a,o)=>a+Number(o.total||0),0);
+  const counterRev=tSales.reduce((a,s)=>a+Number(s.amount||0),0);
+  const totalSales=orderRev+counterRev;
+
+  let cash=0,upi=0,card=0;
+  collected.forEach(o=>{ const m=paidMethod(o)||'cash'; const v=Number(o.total||0); if(m==='upi')upi+=v; else if(m==='card')card+=v; else cash+=v; });
+  tSales.forEach(s=>{ const m=s.payment_method||'cash'; const v=Number(s.amount||0); if(m==='upi')upi+=v; else if(m==='card')card+=v; else cash+=v; });
+
+  const cashIn=tCash.filter(c=>c.direction==='in').reduce((a,c)=>a+Number(c.amount||0),0);
+  const cashOut=tCash.filter(c=>c.direction==='out').reduce((a,c)=>a+Number(c.amount||0),0);
+  const drawer=cash+cashIn-cashOut;
+
+  const gst=collected.reduce((a,o)=>a+gstOf(o.total),0)
+          + tSales.reduce((a,s)=>a+Number(s.gst_amount!=null?s.gst_amount:gstOf(s.amount)),0);
+  const half=Math.round(gst/2);
+
+  const delivered=tOrders.filter(o=>norm(o.status)==="delivered").length;
+  const pending=tOrders.filter(o=>!isDone(o.status)).length;
+
+  let h=`<div class="tbig"><div class="n">${inr(totalSales)}</div><div class="l">total sales today · ${collected.length} order${collected.length===1?"":"s"} + ${tSales.length} counter</div></div>`;
+  h+=`<div class="dc-split">
+    <div class="s"><div class="n">${inr(cash)}</div><div class="l">💵 Cash</div></div>
+    <div class="s"><div class="n">${inr(upi)}</div><div class="l">📲 UPI</div></div>
+    <div class="s"><div class="n">${inr(card)}</div><div class="l">💳 Card</div></div></div>`;
+  h+=`<div class="card">
+    <div class="rowline"><span>Cash sales</span><b>${inr(cash)}</b></div>
+    <div class="rowline"><span>＋ Cash in (float)</span><b>${inr(cashIn)}</b></div>
+    <div class="rowline"><span>− Cash out (expenses)</span><b>−${inr(cashOut)}</b></div>
+    <div class="rowline" style="font-size:1.05rem"><span><b>Cash in drawer</b><br><small style="color:var(--muted);font-weight:600">cash collected − expenses</small></span><b style="color:var(--green)">${inr(drawer)}</b></div></div>`;
+  h+=`<div class="card">
+    <div class="rowline"><span><b>GST collected today</b> · 18% incl.</span><b>${inr(gst)}</b></div>
+    <div class="rowline"><span>CGST 9%</span><b>${inr(half)}</b></div>
+    <div class="rowline"><span>SGST 9%</span><b>${inr(gst-half)}</b></div></div>`;
+  h+=`<div class="dc-split">
+    <div class="s"><div class="n">${delivered}</div><div class="l">Delivered</div></div>
+    <div class="s"><div class="n">${pending}</div><div class="l">Pending</div></div>
+    <div class="s"><div class="n">${tSales.length}</div><div class="l">Counter sales</div></div></div>`;
+  // ---- Day close (per-shop + combined cash tally) ----
+  const canSplit=SCHEMA.orderPaid;
+  const dcBadge=(d)=>{ const col=d===0?'#12A150':(Math.abs(d)<=50?'#9A6B00':'#E11D2A'), bg=d===0?'#E7F7EE':(Math.abs(d)<=50?'#FFF7E0':'#FDECEC'); return `<span style="background:${bg};color:${col};font-weight:800;font-size:.72rem;padding:.15rem .5rem;border-radius:6px">${d===0?'balanced':(d>0?'+':'')+inr(d)}</span>`; };
+  h+=`<div class="card"><div class="chead"><div class="who">🧮 Day close</div></div>`;
+  if(!SCHEMA.daycloses){
+    h+=`<div class="hintbox">Run the day-close SQL to enable the cash tally.</div>`;
+  }else{
+    const perShop=SCHEMA.daycloseShop && SCHEMA.shops;
+    const shops=shopList();
+    const orderHasShop=ORDERS.some(o=>o.shop_id!=null);
+    const todayCloses=(DAYCLOSES||[]).filter(c=>c.day===todayISO());
+    const repairCashFor=sid=>(REPAIRS||[]).filter(r=>String(r.shop_id)===String(sid)&&isToday(r.visit_updated_at||r.created_at)&&r.amount_collected!=null).reduce((a,r)=>a+Number(r.amount_collected||0),0);
+    const orderCashFor=sid=>(orderHasShop?tOrders.filter(o=>norm(o.status)==="delivered"&&String(o.shop_id)===String(sid)):[]).reduce((a,o)=>{const m=paidMethod(o)||'cash';return a+((!canSplit||m==='cash')?Number(o.total||0):0);},0);
+    const expectedFor=sid=>Math.round(orderCashFor(sid)+repairCashFor(sid));
+    const ordersCountFor=sid=>orderHasShop?tOrders.filter(o=>norm(o.status)==="delivered"&&String(o.shop_id)===String(sid)).length:0;
+    if(perShop){
+      h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.6rem">`;
+      shops.forEach(s=>{ const on=String(dcShop)===String(s.id); const done=todayCloses.some(c=>String(c.shop_id)===String(s.id)); h+=`<button class="fchip ${on?'active':''}" onclick="setDcShop('${s.id}')">${esc(s.name||("ProFix "+s.id))}${done?' ✓':''}</button>`; });
+      h+=`<button class="fchip ${dcShop==='all'?'active':''}" onclick="setDcShop('all')">All (combined)</button></div>`;
+      if(dcShop==='all'){
+        let eE=0,eC=0,eD=0; const openN=[],closedN=[];
+        shops.forEach(s=>{ const c=todayCloses.find(x=>String(x.shop_id)===String(s.id)); if(c){ eE+=c.expected_total||0; eC+=c.counted_cash||0; eD+=c.difference||0; closedN.push(s.name||("ProFix "+s.id)); } else openN.push(s.name||("ProFix "+s.id)); });
+        h+=`<div class="rowline"><span><b>Combined · ${closedN.length}/${shops.length} closed</b></span>${closedN.length?dcBadge(eD):''}</div>
+          <div class="rowline"><span>Expected cash</span><b>${inr(eE)}</b></div>
+          <div class="rowline"><span>Counted cash</span><b>${inr(eC)}</b></div>
+          ${openN.length?`<div class="meta">Still open: ${esc(openN.join(", "))}</div>`:`<div class="meta">All shops closed for today ✓</div>`}
+          <div class="meta">Combined is computed from each shop's close — not saved.</div>`;
+      } else {
+        const sid=dcShop, closed=todayCloses.find(x=>String(x.shop_id)===String(sid));
+        if(closed){
+          h+=`<div class="rowline"><span><b>${esc(shopName(sid))} — closed</b></span>${dcBadge(closed.difference||0)}</div>
+            <div class="rowline"><span>Orders</span><b>${closed.orders_count}</b></div>
+            <div class="rowline"><span>Expected cash</span><b>${inr(closed.expected_total)}</b></div>
+            <div class="rowline"><span>Counted cash</span><b>${inr(closed.counted_cash)}</b></div>
+            <div class="meta">One close per shop per day — locked.</div>`;
+        } else {
+          const exp=expectedFor(sid);
+          h+=`<div class="rowline"><span>${esc(shopName(sid))} · delivered ${ordersCountFor(sid)}${!orderHasShop?' <small style="color:var(--muted)">(delivery not shop-tagged; counts walk-ins)</small>':''}</span></div>
+            <div class="rowline"><span>Expected cash (orders + walk-ins)</span><b>${inr(exp)}</b></div>
+            <div class="set-row"><label>Counted cash (₹)</label><input id="dcCount" class="quote-in" type="number" inputmode="numeric" min="0" placeholder="count ${esc(shopName(sid))} drawer"></div>
+            <div class="steps"><button class="step-btn next" onclick="closeDay('${sid}',${exp})">Close ${esc(shopName(sid))}</button></div>`;
+        }
+      }
+    } else {
+      // legacy single close (per-shop columns not present)
+      const dcDelivered=tOrders.filter(o=>norm(o.status)==="delivered");
+      const dcExpectedTotal=dcDelivered.reduce((a,o)=>a+Number(o.total||0),0);
+      const dcExpectedCash=Math.round(canSplit?cash:dcExpectedTotal);
+      const closed=(DAYCLOSES||[]).find(c=>c.day===todayISO());
+      if(closed){ h+=`<div class="rowline"><span><b>Closed for today</b></span>${dcBadge(closed.difference||0)}</div><div class="rowline"><span>Expected</span><b>${inr(closed.expected_total)}</b></div><div class="rowline"><span>Counted</span><b>${inr(closed.counted_cash)}</b></div>`; }
+      else { h+=`<div class="rowline"><span>Delivered orders</span><b>${dcDelivered.length}</b></div><div class="rowline"><span>Expected cash</span><b>${inr(dcExpectedCash)}</b></div><div class="set-row"><label>Counted cash (₹)</label><input id="dcCount" class="quote-in" type="number" inputmode="numeric" min="0" placeholder="count the drawer"></div><div class="steps"><button class="step-btn next" onclick="closeDay(null,${dcExpectedCash})">Close day</button></div>`; }
+    }
+  }
+  h+=`<div class="steps"><button class="step-btn" onclick="shareDailySummary()">📱 Share today's summary</button></div>`;
+  h+=`</div>`;
+  if((DAYCLOSES||[]).length){
+    const byDay={}; DAYCLOSES.forEach(c=>{ (byDay[c.day]=byDay[c.day]||[]).push(c); });
+    const days=Object.keys(byDay).sort().reverse().slice(0,14);
+    h+=`<div class="sec-h">Recent day closes</div>`;
+    days.forEach(d=>{ const rows=byDay[d]; let cE=0,cC=0,cD=0; rows.forEach(c=>{cE+=c.expected_total||0;cC+=c.counted_cash||0;cD+=c.difference||0;});
+      h+=`<div class="mv"><b>📅 ${esc(d)}</b> ${rows.length>1?dcBadge(cD):''}`;
+      rows.forEach(c=>{ h+=`<br><span class="meta">${c.shop_id?esc(shopName(c.shop_id)):"Store"} · exp ${inr(c.expected_total)} / counted ${inr(c.counted_cash)} ${dcBadge(c.difference||0)}</span>`; });
+      if(rows.length>1) h+=`<br><span class="meta"><b>Combined</b> · exp ${inr(cE)} / counted ${inr(cC)}</span>`;
+      h+=`</div>`; });
+  }
+  h+=`<div class="act2"><button class="cs" onclick="openCounterSale()">＋ Counter sale</button><button class="ca" onclick="openCash()">Cash in / out</button></div>`;
+
+  if(!SCHEMA.sales) h+=`<div class="hintbox">Counter sales need the one-time DB update — run the SQL to enable.</div>`;
+  if(!SCHEMA.cash) h+=`<div class="hintbox">The cash log needs the one-time DB update — run the SQL to enable.</div>`;
+  if(!SCHEMA.orderPaid) h+=`<div class="hintbox">Order payment methods are being stored in notes for now. Run the SQL to add the clean <b>paid_method</b> column.</div>`;
+
+  if(tSales.length){
+    h+=`<div class="sec-h">Today’s counter sales</div>`+tSales.map(s=>
+      `<div class="mv">💰 <b>${inr(s.amount)}</b> · ${esc(PAYLBL[s.payment_method]||"Cash")}${s.note?" · "+esc(s.note):""}${s.staff?' <span class="meta">('+esc(s.staff)+')</span>':""}<button class="x" onclick="delSale('${s.id}')">✕</button></div>`).join("");
+  }
+  if(tCash.length){
+    h+=`<div class="sec-h">Today’s cash movements</div>`+tCash.map(c=>
+      `<div class="mv">${c.direction==='out'?"🔴 Out":"🟢 In"} · <b>${inr(c.amount)}</b>${c.reason?" · "+esc(c.reason):""}<button class="x" onclick="delCash('${c.id}')">✕</button></div>`).join("");
+  }
+  $("todayBox").innerHTML=h;
+}
+function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function setDcShop(v){ dcShop=v; renderToday(); }
+async function closeDay(shopId, expectedCash){
+  if(!SCHEMA.daycloses){ toast("Run the day-close SQL first"); return; }
+  const el=$("dcCount"); const cc=parseInt(el&&el.value,10);
+  if(isNaN(cc)){ toast("Enter the counted cash"); if(el) el.focus(); return; }
+  const day=todayISO();
+  const hasShop = shopId && shopId!=="null" && SCHEMA.daycloseShop;
+  const orderHasShop=ORDERS.some(o=>o.shop_id!=null);
+  const cnt = (hasShop && orderHasShop)
+    ? ORDERS.filter(o=>isToday(o.created_at)&&norm(o.status)==="delivered"&&String(o.shop_id)===String(shopId)).length
+    : ORDERS.filter(o=>isToday(o.created_at)&&norm(o.status)==="delivered").length;
+  const exp=Math.round(expectedCash||0), diff=cc-exp;
+  const row={day, orders_count:cnt, expected_total:exp, counted_cash:cc, difference:diff};
+  if(hasShop) row.shop_id=parseInt(shopId,10);
+  const { error }=await sb.from("store_daycloses").insert(row);
+  const reload=async()=>{ try{ const x=await sb.from("store_daycloses").select("*").order("day",{ascending:false}).limit(60); DAYCLOSES=x.data||[]; }catch(_){} };
+  if(error){
+    await reload();
+    if(/duplicate|unique|conflict/i.test(error.message)){ toast(hasShop?("Already closed "+shopName(shopId)+" today"):"Already closed today"); renderToday(); return; }
+    toast("Couldn't close — "+error.message); return;
+  }
+  await reload();
+  toast(diff===0?"Closed · balanced ✓":("Closed · "+(diff>0?"+":"")+inr(diff)));
+  renderToday();
+}
+/* ---- daily WhatsApp summary (staff-initiated, no number, zero cost) ---- */
+function buildDailySummary(){
+  const dt=new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+  const tOrders=ORDERS.filter(o=>isToday(o.created_at));
+  const delivered=tOrders.filter(o=>norm(o.status)==="delivered");
+  const cancelled=tOrders.filter(o=>norm(o.status)==="cancelled").length;
+  const counterSales=(SALES||[]).filter(s=>isToday(s.created_at));
+  const salesTotal=delivered.reduce((a,o)=>a+Number(o.total||0),0)+counterSales.reduce((a,s)=>a+Number(s.amount||0),0);
+  const repairsDone=(REPAIRS||[]).filter(r=>norm(r.status)==="delivered"&&isToday(r.updated_at||r.created_at)).length;
+  const tally={};
+  delivered.forEach(o=>(o.items||[]).forEach(i=>{ const n=i.name||"Item"; tally[n]=(tally[n]||0)+Number(i.qty||0); }));
+  const top=Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,q])=>`${n} x${q}`).join(", ")||"—";
+  const closed=(DAYCLOSES||[]).find(c=>c.day===todayISO());
+  let s=`ProFix — Daily Summary (${dt})\n`;
+  s+=`Orders delivered: ${delivered.length} | Cancelled: ${cancelled}\n`;
+  s+=`Sales total: ${inr(salesTotal)}\n`;
+  s+=`Repairs completed: ${repairsDone}\n`;
+  s+=`Top items: ${top}\n`;
+  if(closed){ const d=closed.difference||0; const dstr=(d>0?"+":d<0?"−":"")+inr(Math.abs(d)); s+=`Day close: expected ${inr(closed.expected_total)} · counted ${inr(closed.counted_cash)} · diff ${dstr}`; }
+  else s+=`Day not closed yet`;
+  return s;
+}
+function shareDailySummary(){ window.open("https://wa.me/?text="+encodeURIComponent(buildDailySummary()),"_blank","noopener"); }
+
+let tt; function toast(m,cls){ const t=$("toast"); t.textContent=m; t.className="toast show"+(cls?" "+cls:""); clearTimeout(tt); tt=setTimeout(()=>t.className="toast",cls==="alert"?4200:1800); }
+</script>
+<script>
+/* PWA install button */
+var _pfInstall=null;
+function _pfShowInstall(v){var b=document.getElementById("installBtn");if(b)b.style.display=v?"inline-flex":"none";}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_pfInstall=e;_pfShowInstall(true);});
+window.addEventListener("appinstalled",function(){_pfShowInstall(false);});
+document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("installBtn");if(!b)return;
+  _pfShowInstall(true); /* always visible: beforeinstallprompt is unreliable */
+  b.addEventListener("click",async function(){
+    if(_pfInstall){_pfInstall.prompt();await _pfInstall.userChoice;_pfInstall=null;_pfShowInstall(false);return;}
+    _pfInstallHelp();
+  });});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+
+</script>
+</body>
+</html>

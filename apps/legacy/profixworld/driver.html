@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f3d5c">
+<title>ProFix Driver</title>
+<link rel="manifest" href="driver.webmanifest">
+<style>
+  :root{--blue:#0f3d5c;--blue2:#14567f;--green:#1e8449;--red:#b03a2e;--bg:#f2f5f8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:#1a1a1a;padding-bottom:70px}
+  header{background:var(--blue);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+  header h1{font-size:17px}
+  .pill{font-size:12px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px}
+  main{padding:14px;max-width:520px;margin:0 auto}
+  .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  label{display:block;font-size:13px;color:#555;margin:10px 0 4px}
+  input,select{width:100%;padding:12px;font-size:16px;border:1px solid #c9d6e0;border-radius:8px}
+  button{width:100%;padding:14px;font-size:16px;font-weight:600;border:0;border-radius:10px;background:var(--blue);color:#fff;margin-top:12px}
+  button.sec{background:#e4ebf1;color:var(--blue)}
+  button.go{background:var(--green)} button.warn{background:var(--red)}
+  button:disabled{opacity:.5}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:#e4ebf1;color:var(--blue)}
+  .tag.open{background:#fdf3e7;color:#8a5a00}.tag.mine{background:#eaf7ec;color:var(--green)}
+  .tag.done{background:#eee;color:#666}
+  .job h3{font-size:15px;margin-bottom:4px}
+  .job .addr{font-size:13px;color:#444;margin:6px 0;line-height:1.5}
+  .job .fee{font-size:18px;font-weight:800;color:var(--green)}
+  .muted{font-size:12px;color:#777}
+  nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #dde;display:flex}
+  nav button{margin:0;border-radius:0;background:#fff;color:#666;font-size:13px;padding:12px 0}
+  nav button.on{color:var(--blue);font-weight:800}
+  .hidden{display:none}
+  .switch{display:flex;align-items:center;justify-content:space-between}
+  .togg{width:54px;height:30px;border-radius:15px;background:#ccc;position:relative;transition:.2s;flex:none}
+  .togg.on{background:var(--green)}
+  .togg span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+  .togg.on span{left:27px}
+  .otpbox{letter-spacing:8px;text-align:center;font-size:24px}
+  #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+  #toast.show{opacity:1}
+  .earn{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
+  .sechd{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--blue2);margin:16px 0 2px;padding-bottom:4px;border-bottom:1px solid #e4ebf1}
+</style>
+</head>
+<body>
+<header>
+  <h1>ProFix Driver</h1>
+  <span class="pill" id="who">not signed in</span>
+</header>
+
+<main>
+  <!-- INSTALL (always visible - never hide behind beforeinstallprompt) -->
+  <div class="card" id="installCard">
+    <div class="switch"><b>Install this app</b><button class="sec" style="width:auto;margin:0;padding:8px 16px" onclick="installApp()">Install</button></div>
+    <div class="muted" id="installHint">Add to home screen for one-tap access.</div>
+  </div>
+
+  <!-- AUTH -->
+  <section id="scrAuth">
+    <div class="card">
+      <h3>Driver Login</h3>
+      <label>Driver Code</label><input id="lgCode" placeholder="PF-DRV-001" autocapitalize="characters">
+      <label>PIN</label><input id="lgPin" type="password" inputmode="numeric" placeholder="****">
+      <button onclick="doLogin()">Login</button>
+      <button class="sec" onclick="show('scrReg')">New driver? Register</button>
+    </div>
+  </section>
+
+  <section id="scrReg" class="hidden">
+    <div class="card">
+      <h3>Register as Driver</h3>
+      <p class="muted">Work pickup, drop &amp; delivery jobs for ProFix shops. After you register, the shop will call you, verify your details, and send a login Code + PIN on WhatsApp.</p>
+
+      <div class="sechd">Your details</div>
+      <label>Full name *</label><input id="rgName" autocomplete="name">
+      <label>Phone (WhatsApp) *</label><input id="rgPhone" inputmode="tel" placeholder="10-digit mobile" autocomplete="tel">
+
+      <div class="sechd">Vehicle</div>
+      <div class="row">
+        <div><label>Type *</label>
+          <select id="rgVehType">
+            <option value="">Selectâ€¦</option>
+            <option value="Bike">Bike</option>
+            <option value="Scooter">Scooter</option>
+            <option value="Car">Car</option>
+            <option value="Auto">Auto</option>
+            <option value="Cycle">Cycle</option>
+          </select></div>
+        <div><label>Number plate *</label><input id="rgVehNo" placeholder="TN 38 XX 1234" autocapitalize="characters"></div>
+      </div>
+      <label>Driving licence â€” last 4 digits</label><input id="rgLic" maxlength="4" inputmode="numeric" placeholder="privacy: last 4 only">
+
+      <div class="sechd">Where you work</div>
+      <label>Home area / locality *</label><input id="rgArea" placeholder="e.g. Gandhipuram, Coimbatore">
+      <label>Full address</label><input id="rgAddr" placeholder="door no, street, landmark">
+
+      <div class="sechd">Payments &amp; safety</div>
+      <label>UPI ID (for weekly payouts)</label><input id="rgUpi" placeholder="name@upi" autocapitalize="none">
+      <label>Emergency contact (name &amp; phone)</label><input id="rgEmerg" placeholder="e.g. Ravi 98xxxxxxxx">
+
+      <div class="sechd">Documents <span style="text-transform:none;font-weight:400;color:#888">(optional â€” speeds up approval)</span></div>
+      <label>ID proof â€” Aadhaar / DL / any govt photo ID</label><input id="rgIdDoc" type="file" accept="image/*,application/pdf">
+      <label>Your photo</label><input id="rgPhoto" type="file" accept="image/*">
+      <p class="muted">Kept private â€” only the ProFix team can view these.</p>
+
+      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;font-size:13px;color:#444">
+        <input type="checkbox" id="rgTerms" style="width:auto;margin-top:2px">
+        <span>I agree to the <a href="driver-terms.html">Driver Partner Terms</a> and confirm my details are correct.</span>
+      </label>
+      <button class="go" onclick="doRegister()">Submit registration</button>
+      <button class="sec" onclick="show('scrAuth')">Back to login</button>
+    </div>
+  </section>
+
+  <!-- REGISTER DONE -->
+  <section id="scrRegDone" class="hidden">
+    <div class="card" style="text-align:center">
+      <div style="font-size:44px">âœ…</div>
+      <h3>Registration received</h3>
+      <p class="muted" style="margin:8px 0 4px">Thanks! The ProFix team will verify your details and send your login <b>Code + PIN</b> on WhatsApp â€” usually within a day.</p>
+      <p class="muted">You can't log in until you're approved.</p>
+      <button class="sec" onclick="show('scrAuth')">Back to login</button>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="scrHome" class="hidden">
+    <div class="card switch">
+      <div><b>I am available</b><div class="muted">Turn on to see and accept jobs</div></div>
+      <div class="togg" id="avTogg" onclick="toggleAvail()"><span></span></div>
+    </div>
+    <div id="jobsWrap"></div>
+    <button class="sec" onclick="loadJobs()">â†» Refresh jobs</button>
+  </section>
+
+  <!-- EARNINGS -->
+  <section id="scrEarn" class="hidden">
+    <div class="card">
+      <h3>My Earnings</h3>
+      <div class="row" style="margin-top:10px;text-align:center">
+        <div><div class="muted">Today</div><div style="font-size:20px;font-weight:800;color:var(--green)" id="eToday">â‚¹0</div></div>
+        <div><div class="muted">This week</div><div style="font-size:20px;font-weight:800;color:var(--green)" id="eWeek">â‚¹0</div></div>
+        <div><div class="muted">Total</div><div style="font-size:20px;font-weight:800" id="eTotal">â‚¹0</div></div>
+      </div>
+      <div class="row" style="margin-top:10px;text-align:center">
+        <div><div class="muted">Jobs done</div><div style="font-size:18px;font-weight:800" id="eJobs">0</div></div>
+        <div><div class="muted">Pending payment</div><div style="font-size:18px;font-weight:800;color:var(--amber,#8a5a00)" id="eUnpaid">â‚¹0</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Job History</h3>
+      <div id="earnList"></div>
+    </div>
+  </section>
+</main>
+
+<nav id="tabs" class="hidden">
+  <button class="on" id="tbJobs" onclick="tab('jobs')">Jobs</button>
+  <button id="tbEarn" onclick="tab('earn')">Earnings</button>
+  <button onclick="logout()">Logout</button>
+</nav>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL  = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRveHdiam9meWdsYnlqYW54bXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2ODkxODEsImV4cCI6MjA5NzI2NTE4MX0.H1C2X7KiPRpx33mLlkfSUSDvRr7hIsrIeWZLBjnH9MQ";
+const sb = supabase.createClient(SB_URL, SB_ANON);
+
+let cred = JSON.parse(localStorage.getItem("pfx_driver") || "null");
+let jobs = [];
+const TYPES = {
+  pickup:"ðŸ“¦ Device Pickup", drop:"ðŸ  Device Drop", return:"â†©ï¸ Return",
+  order_delivery:"ðŸ›ï¸ Order Delivery", parts_run:"ðŸ”§ Parts Run", shop_transfer:"ðŸª Shop Transfer"
+};
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function show(id){["scrAuth","scrReg","scrRegDone","scrHome","scrEarn"].forEach(s=>document.getElementById(s).classList.toggle("hidden",s!==id))}
+function tab(t){show(t==="jobs"?"scrHome":"scrEarn");document.getElementById("tbJobs").classList.toggle("on",t==="jobs");document.getElementById("tbEarn").classList.toggle("on",t==="earn");if(t==="earn")loadEarnings()}
+
+async function rpc(fn, args){ const {data,error}=await sb.rpc(fn,args); if(error){toast("Error: "+error.message);return null} return data }
+
+async function uploadDoc(inputEl, tag){
+  const f = inputEl && inputEl.files && inputEl.files[0];
+  if(!f) return null;
+  if(f.size > 5*1024*1024){ toast((tag==="id"?"ID proof":"Photo")+" is too large (max 5 MB)"); throw new Error("too-large"); }
+  const ext = (f.name.split(".").pop()||"bin").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5) || "bin";
+  const path = `applicants/${crypto.randomUUID()}-${tag}.${ext}`;
+  const {error} = await sb.storage.from("driver-docs").upload(path, f, {contentType: f.type || undefined, upsert:false});
+  if(error){ toast("Upload failed: "+error.message); throw error; }
+  return path;
+}
+async function doRegister(){
+  const name=rgName.value.trim(), phone=rgPhone.value.trim();
+  const vehType=rgVehType.value, vehNo=rgVehNo.value.trim(), area=rgArea.value.trim();
+  const digits=phone.replace(/\D/g,"");
+  // Client-side validation for a clean queue on the HR side.
+  if(!name) return toast("Please enter your full name");
+  if(digits.length<10) return toast("Enter a valid 10-digit phone");
+  if(!vehType) return toast("Please choose your vehicle type");
+  if(!vehNo) return toast("Please enter your number plate");
+  if(!area) return toast("Please enter your home area / locality");
+  if(!rgTerms.checked) return toast("Please accept the Driver Partner Terms");
+  // Upload optional documents to the private bucket first (anon insert-only policy).
+  let idPath=null, photoPath=null;
+  try{
+    idPath=await uploadDoc(rgIdDoc,"id");
+    photoPath=await uploadDoc(rgPhoto,"photo");
+  }catch(e){ return; }   // uploadDoc already toasted the reason
+  // Register via SECURITY DEFINER RPC (same pattern as login/jobs) â€” avoids the anon RLS insert issue.
+  const r=await rpc("driver_register",{
+    p_name:name, p_phone:phone,
+    p_vehicle_type:vehType, p_vehicle_number:vehNo, p_lic:rgLic.value.trim(),
+    p_address:rgAddr.value.trim(), p_area:area,
+    p_upi:rgUpi.value.trim(), p_emergency:rgEmerg.value.trim(),
+    p_id_doc_path:idPath, p_photo_path:photoPath
+  });
+  if(!r) return;                 // rpc() already showed the error
+  if(!r.ok) return toast(r.err||"Could not register â€” please try again");
+  show("scrRegDone");
+}
+
+async function doLogin(){
+  const r=await rpc("driver_login",{p_code:lgCode.value.trim(),p_pin:lgPin.value.trim()});
+  if(!r||!r.ok) return toast("Wrong code or PIN, or not approved yet");
+  cred={code:lgCode.value.trim(),pin:lgPin.value.trim(),name:r.name};
+  localStorage.setItem("pfx_driver",JSON.stringify(cred));
+  setAvailUI(r.available); enterApp();
+}
+function enterApp(){
+  document.getElementById("who").textContent=cred.name;
+  document.getElementById("tabs").classList.remove("hidden");
+  show("scrHome"); loadJobs();
+}
+function logout(){localStorage.removeItem("pfx_driver");cred=null;location.reload()}
+
+function setAvailUI(on){document.getElementById("avTogg").classList.toggle("on",!!on)}
+async function toggleAvail(){
+  const on=!document.getElementById("avTogg").classList.contains("on");
+  const ok=await rpc("driver_set_available",{p_code:cred.code,p_pin:cred.pin,p_avail:on});
+  if(ok){setAvailUI(on);toast(on?"You are available":"You are offline");if(on)loadJobs()}
+}
+
+async function loadJobs(){
+  const data=await rpc("driver_jobs_list",{p_code:cred.code,p_pin:cred.pin});
+  jobs=data||[]; renderJobs();
+}
+function renderJobs(){
+  const w=document.getElementById("jobsWrap");
+  if(!jobs.length){w.innerHTML='<div class="card muted">No jobs right now. Pull refresh in a bit.</div>';return}
+  w.innerHTML=jobs.map(j=>{
+    const mine=j.mine, st=j.status;
+    let tag = st==="open" ? '<span class="tag open">OPEN</span>'
+            : st==="dropped" ? '<span class="tag done">DONE</span>'
+            : '<span class="tag mine">'+st.replace("_"," ").toUpperCase()+'</span>';
+    let btns="";
+    if(st==="open") btns=`<button class="go" onclick="accept(${j.id})">Accept job â€” â‚¹${j.fee}</button>`;
+    else if(mine&&st==="accepted") btns=`<button onclick="going(${j.id})">Start â€” going to pickup</button>`;
+    else if(mine&&(st==="going_pickup"||st==="accepted")) btns=(btns||"")+`<button class="go" onclick="askOtp(${j.id},'pickup')">At pickup â€” enter customer OTP</button>`;
+    else if(mine&&st==="picked_up") btns=`<button class="go" onclick="askOtp(${j.id},'drop')">At drop â€” enter receiver OTP</button>`;
+    return `<div class="card job">
+      <div class="switch"><h3>${TYPES[j.job_type]||j.job_type} Â· ${j.customer_name||""}</h3>${tag}</div>
+      <div class="addr">ðŸ“ From: ${j.from_addr}<br>ðŸ To: ${j.to_addr}</div>
+      <div class="switch"><span class="fee">â‚¹${j.fee}</span><span class="muted">#${j.id}</span></div>
+      ${btns}</div>`;
+  }).join("");
+}
+async function accept(id){ const ok=await rpc("driver_accept_job",{p_code:cred.code,p_pin:cred.pin,p_job:id});
+  toast(ok?"Job is yours!":"Too late â€” someone else took it"); loadJobs() }
+async function going(id){ await rpc("driver_update_status",{p_code:cred.code,p_pin:cred.pin,p_job:id,p_status:"going_pickup"}); loadJobs() }
+function askOtp(id,kind){
+  const otp=prompt(kind==="pickup"?"Ask customer for the 4-digit PICKUP OTP:":"Ask receiver for the 4-digit DROP OTP:");
+  if(!otp) return;
+  verify(id,kind,otp.trim());
+}
+async function verify(id,kind,otp){
+  const fn=kind==="pickup"?"driver_verify_pickup":"driver_verify_drop";
+  const ok=await rpc(fn,{p_code:cred.code,p_pin:cred.pin,p_job:id,p_otp:otp});
+  if(ok){toast(kind==="pickup"?"Pickup confirmed âœ”":"Delivered âœ” Payment added");}
+  else toast("Wrong OTP â€” check with customer");
+  loadJobs();
+}
+
+async function loadEarnings(){
+  const s=await rpc("driver_earnings_summary",{p_code:cred.code,p_pin:cred.pin});
+  if(s&&s.ok){
+    eToday.textContent="â‚¹"+Number(s.today).toFixed(0);
+    eWeek.textContent="â‚¹"+Number(s.week).toFixed(0);
+    eTotal.textContent="â‚¹"+Number(s.total).toFixed(0);
+    eJobs.textContent=s.jobs_done;
+    eUnpaid.textContent="â‚¹"+Number(s.unpaid).toFixed(0);
+  }
+  const data=await rpc("driver_my_earnings",{p_code:cred.code,p_pin:cred.pin})||[];
+  document.getElementById("earnList").innerHTML = data.length
+    ? data.map(p=>`<div class="earn"><span>${(TYPES[p.job_type]||p.job_type)} #${p.job_id}<br><span class="muted">${new Date(p.created_at).toLocaleDateString()} Â· ${p.from_addr||""} â†’ ${p.to_addr||""}</span></span><b style="color:${p.status==='paid'?'var(--green)':'#8a5a00'}">â‚¹${p.amount}<br><span style="font-size:11px">${p.status==='paid'?'âœ” paid':'pending'}</span></b></div>`).join("")
+    : '<div class="muted">No completed jobs yet.</div>';
+}
+
+/* ---- PWA install: button ALWAYS visible; smart fallback ---- */
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e});
+function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;return}
+  const ua=navigator.userAgent;
+  document.getElementById("installHint").textContent =
+    /iPhone|iPad/.test(ua) ? "iPhone: tap Share â–² then 'Add to Home Screen'." :
+    /SamsungBrowser/.test(ua) ? "Samsung: Menu â‰¡ â†’ 'Add page to' â†’ Home screen." :
+    "Browser menu (â‹®) â†’ 'Add to Home screen' / 'Install app'.";
+}
+if("serviceWorker" in navigator) navigator.serviceWorker.register("driver-sw.js").catch(()=>{});
+if(matchMedia("(display-mode: standalone)").matches) document.getElementById("installCard").classList.add("hidden");
+
+/* auto-login */
+if(cred){ rpc("driver_login",{p_code:cred.code,p_pin:cred.pin}).then(r=>{ if(r&&r.ok){setAvailUI(r.available);enterApp()} else logout() }) }
+setInterval(()=>{ if(cred && !document.getElementById("scrHome").classList.contains("hidden")) loadJobs() }, 30000);
+</script>
+</body>
+</html>

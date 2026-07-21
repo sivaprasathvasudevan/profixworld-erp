@@ -1,0 +1,10 @@
+packages:
+  - apps/erp
+  - api
+  - packages/*
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+
+# apps/legacy is static HTML (the live PWAs copied as-is) — not a pnpm package.

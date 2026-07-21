@@ -1,0 +1,28 @@
+{
+ "name": "ProFix HR",
+ "short_name": "HR",
+ "start_url": "/hr.html?src=pwa",
+ "scope": "/hr.html",
+ "display": "standalone",
+ "background_color": "#F6F7F9",
+ "theme_color": "#2563EB",
+ "icons": [
+  {
+   "src": "/hr-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "/hr-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ],
+ "id": "/hr.html?v=2026-07",
+ "categories": [
+  "business",
+  "productivity"
+ ]
+}

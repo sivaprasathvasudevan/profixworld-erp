@@ -1,0 +1,28 @@
+{
+ "name": "ProFix Me",
+ "short_name": "Me",
+ "start_url": "/me.html?src=pwa",
+ "scope": "/me.html",
+ "display": "standalone",
+ "background_color": "#F6F7F9",
+ "theme_color": "#06B6D4",
+ "icons": [
+  {
+   "src": "/me-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "/me-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ],
+ "id": "/me.html?v=2026-07",
+ "categories": [
+  "business",
+  "productivity"
+ ]
+}

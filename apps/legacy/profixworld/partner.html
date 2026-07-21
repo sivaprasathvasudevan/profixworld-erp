@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7C3AED">
+<link rel="manifest" href="/partner.webmanifest">
+<link rel="apple-touch-icon" href="/partner-192.png">
+<title>ProFix Partner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#FF6A2B,#E11D2A);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--line:#E7E9EE;--ok:#0E9F6E;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.top .brand{font-weight:800;font-size:18px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:520px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input,select,textarea{width:100%;min-height:48px;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff;width:100%;padding:0 16px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:38px;font-size:13px;width:auto;padding:0 12px}
+.btn:disabled{opacity:.55}
+.row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.row:last-child{border:0}
+.row img{width:48px;height:48px;object-fit:cover;border-radius:10px;background:#EDEFF3}
+.pill{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill.wait{background:#FEF3E2;color:#B45309}.pill.ok{background:#E6F6EF;color:#0E9F6E}.pill.no{background:#FDEBE6;color:#E11D2A}.pill.grey{background:#EDEFF5;color:#5A6272}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.nav button{flex:1;min-height:60px;border:0;background:none;font:inherit;font-size:11px;font-weight:800;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;justify-content:center}
+.nav button.on{color:#E11D2A}.nav .ic{font-size:20px}
+.shot{width:100%;aspect-ratio:4/3;border:2px dashed var(--line);border-radius:14px;background:#FAFBFC;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--mut);font-weight:700;overflow:hidden}
+.shot img{width:100%;height:100%;object-fit:cover}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hide{display:none!important}
+.skel{height:52px;border-radius:12px;background:linear-gradient(90deg,#EDEFF3 25%,#F7F8FA 50%,#EDEFF3 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:10px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--mut);padding:24px 10px;font-size:14px}
+.sheetBg{position:fixed;inset:0;background:rgba(20,25,40,.45);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.sheetBg.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:.25s;z-index:31;max-width:520px;margin:0 auto;max-height:88vh;overflow:auto}
+.sheet.open{transform:none}
+.handle{width:42px;height:5px;border-radius:99px;background:#D8DBE2;margin:4px auto 12px}
+.qrBox{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px}
+.qrBox img{width:min(70vw,280px);height:auto;image-rendering:pixelated}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6A2B;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9">Partner</span></div>
+  <div style="display:flex;gap:8px">
+    <button id="langBtn" aria-label="Language" style="background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer">த</button>
+    <a href="tel:+919597016448" style="background:rgba(255,255,255,.18);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;text-decoration:none">📞 ProFix</a>
+    <button id="installBtn">📲</button>
+    <button id="outBtn" class="hide">Log out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="vLogin">
+    <div class="card">
+      <h2 data-t="loginTitle">Partner sign in</h2>
+      <p class="mut" data-t="loginSub">Use the phone number and PIN given by ProFix.</p>
+      <label for="ph" data-t="phone">Phone</label><input id="ph" type="tel" inputmode="numeric" maxlength="10" autocomplete="username">
+      <label for="pin">PIN</label><input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn" data-t="signIn">Sign in</button>
+    </div>
+  </section>
+
+  <section id="vApp" class="hide">
+    <div class="mut" id="hello" style="margin:0 2px 12px"></div>
+
+    <!-- SUBMIT -->
+    <section id="pSub">
+      <div class="card">
+        <h2 data-t="addTitle">Add a product for approval</h2>
+        <p class="mut" style="margin-bottom:6px" data-t="photoHint">Up to 5 photos — first photo becomes the cover.</p>
+        <div id="shots" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px"></div>
+        <div class="shot" id="shot" role="button" tabindex="0" aria-label="Take product photo" style="aspect-ratio:auto;min-height:86px">
+          <span style="font-size:24px">📷</span><span id="shotLbl">Tap to take photo (0/5)</span>
+        </div>
+        <input type="file" id="file" accept="image/*" capture="environment" class="hide">
+        <label data-t="pname">Product name</label><input id="fName" placeholder="Tempered glass Redmi Note 13">
+        <label data-t="brand">Brand (optional)</label><input id="fBrand">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div><label data-t="price">Price to shop ₹</label><input id="fPrice" inputmode="numeric"></div>
+          <div><label data-t="qty">Qty available</label><input id="fQty" inputmode="numeric"></div>
+        </div>
+        <label data-t="desc">Description (what makes it good — material, models, colours)</label>
+        <textarea id="fDesc" maxlength="1000" style="min-height:76px" placeholder="9H hardness, full glue, fits Redmi Note 13 / 13 Pro, black & clear available…"></textarea>
+        <label>Note (optional)</label><input id="fNote" placeholder="MOQ, delivery time…">
+        <div style="height:12px"></div>
+        <button class="btn" id="submitBtn" data-t="send">Send for approval</button>
+        <p class="mut" style="margin-top:8px">ProFix reviews every item and price before it goes live. You'll see the status in My items.</p>
+      </div>
+    </section>
+
+    <!-- MY ITEMS -->
+    <section id="pItems" class="hide">
+      <div class="card">
+        <h2 data-t="mySubs">My submissions</h2>
+        <div id="subList"><div class="skel"></div></div>
+      </div>
+      <div class="card">
+        <h2 data-t="myProds">My live products</h2>
+        <p class="mut" style="margin-bottom:8px">Price changes also go for approval — tap a product to request one.</p>
+        <div id="prodList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section id="pDocs" class="hide">
+      <div class="card">
+        <h2 data-t="docsTitle">Trade documents</h2>
+        <div id="balStrip" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
+        <p class="mut" style="margin-bottom:8px">PO = ProFix buying from you · SL = ProFix selling to you. Tap for details + QR.</p>
+        <div id="docList"><div class="skel"></div></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<nav class="nav hide" id="nav">
+  <button data-p="Sub" class="on"><span class="ic">📷</span><span data-t="tabSubmit">Submit</span></button>
+  <button data-p="Items"><span class="ic">📦</span><span data-t="tabItems">My items</span></button>
+  <button data-p="Docs"><span class="ic">🧾</span><span data-t="tabDocs">Documents</span></button>
+</nav>
+
+<div class="sheetBg" id="sBg"></div>
+
+<!-- price change sheet -->
+<div class="sheet" id="pcSheet">
+  <div class="handle"></div>
+  <h2 id="pcTitle" data-t="pcTitle">Request price change</h2>
+  <p class="mut" id="pcCur"></p>
+  <label data-t="newPrice">New price to shop ₹</label><input id="pcPrice" inputmode="numeric">
+  <label>Reason (optional)</label><input id="pcNote">
+  <div style="height:12px"></div>
+  <button class="btn" id="pcSend" data-t="send">Send for approval</button>
+</div>
+
+<!-- doc detail sheet -->
+<div class="sheet" id="docSheet">
+  <div class="handle"></div>
+  <h2 id="dTitle"></h2>
+  <p class="mut" id="dMeta"></p>
+  <div id="dItems"></div>
+  <div class="qrBox"><img id="dQr" alt="Document QR code"><div class="mut" id="dCode"></div></div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator"></script>
+<script>
+const SB_URL = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY = "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+const $ = id => document.getElementById(id);
+const toast = m => { const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2800); };
+const buzz = () => { try{navigator.vibrate&&navigator.vibrate(10);}catch(e){} };
+const inr = n => "₹"+Number(n||0).toLocaleString("en-IN");
+const fday = d => new Date(d).toLocaleDateString([], {day:"numeric",month:"short"});
+
+let PH = localStorage.getItem("px_pt_phone")||"", PIN = sessionStorage.getItem("px_pt_pin")||"";
+let ME=null, pcProduct=null, MYPRODS=[];
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+// ---------- EN / Tamil ----------
+const T = {
+ en:{loginTitle:"Partner sign in",loginSub:"Use the phone number and PIN given by ProFix.",phone:"Phone",signIn:"Sign in",
+  addTitle:"Add a product for approval",photoHint:"Up to 5 photos — first photo becomes the cover.",pname:"Product name",
+  brand:"Brand (optional)",price:"Price to shop ₹",qty:"Qty available",desc:"Description (material, models, colours)",
+  send:"Send for approval",mySubs:"My submissions",myProds:"My live products",docsTitle:"Trade documents",
+  pcTitle:"Request price change",newPrice:"New price to shop ₹",tabSubmit:"Submit",tabItems:"My items",tabDocs:"Documents",
+  pending:"Pending",approved:"Approved",rejected:"Rejected",withdraw:"Withdraw",changePrice:"Change price"},
+ ta:{loginTitle:"பார்ட்னர் உள்நுழைவு",loginSub:"ProFix கொடுத்த போன் எண் மற்றும் PIN-ஐ பயன்படுத்தவும்.",phone:"போன் எண்",signIn:"உள்நுழைக",
+  addTitle:"ஒப்புதலுக்கு பொருள் சேர்க்கவும்",photoHint:"5 புகைப்படங்கள் வரை — முதல் படம் அட்டைப்படம்.",pname:"பொருளின் பெயர்",
+  brand:"பிராண்ட் (விருப்பம்)",price:"கடைக்கு விலை ₹",qty:"கையிருப்பு",desc:"விவரம் (பொருள், மாடல், நிறங்கள்)",
+  send:"ஒப்புதலுக்கு அனுப்பு",mySubs:"என் சமர்ப்பிப்புகள்",myProds:"என் நேரடி பொருட்கள்",docsTitle:"வர்த்தக ஆவணங்கள்",
+  pcTitle:"விலை மாற்றக் கோரிக்கை",newPrice:"கடைக்கு புதிய விலை ₹",tabSubmit:"சமர்ப்பி",tabItems:"என் பொருட்கள்",tabDocs:"ஆவணங்கள்",
+  pending:"காத்திருக்கிறது",approved:"ஒப்புதல் ✓",rejected:"நிராகரிப்பு",withdraw:"திரும்பப்பெறு",changePrice:"விலை மாற்று"}
+};
+let lang = localStorage.getItem("px_pt_lang") || "en";
+const t = k => (T[lang] && T[lang][k]) || T.en[k] || k;
+function applyLang(){
+  document.querySelectorAll("[data-t]").forEach(el=>{ el.textContent = t(el.dataset.t); });
+  document.getElementById("langBtn").textContent = lang==="en" ? "த" : "EN";
+}
+document.getElementById("langBtn").addEventListener("click", ()=>{
+  lang = lang==="en" ? "ta" : "en";
+  localStorage.setItem("px_pt_lang", lang);
+  applyLang(); loadSubs(); loadProds();
+});
+applyLang();
+
+async function rpc(fn, args){ const {data,error}=await sb.rpc(fn,args); if(error) throw error; return data; }
+
+// ---------- login ----------
+async function login(){
+  const ph=$("ph").value.trim(), pin=$("pin").value.trim();
+  if(!ph||!pin) return toast("Enter phone and PIN");
+  $("loginBtn").disabled=true;
+  try{
+    ME = await rpc("partner_status",{p_phone:ph,p_pin:pin});
+    PH=ph; PIN=pin;
+    localStorage.setItem("px_pt_phone",ph); sessionStorage.setItem("px_pt_pin",pin);
+    enter();
+  }catch(e){ toast(e.message||"Sign-in failed"); }
+  $("loginBtn").disabled=false;
+}
+function enter(){
+  $("vLogin").classList.add("hide"); $("vApp").classList.remove("hide");
+  $("nav").classList.remove("hide"); $("outBtn").classList.remove("hide");
+  $("hello").innerHTML = "🙏 Vanakkam <b>"+ME.name+"</b>"+(ME.business?" · "+ME.business:"")+' <span id="helloCounts" class="mut"></span>';
+  loadDraft(); renderShots();
+  loadSubs(); loadProds(); loadDocs();
+  // deep link ?q=PO-2026-0001 or #q=
+  const q = new URLSearchParams(location.search).get("q") || (location.hash.match(/q=([\w-]+)/)||[])[1];
+  if(q) openDocByCode(q);
+}
+function logout(){ PIN=""; sessionStorage.removeItem("px_pt_pin"); location.reload(); }
+
+// ---------- photo capture (up to 5) + compress ----------
+let imgBlobs = [];  // [{blob, url}]
+function renderShots(){
+  $("shots").innerHTML = imgBlobs.map((b,i)=>
+    '<div style="position:relative"><img src="'+b.url+'" alt="Photo '+(i+1)+'" style="width:72px;height:72px;object-fit:cover;border-radius:10px;'+(i===0?'outline:3px solid #7C3AED':'')+'">'+
+    '<button data-rm="'+i+'" aria-label="Remove photo" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border:0;border-radius:99px;background:#E11D2A;color:#fff;font-weight:800;cursor:pointer">✕</button>'+
+    (i===0?'<div style="position:absolute;bottom:-2px;left:0;right:0;text-align:center;font-size:9px;font-weight:800;color:#7C3AED;background:rgba(255,255,255,.9);border-radius:0 0 10px 10px">COVER</div>':'')+'</div>'
+  ).join("");
+  $("shotLbl").textContent = imgBlobs.length>=5 ? "5/5 photos — remove one to change" : "Tap to take photo ("+imgBlobs.length+"/5)";
+  $("shot").style.opacity = imgBlobs.length>=5 ? .5 : 1;
+  document.querySelectorAll("[data-rm]").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation(); const i=Number(b.dataset.rm);
+    URL.revokeObjectURL(imgBlobs[i].url); imgBlobs.splice(i,1); renderShots();
+  }));
+}
+$("shot").addEventListener("click", ()=>{ if(imgBlobs.length<5) $("file").click(); });
+$("shot").addEventListener("keydown", e=>{ if(e.key==="Enter"&&imgBlobs.length<5) $("file").click(); });
+$("file").addEventListener("change", async e=>{
+  const f = e.target.files[0]; if(!f) return; e.target.value="";
+  const img = new Image();
+  img.onload = ()=>{
+    const max=1024, sc=Math.min(1, max/Math.max(img.width,img.height));
+    const c=document.createElement("canvas");
+    c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    c.toBlob(b=>{ imgBlobs.push({blob:b,url:URL.createObjectURL(b)}); renderShots(); saveDraft(); }, "image/jpeg", .72);
+    URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f);
+});
+
+async function uploadImgs(){
+  const urls=[];
+  for(let i=0;i<imgBlobs.length;i++){
+    const path = PH+"/"+Date.now()+"-"+i+".jpg";
+    const { error } = await sb.storage.from("partner-images").upload(path, imgBlobs[i].blob, {contentType:"image/jpeg"});
+    if(error) throw error;
+    urls.push(sb.storage.from("partner-images").getPublicUrl(path).data.publicUrl);
+  }
+  return urls;
+}
+
+// ---------- draft (resume interrupted submission; photos not persisted) ----------
+function saveDraft(){
+  try{ localStorage.setItem("px_pt_draft", JSON.stringify({
+    n:$("fName").value,b:$("fBrand").value,p:$("fPrice").value,q:$("fQty").value,
+    d:$("fDesc").value,o:$("fNote").value })); }catch(e){}
+}
+["fName","fBrand","fPrice","fQty","fDesc","fNote"].forEach(i=>$(i).addEventListener("input",saveDraft));
+function loadDraft(){
+  try{ const d=JSON.parse(localStorage.getItem("px_pt_draft")||"null"); if(!d) return;
+    $("fName").value=d.n||"";$("fBrand").value=d.b||"";$("fPrice").value=d.p||"";
+    $("fQty").value=d.q||"";$("fDesc").value=d.d||"";$("fNote").value=d.o||"";
+    if(d.n||d.p) toast("Draft restored — photos need retaking");
+  }catch(e){}
+}
+function clearDraft(){ localStorage.removeItem("px_pt_draft"); }
+
+// ---------- submit ----------
+$("submitBtn").addEventListener("click", async ()=>{
+  const name=$("fName").value.trim(), price=Number($("fPrice").value), qty=Number($("fQty").value)||0;
+  if(!name) return toast("Enter the product name");
+  if(!price||price<=0) return toast("Enter a valid price");
+  if(!imgBlobs.length) return toast("Add at least one photo — buyers need to see it");
+  $("submitBtn").disabled=true; buzz();
+  try{
+    const urls = await uploadImgs();
+    await rpc("partner_submit_v2",{p_phone:PH,p_pin:PIN,p_kind:"new",p_product_id:null,
+      p_name:name,p_brand:$("fBrand").value.trim(),p_price:price,p_qty:qty,
+      p_images:urls,p_description:$("fDesc").value.trim(),p_note:$("fNote").value.trim()});
+    toast("Sent for approval ✓");
+    ["fName","fBrand","fPrice","fQty","fDesc","fNote"].forEach(i=>$(i).value="");
+    imgBlobs.forEach(b=>URL.revokeObjectURL(b.url)); imgBlobs=[]; renderShots(); clearDraft();
+    loadSubs();
+  }catch(e){ toast(e.message||"Could not send"); }
+  $("submitBtn").disabled=false;
+});
+
+// ---------- my items ----------
+async function loadSubs(){
+  try{
+    const rows = await rpc("partner_my_submissions",{p_phone:PH,p_pin:PIN})||[];
+    const pend=rows.filter(r=>r.status==="pending").length, ok=rows.filter(r=>r.status==="approved").length;
+    const hc=$("helloCounts"); if(hc) hc.textContent = " — "+pend+" pending · "+ok+" approved";
+    $("subList").innerHTML = rows.length ? rows.map(r=>{
+      const pill = r.status==="approved" ? '<span class="pill ok">'+t("approved")+'</span>'
+        : r.status==="rejected" ? '<span class="pill no">'+t("rejected")+'</span>'
+        : '<span class="pill wait">'+t("pending")+'</span>';
+      return '<div class="row">'+(r.image_url?'<img src="'+r.image_url+'" alt="">':'')+
+        '<div style="flex:1"><b>'+r.name+'</b>'+(r.kind==='price_change'?' <span class="pill grey">price change</span>':'')+
+        '<div class="mut">'+inr(r.price)+' · qty '+r.qty+' · '+fday(r.created_at)+
+        (r.status==='rejected'&&r.reject_reason?'<br>Reason: '+r.reject_reason:'')+'</div></div>'+pill+
+        (r.status==='pending'?'<button class="btn ghost sm" data-wd="'+r.id+'">'+t("withdraw")+'</button>':'')+'</div>';
+    }).join("") : '<div class="empty">Nothing submitted yet — add your first product from the Submit tab.</div>';
+    document.querySelectorAll("[data-wd]").forEach(b=>b.addEventListener("click", async ()=>{
+      if(!confirm("Withdraw this submission? You can submit it again later.")) return;
+      try{ await rpc("partner_withdraw_submission",{p_phone:PH,p_pin:PIN,p_id:b.dataset.wd});
+        toast("Withdrawn ✓"); loadSubs();
+      }catch(e){ toast(e.message||"Could not withdraw"); }
+    }));
+  }catch(e){ $("subList").innerHTML='<div class="empty">'+(e.message||"Could not load")+'</div>'; }
+}
+async function loadProds(){
+  try{
+    MYPRODS = await rpc("partner_my_products",{p_phone:PH,p_pin:PIN})||[];
+    $("prodList").innerHTML = MYPRODS.length ? MYPRODS.map(p=>
+      '<div class="row"><div><b>'+p.name+'</b><div class="mut">'+inr(p.price)+' · stock '+(p.stock??0)+'</div></div>'+
+      '<button class="btn ghost sm" data-pc="'+p.id+'">'+t("changePrice")+'</button></div>'
+    ).join("") : '<div class="empty">No live products yet — they appear here after ProFix approves.</div>';
+    document.querySelectorAll("[data-pc]").forEach(b=>b.addEventListener("click",()=>openPc(b.dataset.pc)));
+  }catch(e){ $("prodList").innerHTML='<div class="empty">Could not load</div>'; }
+}
+function openPc(id){
+  pcProduct = MYPRODS.find(p=>p.id===id); if(!pcProduct) return;
+  $("pcTitle").textContent = pcProduct.name;
+  $("pcCur").textContent = "Current price: "+inr(pcProduct.price);
+  $("pcPrice").value=""; $("pcNote").value="";
+  openSheet("pcSheet");
+}
+$("pcSend").addEventListener("click", async ()=>{
+  const price=Number($("pcPrice").value);
+  if(!price||price<=0) return toast("Enter a valid price");
+  $("pcSend").disabled=true; buzz();
+  try{
+    await rpc("partner_submit",{p_phone:PH,p_pin:PIN,p_kind:"price_change",p_product_id:pcProduct.id,
+      p_name:pcProduct.name,p_brand:pcProduct.brand||"",p_price:price,p_qty:0,p_image_url:null,p_note:$("pcNote").value.trim()});
+    toast("Price change sent for approval ✓"); closeSheets(); loadSubs();
+  }catch(e){ toast(e.message||"Could not send"); }
+  $("pcSend").disabled=false;
+});
+
+// ---------- docs ----------
+let DOCS=[];
+async function loadDocs(){
+  try{
+    DOCS = await rpc("partner_my_docs",{p_phone:PH,p_pin:PIN})||[];
+    // balance strip: what ProFix owes you (POs not yet paid) vs what you owe ProFix (SLs not yet paid)
+    const owedToYou = DOCS.filter(d=>d.doc_type==='PO' && ['issued','received'].includes(d.status)).reduce((a,d)=>a+d.total,0);
+    const youOwe    = DOCS.filter(d=>d.doc_type==='SL' && ['issued','dispatched'].includes(d.status)).reduce((a,d)=>a+d.total,0);
+    const paidAll   = DOCS.filter(d=>d.status==='paid').reduce((a,d)=>a+d.total,0);
+    const bs=$("balStrip");
+    if(bs) bs.innerHTML =
+      '<div style="flex:1;min-width:120px;background:#F0FDF4;border-radius:12px;padding:10px;text-align:center"><div style="font-weight:800;font-size:17px">'+inr(owedToYou)+'</div><div class="mut" style="font-size:11px;font-weight:700">PROFIX TO PAY YOU</div></div>'+
+      '<div style="flex:1;min-width:120px;background:#FEF2F2;border-radius:12px;padding:10px;text-align:center"><div style="font-weight:800;font-size:17px">'+inr(youOwe)+'</div><div class="mut" style="font-size:11px;font-weight:700">YOU TO PAY PROFIX</div></div>'+
+      '<div style="flex:1;min-width:120px;background:#F8FAFC;border-radius:12px;padding:10px;text-align:center"><div style="font-weight:800;font-size:17px">'+inr(paidAll)+'</div><div class="mut" style="font-size:11px;font-weight:700">SETTLED TOTAL</div></div>';
+    $("docList").innerHTML = DOCS.length ? DOCS.map(d=>
+      '<div class="row" role="button" tabindex="0" data-doc="'+d.code+'"><div><b>'+d.code+'</b><div class="mut">'+
+      (d.doc_type==='PO'?'ProFix buys from you':'ProFix sells to you')+' · '+fday(d.created_at)+'</div></div>'+
+      '<div style="text-align:right"><b>'+inr(d.total)+'</b><div><span class="pill '+(d.status==='cancelled'?'no':d.status==='issued'?'wait':'ok')+'">'+d.status+'</span></div></div></div>'
+    ).join("") : '<div class="empty">No documents yet.</div>';
+    document.querySelectorAll("[data-doc]").forEach(el=>{
+      el.addEventListener("click",()=>openDocByCode(el.dataset.doc));
+      el.addEventListener("keydown",e=>{ if(e.key==="Enter") openDocByCode(el.dataset.doc); });
+    });
+  }catch(e){ $("docList").innerHTML='<div class="empty">Could not load</div>'; }
+}
+async function openDocByCode(code){
+  let d = DOCS.find(x=>x.code===code.toUpperCase());
+  try{ if(!d) d = await rpc("partner_get_doc",{p_phone:PH,p_pin:PIN,p_code:code}); }
+  catch(e){ return toast(e.message||"Document not found"); }
+  $("dTitle").textContent = d.code+" · "+(d.doc_type==='PO'?'Purchase from you':'Sale to you');
+  $("dMeta").textContent = fday(d.created_at)+" · status: "+d.status+(d.notes?' · '+d.notes:'');
+  const items = Array.isArray(d.items)?d.items:JSON.parse(d.items||"[]");
+  $("dItems").innerHTML = items.map(i=>'<div class="row"><span>'+i.name+' × '+i.qty+'</span><b>'+inr(i.qty*i.price)+'</b></div>').join("")+
+    '<div class="row"><b>Total</b><b>'+inr(d.total)+'</b></div>';
+  const q = qrcode(0,"M"); q.addData("https://profixworld.com/trade.html#q="+d.code); q.make();
+  $("dQr").src = q.createDataURL(6,8); $("dCode").textContent = d.code;
+  openSheet("docSheet");
+}
+
+// ---------- sheets / nav ----------
+function openSheet(id){ $("sBg").classList.add("open"); $(id).classList.add("open"); }
+function closeSheets(){ $("sBg").classList.remove("open"); document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("open")); }
+$("sBg").addEventListener("click", closeSheets);
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  ["Sub","Items","Docs"].forEach(p=>$("p"+p).classList.toggle("hide", p!==b.dataset.p));
+  if(b.dataset.p==="Items"){loadSubs();loadProds();} if(b.dataset.p==="Docs") loadDocs();
+}));
+$("loginBtn").addEventListener("click", login);
+$("pin").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+$("outBtn").addEventListener("click", logout);
+
+// boot
+$("ph").value = PH;
+if(PH && PIN){ rpc("partner_status",{p_phone:PH,p_pin:PIN}).then(m=>{ME=m;enter();}).catch(()=>{}); }
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

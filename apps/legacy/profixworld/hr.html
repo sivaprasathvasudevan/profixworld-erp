@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563EB">
+<link rel="manifest" href="/hr.webmanifest">
+<link rel="apple-touch-icon" href="/hr-192.png">
+<title>ProFix HR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#FF6A2B,#E11D2A);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--line:#E7E9EE;--ok:#0E9F6E;--warn:#B45309;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.top .brand{font-weight:800;font-size:18px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input,select,textarea{width:100%;min-height:48px;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+textarea{min-height:64px}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff;padding:0 18px;width:100%}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:38px;font-size:13px;width:auto;padding:0 12px}
+.btn:disabled{opacity:.55}
+.row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.row:last-child{border:0}
+.pill{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill.in{background:#E6F6EF;color:#0E9F6E}.pill.off{background:#EDEFF5;color:#5A6272}
+.pill.warn{background:#FEF3E2;color:#B45309}.pill.red{background:#FDEBE6;color:#E11D2A}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.nav button{flex:1;min-height:60px;border:0;background:none;font:inherit;font-size:11px;font-weight:800;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.nav button.on{color:#E11D2A}
+.nav .ic{font-size:20px}
+.sheetBg{position:fixed;inset:0;background:rgba(20,25,40,.45);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.sheetBg.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:.25s;z-index:31;max-width:640px;margin:0 auto;max-height:88vh;overflow:auto}
+.sheet.open{transform:none}
+.handle{width:42px;height:5px;border-radius:99px;background:#D8DBE2;margin:4px auto 12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.chips button{border:1.5px solid var(--line);background:#fff;border-radius:99px;min-height:40px;padding:0 14px;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.chips button.on{background:var(--grad);color:#fff;border-color:transparent}
+.tot{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.tot>div{flex:1;min-width:120px;background:#fff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(20,25,40,.07)}
+.tot .n{font-size:20px;font-weight:800}.tot .l{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hide{display:none!important}
+.skel{height:52px;border-radius:12px;background:linear-gradient(90deg,#EDEFF3 25%,#F7F8FA 50%,#EDEFF3 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:10px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--mut);padding:24px 10px;font-size:14px}
+.monthNav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.monthNav button{border:1.5px solid var(--line);background:#fff;border-radius:10px;min-width:44px;min-height:40px;font-size:18px;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #FF6A2B;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9">HR</span></div>
+  <button id="installBtn">📲</button>
+    <button id="outBtn" class="hide">Log out</button>
+</header>
+
+<main class="wrap">
+  <!-- LOGIN -->
+  <section id="vLogin">
+    <div class="card">
+      <h2>Owner sign in</h2>
+      <p class="mut">Use the same email &amp; password as your admin app.</p>
+      <label for="em">Email</label><input id="em" type="email" autocomplete="username">
+      <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn">Sign in</button>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="vApp" class="hide">
+
+    <!-- LIVE -->
+    <section id="pLive">
+      <div class="tot" id="liveTot"></div>
+      <div class="card" style="margin-top:14px">
+        <h2>On shift now</h2>
+        <div id="liveList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- STAFF -->
+    <section id="pStaff" class="hide">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2 style="margin:0">Staff</h2>
+          <button class="btn sm" id="addStaff">+ Add staff</button>
+        </div>
+        <div id="staffList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section id="pAtt" class="hide">
+      <div class="card">
+        <div class="monthNav">
+          <button id="aPrev" aria-label="Previous month">‹</button><b id="aLabel"></b><button id="aNext" aria-label="Next month">›</button>
+        </div>
+        <select id="aStaff" aria-label="Filter staff"></select>
+        <div style="height:10px"></div>
+        <div id="attList"><div class="skel"></div></div>
+        <div class="tot" id="attTot"></div>
+        <p class="mut" style="margin-top:10px">📍 = clock-in was outside the shop radius (set in Settings). It's a flag, not proof — always ask before acting.</p>
+      </div>
+    </section>
+
+    <!-- INCENTIVES -->
+    <section id="pInc" class="hide">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2 style="margin:0">Incentives</h2>
+          <button class="btn sm" id="addInc">+ Assign</button>
+        </div>
+        <div id="incList"><div class="skel"></div></div>
+        <div class="tot" id="incTot"></div>
+      </div>
+    </section>
+
+    <!-- ROSTER + LEAVE -->
+    <section id="pRoster" class="hide">
+      <div class="card">
+        <div class="monthNav">
+          <button id="rPrev" aria-label="Previous day">‹</button>
+          <b id="rLabel"></b>
+          <button id="rNext" aria-label="Next day">›</button>
+        </div>
+        <p class="mut" style="margin-bottom:6px">Assign each employee to a shop for this day. Short-staffed shops show a count.</p>
+        <div id="shopCounts" class="tot" style="margin-bottom:8px"></div>
+        <div id="rosterList"><div class="skel"></div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2 style="margin:0">🌴 Leave requests</h2>
+          <span class="pill wait" id="leaveCount" style="display:none"></span>
+        </div>
+        <div id="leaveReqList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="pSet" class="hide">
+      <div class="card">
+        <h2>Shop location (for clock-in flags)</h2>
+        <p class="mut">Set once, standing inside the shop. Staff clocking in far from here get a 📍 flag in Attendance.</p>
+        <div class="grid2">
+          <div><label>Latitude</label><input id="sLat" inputmode="decimal"></div>
+          <div><label>Longitude</label><input id="sLng" inputmode="decimal"></div>
+        </div>
+        <label>Radius (meters)</label><input id="sRad" inputmode="numeric" value="150">
+        <div style="height:12px"></div>
+        <button class="btn ghost" id="useHere" style="margin-bottom:10px">📍 Use my current location</button>
+        <button class="btn" id="saveSet">Save settings</button>
+      </div>
+    </section>
+  </section>
+</main>
+
+<!-- bottom nav -->
+<nav class="nav hide" id="nav">
+  <button data-p="Live" class="on"><span class="ic">🟢</span>Live</button>
+  <button data-p="Staff"><span class="ic">👥</span>Staff</button>
+  <button data-p="Att"><span class="ic">🗓️</span>Attendance</button>
+  <button data-p="Inc"><span class="ic">🎁</span>Incentives</button>
+  <button data-p="Roster"><span class="ic">🗓️</span>Roster</button>
+  <button data-p="Set"><span class="ic">⚙️</span>Settings</button>
+</nav>
+
+<!-- staff sheet -->
+<div class="sheetBg" id="sBg"></div>
+<div class="sheet" id="staffSheet">
+  <div class="handle"></div>
+  <h2 id="ssTitle">Add employee</h2>
+  <div style="display:flex;gap:12px;align-items:center;margin:4px 0 6px">
+    <div id="ssPhotoBox" role="button" tabindex="0" aria-label="Employee photo" style="width:72px;height:72px;border-radius:16px;background:#EDEFF3;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;overflow:hidden;flex:none">📷</div>
+    <div class="mut">Tap to add a photo (optional)</div>
+    <input type="file" id="ssPhotoFile" accept="image/*" capture="user" class="hide">
+  </div>
+  <label>Name</label><input id="ssName">
+  <div class="grid2">
+    <div><label>Staff code (punch clock)</label><input id="ssCode" autocapitalize="characters" placeholder="RAVI1"></div>
+    <div><label>PIN (4–6 digits)</label><input id="ssPin" inputmode="numeric" maxlength="6" placeholder="leave blank = keep"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Role</label>
+      <select id="ssRole"><option>staff</option><option>delivery</option><option>technician</option><option>manager</option></select></div>
+    <div><label>Works in</label>
+      <select id="ssWorks"><option value="store">Store / delivery</option><option value="crm">Repair desk (CRM)</option><option value="both">Both</option></select></div>
+  </div>
+  <div class="grid2">
+    <div><label>Phone</label><input id="ssPhone" inputmode="numeric" maxlength="10"></div>
+    <div><label>Joining date</label><input id="ssJoin" type="date"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Daily wage ₹</label><input id="ssWage" inputmode="numeric"></div>
+    <div><label>Monthly salary ₹</label><input id="ssSalary" inputmode="numeric"></div>
+  </div>
+  <label>Address</label><input id="ssAddr">
+  <div class="grid2">
+    <div><label>Emergency contact name</label><input id="ssEmName"></div>
+    <div><label>Emergency phone</label><input id="ssEmPhone" inputmode="numeric" maxlength="10"></div>
+  </div>
+  <div class="grid2">
+    <div><label>ID ref (Aadhaar last 4 / DL)</label><input id="ssIdNum" maxlength="20"></div>
+    <div><label style="visibility:hidden">.</label><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink);margin-top:0"><input type="checkbox" id="ssActive" checked style="width:20px;min-height:20px"> Active</label></div>
+  </div>
+  <label>Notes (only owners see any of this)</label><input id="ssNotes">
+  <div style="height:12px"></div>
+  <button class="btn" id="ssSave">Save employee</button>
+</div>
+
+<!-- employee detail sheet -->
+<div class="sheet" id="empSheet">
+  <div class="handle"></div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <div id="edPhoto" style="width:64px;height:64px;border-radius:16px;background:#EDEFF3;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none">👤</div>
+    <div><h2 id="edName" style="margin:0"></h2><div class="mut" id="edMeta"></div></div>
+  </div>
+  <div id="edInfo" style="margin-top:10px"></div>
+  <div class="tot" id="edStats" style="margin-top:6px"></div>
+  <div style="height:12px"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn ghost" id="edEdit" style="flex:1">✏️ Edit</button>
+    <button class="btn ghost" id="edReg" style="flex:1">📄 Registration</button>
+  </div>
+  <div style="height:14px"></div>
+  <h2 style="font-size:14px">📋 Assignments</h2>
+  <div id="edTodos" style="margin-bottom:8px"></div>
+  <div style="display:flex;gap:8px">
+    <input id="edTaskTitle" placeholder="New task for this employee…" style="flex:1;min-height:44px">
+    <button class="btn sm" id="edTaskAdd" style="width:auto">Add</button>
+  </div>
+  <div style="height:14px"></div>
+  <h2 style="font-size:14px">₹ Advances / deductions (this month)</h2>
+  <div id="edAdvList" style="margin-bottom:8px"></div>
+  <div style="display:flex;gap:8px">
+    <input id="edAdvAmt" inputmode="numeric" placeholder="₹" style="width:90px;min-height:44px">
+    <input id="edAdvWhy" placeholder="Reason (advance, uniform…)" style="flex:1;min-height:44px">
+    <button class="btn sm" id="edAdvAdd" style="width:auto">Add</button>
+  </div>
+</div>
+
+<!-- attendance edit sheet -->
+<div class="sheet" id="attSheet">
+  <div class="handle"></div>
+  <h2 id="aeTitle">Edit punch</h2>
+  <p class="mut">Fix a forgotten punch-out or a wrong time. The record is marked "edited" so it stays honest.</p>
+  <label>Clock in</label><input id="aeIn" type="datetime-local">
+  <label>Clock out (leave empty = still on shift)</label><input id="aeOut" type="datetime-local">
+  <div style="height:12px"></div>
+  <button class="btn" id="aeSave">Save punch</button>
+  <button class="btn red" id="aeDel" style="margin-top:8px;background:#fff;color:#E11D2A;border:1.5px solid #F6C6C0">Delete this punch</button>
+</div>
+
+<!-- incentive sheet -->
+<div class="sheet" id="incSheet">
+  <div class="handle"></div>
+  <h2>Assign incentive</h2>
+  <label>Staff</label><select id="isStaff"></select>
+  <label>Amount ₹</label><input id="isAmt" inputmode="numeric">
+  <label>Reason</label>
+  <div class="chips" id="isChips">
+    <button data-r="sales target">Sales target</button>
+    <button data-r="repairs done">Repairs done</button>
+    <button data-r="attendance bonus">Attendance bonus</button>
+    <button data-r="festival">Festival</button>
+    <button data-r="other">Other</button>
+  </div>
+  <label>Note (optional)</label><input id="isNote">
+  <div style="height:12px"></div>
+  <button class="btn" id="isSave">Assign</button>
+</div>
+
+<div class="sheet" id="regSheet" style="max-height:92vh">
+  <div class="handle"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2 id="rgTitle" style="margin:0">Employee registration</h2>
+    <button class="btn ghost sm" id="rgPrint">🖨 Print form</button>
+  </div>
+  <p class="mut" id="rgUid" style="margin:4px 0 8px"></p>
+
+  <h2 style="font-size:13px;color:#E11D2A">1 · Personal details</h2>
+  <label>Father's / Mother's name</label><input id="rgParent">
+  <div class="grid2">
+    <div><label>Date of birth</label><input id="rgDob" type="date"></div>
+    <div><label>Gender</label><select id="rgGender"><option value="">—</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+  </div>
+  <div class="grid2">
+    <div><label>Blood group</label><input id="rgBlood" placeholder="O+"></div>
+    <div><label>Marital status</label><select id="rgMarital"><option value="">—</option><option value="single">Single</option><option value="married">Married</option></select></div>
+  </div>
+  <div class="grid2">
+    <div><label>Aadhaar — LAST 4 ONLY</label><input id="rgAadhaar" maxlength="4" inputmode="numeric" placeholder="never the full number"></div>
+    <div><label>PAN</label><input id="rgPan" maxlength="10" autocapitalize="characters"></div>
+  </div>
+  <label>Driving licence (if any)</label><input id="rgDl">
+
+  <h2 style="font-size:13px;color:#E11D2A;margin-top:14px">2 · Contact details</h2>
+  <div class="grid2">
+    <div><label>Alternate number</label><input id="rgAlt" inputmode="numeric" maxlength="10"></div>
+    <div><label>Email</label><input id="rgEmail" type="email"></div>
+  </div>
+  <label>Permanent address (current address is in Edit)</label><input id="rgPermAddr">
+
+  <h2 style="font-size:13px;color:#E11D2A;margin-top:14px">3 · Employment details</h2>
+  <div class="grid2">
+    <div><label>Department</label><input id="rgDept" placeholder="Sales / Service / Delivery"></div>
+    <div><label>Designation</label><input id="rgDesig" placeholder="Technician / Sales exec"></div>
+  </div>
+  <div class="grid2">
+    <div><label>Employment type</label><select id="rgType"><option value="">—</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="trainee">Trainee</option><option value="contract">Contract</option></select></div>
+    <div><label>Working shift</label><input id="rgShift" placeholder="10 AM – 8 PM"></div>
+  </div>
+  <label>Seniority (used for service-visit dispatch)</label>
+  <select id="rgSenior"><option value="">—</option><option value="junior">Junior</option><option value="senior">Senior</option><option value="lead">Lead</option></select>
+
+  <h2 style="font-size:13px;color:#E11D2A;margin-top:14px">4 · Emergency contact</h2>
+  <label>Relationship (name & phone are in Edit)</label><input id="rgEmRel" placeholder="Father / Spouse / Friend">
+
+  <h2 style="font-size:13px;color:#E11D2A;margin-top:14px">5 · Bank details (salary)</h2>
+  <label>Bank name</label><input id="rgBank">
+  <div class="grid2">
+    <div><label>Account number</label><input id="rgAcct" inputmode="numeric"></div>
+    <div><label>IFSC</label><input id="rgIfsc" autocapitalize="characters"></div>
+  </div>
+
+  <h2 style="font-size:13px;color:#E11D2A;margin-top:14px">6 · Documents submitted</h2>
+  <div id="rgDocs" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+
+  <h2 style="font-size:13px;color:#E11D2A;margin-top:14px">7 · Declaration</h2>
+  <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink)">
+    <input type="checkbox" id="rgDeclared" style="width:20px;min-height:20px"> Employee signed the declaration (date saved on tick)
+  </label>
+  <div style="height:12px"></div>
+  <button class="btn" id="rgSave">Save registration</button>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY = "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+const toast = m => { const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2600); };
+const buzz = () => { try{navigator.vibrate&&navigator.vibrate(10);}catch(e){} };
+const hms = s => { s=Math.max(0,Math.floor(s)); return Math.floor(s/3600)+":"+String(Math.floor(s%3600/60)).padStart(2,"0"); };
+const fdt = d => new Date(d).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+const fday = d => new Date(d).toLocaleDateString([], {day:"numeric",month:"short"});
+const inr = n => "₹"+Number(n||0).toLocaleString("en-IN");
+
+let STAFF=[], SET=null, editId=null, incReason="other", ATT=[], attEdit=null;
+const toLocal = d => { const x=new Date(d); x.setMinutes(x.getMinutes()-x.getTimezoneOffset()); return x.toISOString().slice(0,16); };
+function openAttEdit(id){
+  attEdit = ATT.find(r=>r.id===id); if(!attEdit) return;
+  const byName = i => (STAFF.find(s=>s.id===i)||{}).name || "?";
+  $("aeTitle").textContent = "Edit punch — "+byName(attEdit.staff_id);
+  $("aeIn").value = toLocal(attEdit.clock_in);
+  $("aeOut").value = attEdit.clock_out ? toLocal(attEdit.clock_out) : "";
+  openSheet("attSheet");
+}
+let aY, aM;
+const now = new Date(); aY = now.getFullYear(); aM = now.getMonth()+1;
+
+function dist(lat1,lng1,lat2,lng2){ // haversine, meters
+  const R=6371000, r=x=>x*Math.PI/180;
+  const dLat=r(lat2-lat1), dLng=r(lng2-lng1);
+  const a=Math.sin(dLat/2)**2 + Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function flagged(r){
+  if(!SET || SET.shop_lat==null || r.in_lat==null) return false;
+  return dist(SET.shop_lat, SET.shop_lng, r.in_lat, r.in_lng) > (SET.radius_m||150);
+}
+
+// ---------- auth ----------
+async function login(){
+  $("loginBtn").disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email:$("em").value.trim(), password:$("pw").value });
+  $("loginBtn").disabled = false;
+  if(error) return toast(error.message);
+  boot();
+}
+async function boot(){
+  $("vLogin").classList.add("hide"); $("vApp").classList.remove("hide");
+  $("nav").classList.remove("hide"); $("outBtn").classList.remove("hide");
+  await Promise.all([loadStaff(), loadSettings(), loadShops()]);
+  try{ const {data:n} = await sb.rpc("auto_close_stale_shifts"); if(n>0) toast("⚠ Auto-closed "+n+" forgotten shift"+(n>1?"s":"")+" — check Attendance"); }catch(e){}
+  loadLive(); loadAtt(); loadInc();
+}
+
+// ---------- data ----------
+async function loadStaff(){
+  const { data, error } = await sb.from("staff_members").select("*").order("created_at");
+  if(error) return toast(error.message);
+  STAFF = data||[]; renderStaff(); fillStaffSelects();
+}
+async function loadSettings(){
+  const { data } = await sb.from("staff_settings").select("*").eq("id",1).maybeSingle();
+  SET = data; if(!SET) return;
+  $("sLat").value = SET.shop_lat ?? ""; $("sLng").value = SET.shop_lng ?? ""; $("sRad").value = SET.radius_m ?? 150;
+}
+async function loadLive(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const { data, error } = await sb.from("staff_attendance").select("*").gte("clock_in", today.toISOString()).order("clock_in");
+  if(error) return toast(error.message);
+  const rows = data||[];
+  const open = rows.filter(r=>!r.clock_out);
+  const byName = id => (STAFF.find(s=>s.id===id)||{}).name || "?";
+  const activeStaff = STAFF.filter(s=>s.active);
+  const presentIds = new Set(rows.map(r=>r.staff_id));
+  $("liveTot").innerHTML =
+    '<div><div class="n">'+open.length+'</div><div class="l">On shift</div></div>'+
+    '<div><div class="n">'+presentIds.size+' / '+activeStaff.length+'</div><div class="l">Present today</div></div>'+
+    '<div><div class="n">'+hms(rows.reduce((a,r)=>a+((r.clock_out?new Date(r.clock_out):new Date())-new Date(r.clock_in))/1000,0))+'</div><div class="l">Hours today</div></div>';
+  $("liveList").innerHTML = open.length ? open.map(r=>
+    '<div class="row"><div><b>'+byName(r.staff_id)+'</b><div class="mut">In '+fdt(r.clock_in)+(flagged(r)?' 📍':'')+'</div></div><span class="pill in">'+hms((Date.now()-new Date(r.clock_in))/1000)+'</span></div>'
+  ).join("") : '<div class="empty">Nobody on shift right now.</div>';
+}
+function renderStaff(){
+  const worksLbl = w => w==='crm' ? 'Repair desk' : w==='both' ? 'Store + CRM' : 'Store';
+  $("staffList").innerHTML = STAFF.length ? STAFF.map(s=>
+    '<div class="row" role="button" tabindex="0" data-emp="'+s.id+'">'+
+    (s.photo_url?'<img src="'+s.photo_url+'" alt="" style="width:44px;height:44px;border-radius:12px;object-fit:cover;flex:none">':'<div style="width:44px;height:44px;border-radius:12px;background:#EDEFF3;display:flex;align-items:center;justify-content:center;flex:none">👤</div>')+
+    '<div style="flex:1"><b>'+s.name+'</b><div class="mut">'+s.code+' · '+s.role+' · '+worksLbl(s.works_in)+(s.phone?' · '+s.phone:'')+'</div></div>'+
+    '<div style="display:flex;gap:6px;align-items:center"><span class="pill '+(s.active?'in':'off')+'">'+(s.active?'Active':'Off')+'</span>'+
+    '<button class="btn ghost sm" data-edit="'+s.id+'">Edit</button></div></div>'
+  ).join("") : '<div class="empty">No employees yet. Tap + Add staff.</div>';
+  document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();openStaffSheet(b.dataset.edit);}));
+  document.querySelectorAll("[data-emp]").forEach(el=>{
+    const open=()=>openEmp(el.dataset.emp);
+    el.addEventListener("click",open);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter")open();});
+  });
+}
+function fillStaffSelects(){
+  const opts = STAFF.filter(s=>s.active).map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join("");
+  $("isStaff").innerHTML = opts;
+  $("aStaff").innerHTML = '<option value="">All staff</option>'+STAFF.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join("");
+}
+
+async function loadAtt(){
+  $("aLabel").textContent = new Date(aY,aM-1,1).toLocaleDateString([], {month:"long",year:"numeric"});
+  const from = new Date(aY,aM-1,1), to = new Date(aY,aM,1);
+  let q = sb.from("staff_attendance").select("*").gte("clock_in",from.toISOString()).lt("clock_in",to.toISOString()).order("clock_in",{ascending:false});
+  const sid = $("aStaff").value; if(sid) q = q.eq("staff_id",sid);
+  const { data, error } = await q;
+  if(error) return toast(error.message);
+  const rows = data||[];
+  ATT = rows;
+  const byName = id => (STAFF.find(s=>s.id===id)||{}).name || "?";
+  $("attList").innerHTML = rows.length ? rows.map(r=>{
+    const open=!r.clock_out;
+    const dur=((open?Date.now():new Date(r.clock_out).getTime())-new Date(r.clock_in).getTime())/1000;
+    return '<div class="row"><div><b>'+byName(r.staff_id)+'</b>'+(flagged(r)?' <span class="pill warn">📍 outside</span>':'')+
+      (r.auto_closed?' <span class="pill warn">⚠ auto-closed</span>':'')+(r.edited?' <span class="pill off">edited</span>':'')+
+      '<div class="mut">'+fday(r.clock_in)+' · In '+fdt(r.clock_in)+(open?'':' · Out '+fdt(r.clock_out))+'</div></div>'+
+      '<div style="display:flex;gap:6px;align-items:center">'+
+      (open?'<span class="pill in">On shift</span>':'<b>'+hms(dur)+'</b>')+
+      '<button class="btn ghost sm" data-att="'+r.id+'">✏️</button></div></div>';
+  }).join("") : '<div class="empty">No attendance in this month.</div>';
+  document.querySelectorAll("[data-att]").forEach(b=>b.addEventListener("click",()=>openAttEdit(b.dataset.att)));
+  // per-staff totals
+  const tot={};
+  rows.forEach(r=>{ if(!r.clock_out) return; const k=r.staff_id;
+    tot[k]=tot[k]||{secs:0,days:new Set()};
+    tot[k].secs += (new Date(r.clock_out)-new Date(r.clock_in))/1000;
+    tot[k].days.add(new Date(r.clock_in).toDateString());
+  });
+  $("attTot").innerHTML = Object.keys(tot).map(k=>
+    '<div><div class="n">'+hms(tot[k].secs)+'</div><div class="l">'+byName(k)+' · '+tot[k].days.size+' days</div></div>'
+  ).join("") || "";
+}
+
+let INC=[];
+async function loadInc(){
+  const { data, error } = await sb.from("staff_incentives").select("*").order("created_at",{ascending:false}).limit(100);
+  if(error) return toast(error.message);
+  INC = data||[]; renderInc();
+}
+function renderInc(){
+  const byName = id => (STAFF.find(s=>s.id===id)||{}).name || "?";
+  $("incList").innerHTML = INC.length ? INC.map(r=>
+    '<div class="row"><div><b>'+byName(r.staff_id)+' · '+inr(r.amount)+'</b><div class="mut">'+r.reason+(r.note?' · '+r.note:'')+' · '+fday(r.created_at)+'</div></div>'+
+    (r.status==="paid" ? '<span class="pill in">Paid '+fday(r.paid_at)+'</span>'
+      : '<button class="btn sm" data-pay="'+r.id+'">Mark paid</button>')+'</div>'
+  ).join("") : '<div class="empty">No incentives yet. Tap + Assign.</div>';
+  document.querySelectorAll("[data-pay]").forEach(b=>b.addEventListener("click",()=>markPaid(b.dataset.pay)));
+  const pend = INC.filter(r=>r.status!=="paid").reduce((a,r)=>a+r.amount,0);
+  const paid = INC.filter(r=>r.status==="paid").reduce((a,r)=>a+r.amount,0);
+  $("incTot").innerHTML = '<div><div class="n">'+inr(pend)+'</div><div class="l">To pay</div></div><div><div class="n">'+inr(paid)+'</div><div class="l">Paid</div></div>';
+}
+async function markPaid(id){
+  buzz();
+  const { error } = await sb.from("staff_incentives").update({status:"paid",paid_at:new Date().toISOString()}).eq("id",id);
+  if(error) return toast(error.message);
+  toast("Marked paid ✓"); loadInc();
+}
+
+// ---------- sheets ----------
+function openSheet(id){ $("sBg").classList.add("open"); $(id).classList.add("open"); }
+function closeSheets(){ $("sBg").classList.remove("open"); document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("open")); }
+$("sBg").addEventListener("click", closeSheets);
+
+let ssPhotoBlob=null, ssPhotoUrl=null;
+function openStaffSheet(id){
+  editId = id||null;
+  const s = STAFF.find(x=>x.id===id) || {};
+  $("ssTitle").textContent = id ? "Edit employee" : "Add employee";
+  $("ssName").value = s.name||""; $("ssCode").value = s.code||"";
+  $("ssPin").value = ""; $("ssPin").placeholder = id ? "leave blank = keep current" : "e.g. 4321";
+  $("ssRole").value = s.role||"staff"; $("ssWage").value = s.daily_wage||"";
+  $("ssWorks").value = s.works_in||"store";
+  $("ssPhone").value = s.phone||""; $("ssJoin").value = s.joining_date||"";
+  $("ssSalary").value = s.monthly_salary||""; $("ssAddr").value = s.address||"";
+  $("ssEmName").value = s.emergency_name||""; $("ssEmPhone").value = s.emergency_phone||"";
+  $("ssIdNum").value = s.id_number||""; $("ssNotes").value = s.notes||"";
+  $("ssActive").checked = s.active!==false;
+  ssPhotoBlob = null; ssPhotoUrl = s.photo_url||null;
+  $("ssPhotoBox").innerHTML = ssPhotoUrl ? '<img src="'+ssPhotoUrl+'" style="width:100%;height:100%;object-fit:cover">' : "📷";
+  openSheet("staffSheet");
+}
+$("ssPhotoBox").addEventListener("click", ()=>$("ssPhotoFile").click());
+$("ssPhotoBox").addEventListener("keydown", e=>{ if(e.key==="Enter") $("ssPhotoFile").click(); });
+$("ssPhotoFile").addEventListener("change", e=>{
+  const f=e.target.files[0]; if(!f) return; e.target.value="";
+  const img=new Image();
+  img.onload=()=>{
+    const max=512, sc=Math.min(1,max/Math.max(img.width,img.height));
+    const c=document.createElement("canvas"); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    c.toBlob(b=>{ ssPhotoBlob=b; $("ssPhotoBox").innerHTML='<img src="'+URL.createObjectURL(b)+'" style="width:100%;height:100%;object-fit:cover">'; },"image/jpeg",.75);
+    URL.revokeObjectURL(img.src);
+  };
+  img.src=URL.createObjectURL(f);
+});
+$("addStaff").addEventListener("click", ()=>openStaffSheet(null));
+$("ssSave").addEventListener("click", async ()=>{
+  const name=$("ssName").value.trim(), code=$("ssCode").value.trim(), pin=$("ssPin").value.trim();
+  if(!name||!code) return toast("Name and code are required");
+  if(!editId && pin.length<4) return toast("PIN must be at least 4 digits");
+  $("ssSave").disabled=true; buzz();
+  // photo upload first (if a new one was taken)
+  if(ssPhotoBlob){
+    try{
+      const path = "staff/"+(editId||Date.now())+"-"+Date.now()+".jpg";
+      const up = await sb.storage.from("partner-images").upload(path, ssPhotoBlob, {contentType:"image/jpeg"});
+      if(up.error) throw up.error;
+      ssPhotoUrl = sb.storage.from("partner-images").getPublicUrl(path).data.publicUrl;
+    }catch(e){ $("ssSave").disabled=false; return toast("Photo upload failed: "+(e.message||"")); }
+  }
+  const { data: newId, error } = await sb.rpc("admin_upsert_staff", {
+    p_id: editId, p_name: name, p_code: code, p_pin: pin || null,
+    p_role: $("ssRole").value, p_wage: $("ssWage").value ? Number($("ssWage").value) : null,
+    p_active: $("ssActive").checked });
+  if(error){ $("ssSave").disabled=false; return toast(error.message); }
+  // profile fields via direct update (owner policy)
+  const prof = {
+    works_in: $("ssWorks").value, phone: $("ssPhone").value.trim()||null,
+    joining_date: $("ssJoin").value||null,
+    monthly_salary: $("ssSalary").value ? Number($("ssSalary").value) : null,
+    address: $("ssAddr").value.trim()||null,
+    emergency_name: $("ssEmName").value.trim()||null,
+    emergency_phone: $("ssEmPhone").value.trim()||null,
+    id_number: $("ssIdNum").value.trim()||null,
+    notes: $("ssNotes").value.trim()||null };
+  if(ssPhotoUrl) prof.photo_url = ssPhotoUrl;
+  const targetId = editId || newId;
+  const up2 = await sb.from("staff_members").update(prof).eq("id", targetId);
+  $("ssSave").disabled=false;
+  if(up2.error) return toast("Saved basics, but profile failed: "+up2.error.message+" (run the Task 7 SQL?)");
+  toast(editId ? "Staff updated ✓" : "Staff added ✓ — give them the code & PIN");
+  closeSheets(); loadStaff();
+});
+
+$("addInc").addEventListener("click", ()=>{ incReason="other"; document.querySelectorAll("#isChips button").forEach(b=>b.classList.remove("on")); $("isAmt").value=""; $("isNote").value=""; openSheet("incSheet"); });
+document.querySelectorAll("#isChips button").forEach(b=>b.addEventListener("click",()=>{ document.querySelectorAll("#isChips button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); incReason=b.dataset.r; }));
+$("isSave").addEventListener("click", async ()=>{
+  const amt = Number($("isAmt").value);
+  if(!amt || amt<=0) return toast("Enter a valid amount");
+  $("isSave").disabled=true; buzz();
+  const { error } = await sb.from("staff_incentives").insert({ staff_id:$("isStaff").value, amount:amt, reason:incReason, note:$("isNote").value.trim()||null });
+  $("isSave").disabled=false;
+  if(error) return toast(error.message);
+  toast("Incentive assigned ✓"); closeSheets(); loadInc();
+});
+
+$("aeSave").addEventListener("click", async ()=>{
+  const cin=$("aeIn").value, cout=$("aeOut").value;
+  if(!cin) return toast("Clock-in time is required");
+  if(cout && new Date(cout) <= new Date(cin)) return toast("Clock-out must be after clock-in");
+  $("aeSave").disabled=true; buzz();
+  const { error } = await sb.from("staff_attendance").update({
+    clock_in:new Date(cin).toISOString(),
+    clock_out:cout?new Date(cout).toISOString():null,
+    edited:true, auto_closed:false }).eq("id",attEdit.id);
+  $("aeSave").disabled=false;
+  if(error) return toast(error.message);
+  toast("Punch updated ✓"); closeSheets(); loadAtt(); loadLive();
+});
+$("aeDel").addEventListener("click", async ()=>{
+  if(!confirm("Delete this punch completely? Use only for mistakes (double punch etc.)")) return;
+  const { error } = await sb.from("staff_attendance").delete().eq("id",attEdit.id);
+  if(error) return toast(error.message);
+  toast("Punch deleted"); closeSheets(); loadAtt(); loadLive();
+});
+
+// ---------- shops / roster / leave ----------
+let SHOPS=[], rDay=new Date();
+async function loadShops(){
+  const { data } = await sb.from("profix_shops").select("*").eq("active",true).order("sort");
+  SHOPS = data||[];
+}
+function shopName(id){ const s=SHOPS.find(x=>x.id===id); return s?s.name:"—"; }
+async function loadRoster(){
+  if(!$("rLabel")) return;
+  const dayStr = rDay.toISOString().slice(0,10);
+  $("rLabel").textContent = rDay.toLocaleDateString([], {weekday:"short",day:"numeric",month:"short"});
+  const [ros, lv] = await Promise.all([
+    sb.from("staff_roster").select("*").eq("day",dayStr),
+    sb.from("staff_leave").select("*").eq("status","approved").lte("from_day",dayStr).gte("to_day",dayStr)
+  ]);
+  const rmap={}; (ros.data||[]).forEach(r=>rmap[r.staff_id]=r.shop_id);
+  const onLeave=new Set((lv.data||[]).map(r=>r.staff_id));
+  // per-shop counts
+  const counts={}; SHOPS.forEach(s=>counts[s.id]=0);
+  Object.values(rmap).forEach(sid=>{ if(counts[sid]!=null) counts[sid]++; });
+  $("shopCounts").innerHTML = SHOPS.map(s=>
+    '<div><div class="n'+(counts[s.id]===0?' ':'')+'" style="'+(counts[s.id]===0?'color:#E11D2A':'')+'">'+counts[s.id]+'</div><div class="l">'+s.name+'</div></div>').join("");
+  const active = STAFF.filter(s=>s.active);
+  const opts = sid => '<option value="">— none —</option>'+SHOPS.map(s=>'<option value="'+s.id+'"'+(sid===s.id?' selected':'')+'>'+s.name+'</option>').join("");
+  $("rosterList").innerHTML = active.length ? active.map(s=>
+    '<div class="row"><div style="flex:1"><b>'+s.name+'</b>'+(onLeave.has(s.id)?' <span class="pill warn">on leave</span>':'')+'<div class="mut">'+s.role+'</div></div>'+
+    '<select data-ros="'+s.id+'" style="min-height:40px;max-width:150px" '+(onLeave.has(s.id)?'disabled':'')+'>'+opts(rmap[s.id])+'</select></div>'
+  ).join("") : '<div class="empty">No employees yet.</div>';
+  document.querySelectorAll("[data-ros]").forEach(sel=>sel.addEventListener("change", async ()=>{
+    const staffId=sel.dataset.ros, shopId=sel.value;
+    buzz();
+    if(!shopId){ await sb.from("staff_roster").delete().eq("day",dayStr).eq("staff_id",staffId); }
+    else{
+      const { error } = await sb.from("staff_roster").upsert({day:dayStr,staff_id:staffId,shop_id:Number(shopId)},{onConflict:"day,staff_id"});
+      if(error) return toast(error.message);
+    }
+    toast("Roster saved ✓"); loadRoster();
+  }));
+}
+async function loadLeaveReqs(){
+  const { data, error } = await sb.from("staff_leave").select("*").order("created_at",{ascending:false}).limit(60);
+  if(error) return;
+  const rows=data||[]; const pend=rows.filter(r=>r.status==="pending").length;
+  const lc=$("leaveCount"); lc.textContent=pend+" pending"; lc.style.display=pend?"inline-block":"none";
+  $("leaveReqList").innerHTML = rows.length ? rows.map(r=>{
+    const nm=(STAFF.find(x=>x.id===r.staff_id)||{}).name||"?";
+    const pill=r.status==="approved"?'<span class="pill in">Approved</span>':r.status==="rejected"?'<span class="pill red">Rejected</span>':'<span class="pill warn">Pending</span>';
+    const actions = r.status==="pending"
+      ? '<div style="display:flex;gap:6px"><button class="btn sm" data-lok="'+r.id+'">Approve</button><button class="btn red sm" data-lno="'+r.id+'">Reject</button></div>'
+      : pill;
+    return '<div class="row"><div style="flex:1"><b>'+nm+'</b><div class="mut">'+fday(r.from_day)+' → '+fday(r.to_day)+(r.reason?' · '+r.reason:'')+'</div></div>'+actions+'</div>';
+  }).join("") : '<div class="empty">No leave requests.</div>';
+  document.querySelectorAll("[data-lok]").forEach(b=>b.addEventListener("click",()=>decideLeave(b.dataset.lok,"approved")));
+  document.querySelectorAll("[data-lno]").forEach(b=>b.addEventListener("click",()=>decideLeave(b.dataset.lno,"rejected")));
+}
+async function decideLeave(id,status){
+  buzz();
+  const { error } = await sb.from("staff_leave").update({status,decided_at:new Date().toISOString()}).eq("id",id);
+  if(error) return toast(error.message);
+  toast(status==="approved"?"Approved ✓":"Rejected"); loadLeaveReqs(); loadRoster();
+}
+
+// ---------- employee detail ----------
+async function openEmp(id){
+  const s = STAFF.find(x=>x.id===id); if(!s) return;
+  const worksLbl = w => w==='crm' ? 'Repair desk' : w==='both' ? 'Store + CRM' : 'Store';
+  $("edName").textContent = s.name;
+  $("edMeta").textContent = s.code+" · "+s.role+" · "+worksLbl(s.works_in)+(s.joining_date?" · joined "+s.joining_date:"");
+  $("edPhoto").innerHTML = s.photo_url ? '<img src="'+s.photo_url+'" style="width:100%;height:100%;object-fit:cover">' : "👤";
+  const info = [];
+  if(s.phone) info.push(["📞 Phone", '<a href="tel:'+s.phone+'">'+s.phone+'</a>']);
+  if(s.address) info.push(["🏠 Address", s.address]);
+  if(s.emergency_name||s.emergency_phone) info.push(["🆘 Emergency", (s.emergency_name||"")+(s.emergency_phone?' · <a href="tel:'+s.emergency_phone+'">'+s.emergency_phone+'</a>':'')]);
+  if(s.id_number) info.push(["🪪 ID ref", s.id_number]);
+  if(s.daily_wage) info.push(["₹ Daily wage", inr(s.daily_wage)]);
+  if(s.monthly_salary) info.push(["₹ Monthly salary", inr(s.monthly_salary)]);
+  if(s.notes) info.push(["📝 Notes", s.notes]);
+  $("edInfo").innerHTML = info.map(x=>'<div class="row"><span class="mut">'+x[0]+'</span><span style="text-align:right">'+x[1]+'</span></div>').join("") || '<div class="empty">No details yet — tap Edit to add.</div>';
+  // this-month stats
+  const now = new Date(), from = new Date(now.getFullYear(), now.getMonth(), 1);
+  const [att, inc] = await Promise.all([
+    sb.from("staff_attendance").select("*").eq("staff_id", id).gte("clock_in", from.toISOString()),
+    sb.from("staff_incentives").select("amount,status").eq("staff_id", id).gte("created_at", from.toISOString())
+  ]);
+  const arows = att.data||[]; let secs=0; const days=new Set();
+  arows.forEach(r=>{ if(r.clock_out){ secs+=(new Date(r.clock_out)-new Date(r.clock_in))/1000; days.add(new Date(r.clock_in).toDateString()); }});
+  const incTotal = (inc.data||[]).reduce((a,r)=>a+r.amount,0);
+  $("edStats").innerHTML =
+    '<div><div class="n">'+days.size+'</div><div class="l">Days this month</div></div>'+
+    '<div><div class="n">'+hms(secs)+'</div><div class="l">Hours</div></div>'+
+    '<div><div class="n">'+inr(incTotal)+'</div><div class="l">Incentives</div></div>';
+  $("edEdit").onclick = ()=>{ closeSheets(); setTimeout(()=>openStaffSheet(id), 250); };
+  $("edReg").onclick = ()=>{ closeSheets(); setTimeout(()=>openReg(id), 250); };
+  loadEmpTodos(id); loadEmpAdv(id);
+  $("edAdvAdd").onclick = async ()=>{
+    const amt=Number($("edAdvAmt").value); if(!amt) return toast("Enter ₹ amount");
+    $("edAdvAdd").disabled=true; buzz();
+    const { error } = await sb.from("staff_advances").insert({ staff_id:id, amount:amt, reason:$("edAdvWhy").value.trim()||null });
+    $("edAdvAdd").disabled=false;
+    if(error) return toast(error.message+" (run Task 9 SQL?)");
+    $("edAdvAmt").value=""; $("edAdvWhy").value=""; toast("Recorded ✓"); loadEmpAdv(id);
+  };
+  $("edTaskAdd").onclick = async ()=>{
+    const title = $("edTaskTitle").value.trim();
+    if(!title) return toast("Type a task first");
+    $("edTaskAdd").disabled=true; buzz();
+    const { error } = await sb.from("staff_todos").insert({ staff_id:id, title, created_by:"owner" });
+    $("edTaskAdd").disabled=false;
+    if(error) return toast(error.message);
+    $("edTaskTitle").value=""; toast("Task assigned ✓"); loadEmpTodos(id);
+  };
+  $("edTaskTitle").onkeydown = e=>{ if(e.key==="Enter") $("edTaskAdd").click(); };
+  openSheet("empSheet");
+}
+
+async function loadEmpTodos(id){
+  const { data, error } = await sb.from("staff_todos").select("*").eq("staff_id",id).order("done").order("created_at",{ascending:false}).limit(40);
+  if(error){ $("edTodos").innerHTML='<div class="mut">'+error.message+'</div>'; return; }
+  const rows=data||[];
+  $("edTodos").innerHTML = rows.length ? rows.map(r=>
+    '<div class="row"><div style="flex:1"><b style="'+(r.done?'text-decoration:line-through;opacity:.6':'')+'">'+r.title+'</b>'+
+    '<div class="mut">'+(r.done?'done':'open')+(r.created_by?' · by '+r.created_by:'')+'</div></div>'+
+    '<button class="btn ghost sm" data-deltodo="'+r.id+'" aria-label="Delete task">✕</button></div>'
+  ).join("") : '<div class="mut">No assignments yet.</div>';
+  document.querySelectorAll("[data-deltodo]").forEach(b=>b.addEventListener("click", async ()=>{
+    buzz();
+    const { error } = await sb.from("staff_todos").delete().eq("id", b.dataset.deltodo);
+    if(error) return toast(error.message);
+    toast("Removed"); loadEmpTodos(id);
+  }));
+}
+
+// ---------- full registration ----------
+const DOC_KEYS=[["aadhaar","Aadhaar copy"],["pan","PAN copy"],["photos","Passport photos (2)"],["edu","Educational certificates"],["exp","Experience certificate"],["passbook","Bank passbook copy"],["police","Police verification"],["other","Other"]];
+let regId=null;
+function openReg(id){
+  const s=STAFF.find(x=>x.id===id); if(!s) return;
+  regId=id;
+  $("rgTitle").textContent="Registration — "+s.name;
+  $("rgUid").textContent=(s.employee_uid?("Employee ID: "+s.employee_uid):"Employee ID: will be generated on save")+(s.joining_date?" · joined "+s.joining_date:"");
+  $("rgParent").value=s.father_mother_name||""; $("rgDob").value=s.dob||"";
+  $("rgGender").value=s.gender||""; $("rgBlood").value=s.blood_group||"";
+  $("rgMarital").value=s.marital_status||""; $("rgAadhaar").value=s.aadhaar_last4||"";
+  $("rgPan").value=s.pan||""; $("rgDl").value=s.driving_licence||"";
+  $("rgAlt").value=s.alt_phone||""; $("rgEmail").value=s.email||"";
+  $("rgPermAddr").value=s.permanent_address||"";
+  $("rgDept").value=s.department||""; $("rgDesig").value=s.designation||"";
+  $("rgType").value=s.employment_type||""; $("rgShift").value=s.working_shift||"";
+  $("rgSenior").value=s.seniority||""; $("rgEmRel").value=s.emergency_relation||"";
+  $("rgBank").value=s.bank_name||""; $("rgAcct").value=s.bank_account||""; $("rgIfsc").value=s.bank_ifsc||"";
+  const docs=s.docs||{};
+  $("rgDocs").innerHTML=DOC_KEYS.map(([k,l])=>'<label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;color:var(--ink)"><input type="checkbox" data-doc="'+k+'" '+(docs[k]?'checked':'')+' style="width:18px;min-height:18px"> '+l+'</label>').join("");
+  $("rgDeclared").checked=!!s.declared_on;
+  openSheet("regSheet");
+}
+$("rgSave").addEventListener("click", async ()=>{
+  if(!regId) return;
+  const s=STAFF.find(x=>x.id===regId)||{};
+  $("rgSave").disabled=true; buzz();
+  const docs={}; document.querySelectorAll("[data-doc]").forEach(c=>{ docs[c.dataset.doc]=c.checked; });
+  let uid=s.employee_uid;
+  if(!uid){
+    const n=STAFF.filter(x=>x.employee_uid).length+1;
+    uid="PF-EMP-"+String(n).padStart(3,"0");
+  }
+  const upd={
+    employee_uid:uid,
+    father_mother_name:$("rgParent").value.trim()||null, dob:$("rgDob").value||null,
+    gender:$("rgGender").value||null, blood_group:$("rgBlood").value.trim()||null,
+    marital_status:$("rgMarital").value||null,
+    aadhaar_last4:($("rgAadhaar").value.trim().slice(-4))||null,
+    pan:$("rgPan").value.trim().toUpperCase()||null, driving_licence:$("rgDl").value.trim()||null,
+    alt_phone:$("rgAlt").value.trim()||null, email:$("rgEmail").value.trim()||null,
+    permanent_address:$("rgPermAddr").value.trim()||null,
+    department:$("rgDept").value.trim()||null, designation:$("rgDesig").value.trim()||null,
+    employment_type:$("rgType").value||null, working_shift:$("rgShift").value.trim()||null,
+    seniority:$("rgSenior").value||null, emergency_relation:$("rgEmRel").value.trim()||null,
+    bank_name:$("rgBank").value.trim()||null, bank_account:$("rgAcct").value.trim()||null,
+    bank_ifsc:$("rgIfsc").value.trim().toUpperCase()||null,
+    docs, declared_on: $("rgDeclared").checked ? (s.declared_on||new Date().toISOString().slice(0,10)) : null
+  };
+  const { error } = await sb.from("staff_members").update(upd).eq("id", regId);
+  $("rgSave").disabled=false;
+  if(error) return toast(error.message+" (run the Task 8 SQL?)");
+  toast("Registration saved ✓ "+uid);
+  await loadStaff(); openEmp(regId);
+});
+$("rgPrint").addEventListener("click", ()=>{
+  const s=STAFF.find(x=>x.id===regId); if(!s) return;
+  const v=x=>x||"____________________";
+  const docs=s.docs||{};
+  const dk=k=>docs[k]?"☑":"☐";
+  const w=window.open("","_blank","width=800,height=1000");
+  w.document.write(`<!DOCTYPE html><html><head><title>ProFix Registration — ${s.name||""}</title><style>
+  body{font-family:Arial,sans-serif;color:#1F2430;margin:26px;font-size:13px}
+  .hdr{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #E11D2A;padding-bottom:8px}
+  .logo{font-size:26px;font-weight:900;color:#E11D2A}.logo small{display:block;font-size:10px;color:#333;font-weight:600}
+  h1{text-align:center;color:#E11D2A;font-size:19px;margin:14px 0}
+  .sec{border:1px solid #ccc;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+  .sec h3{background:#E11D2A;color:#fff;display:inline-block;padding:2px 10px;border-radius:4px;font-size:12px;margin:0 0 8px}
+  .r{margin:5px 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+  .sig{display:flex;justify-content:space-between;margin-top:26px}
+  @media print{.np{display:none}}
+  </style></head><body>
+  <div class="hdr"><div class="logo">PR⚙FIX<small>Hi-Tech Mobile Solutions · Smartphone Service Centre</small></div>
+  <div style="text-align:right"><b>COIMBATORE</b><br>GST No : 33BCQPV3641B2ZK</div></div>
+  <h1>— EMPLOYEE REGISTRATION FORM —</h1>
+  <div class="two"><div class="r"><b>Employee ID:</b> ${v(s.employee_uid)}</div><div class="r"><b>Date of Joining:</b> ${v(s.joining_date)}</div></div>
+  <div class="two">
+  <div class="sec"><h3>1. PERSONAL DETAILS</h3>
+    <div class="r"><b>Full Name:</b> ${v(s.name)}</div>
+    <div class="r"><b>Father's/Mother's Name:</b> ${v(s.father_mother_name)}</div>
+    <div class="r"><b>DOB:</b> ${v(s.dob)} &nbsp; <b>Gender:</b> ${v(s.gender)}</div>
+    <div class="r"><b>Blood Group:</b> ${v(s.blood_group)} &nbsp; <b>Marital:</b> ${v(s.marital_status)}</div>
+    <div class="r"><b>Aadhaar (last 4):</b> XXXX-XXXX-${v(s.aadhaar_last4)}</div>
+    <div class="r"><b>PAN:</b> ${v(s.pan)}</div>
+    <div class="r"><b>Driving Licence:</b> ${v(s.driving_licence)}</div></div>
+  <div class="sec"><h3>2. CONTACT DETAILS</h3>
+    <div class="r"><b>Mobile:</b> ${v(s.phone)}</div>
+    <div class="r"><b>Alternate:</b> ${v(s.alt_phone)}</div>
+    <div class="r"><b>Email:</b> ${v(s.email)}</div>
+    <div class="r"><b>Current Address:</b> ${v(s.address)}</div>
+    <div class="r"><b>Permanent Address:</b> ${v(s.permanent_address)}</div></div>
+  <div class="sec"><h3>3. EMPLOYMENT DETAILS</h3>
+    <div class="r"><b>Department:</b> ${v(s.department)}</div>
+    <div class="r"><b>Designation:</b> ${v(s.designation)} &nbsp; <b>Seniority:</b> ${v(s.seniority)}</div>
+    <div class="r"><b>Type:</b> ${v(s.employment_type)} &nbsp; <b>Shift:</b> ${v(s.working_shift)}</div>
+    <div class="r"><b>Salary:</b> ₹ ${v(s.monthly_salary)} / month &nbsp; <b>Daily wage:</b> ₹ ${v(s.daily_wage)}</div>
+    <div class="r"><b>Works in:</b> ${v(s.works_in)}</div></div>
+  <div class="sec"><h3>4. EMERGENCY CONTACT</h3>
+    <div class="r"><b>Name:</b> ${v(s.emergency_name)}</div>
+    <div class="r"><b>Relationship:</b> ${v(s.emergency_relation)}</div>
+    <div class="r"><b>Mobile:</b> ${v(s.emergency_phone)}</div></div>
+  <div class="sec"><h3>5. BANK DETAILS</h3>
+    <div class="r"><b>Bank:</b> ${v(s.bank_name)}</div>
+    <div class="r"><b>Account No:</b> ${v(s.bank_account)}</div>
+    <div class="r"><b>IFSC:</b> ${v(s.bank_ifsc)}</div></div>
+  <div class="sec"><h3>6. DOCUMENTS SUBMITTED</h3>
+    <div class="r">${dk("aadhaar")} Aadhaar copy &nbsp; ${dk("pan")} PAN copy &nbsp; ${dk("photos")} Photos (2)</div>
+    <div class="r">${dk("edu")} Educational &nbsp; ${dk("exp")} Experience &nbsp; ${dk("passbook")} Passbook</div>
+    <div class="r">${dk("police")} Police verification &nbsp; ${dk("other")} Other</div></div>
+  </div>
+  <div class="sec"><h3>7. DECLARATION</h3>
+    I hereby declare that all the information provided above is true and correct to the best of my knowledge. I agree to abide by the rules and regulations of the company.
+    <div class="sig"><div><b>Employee Signature:</b> ______________________</div><div><b>Date:</b> ${v(s.declared_on)}</div></div>
+    <div class="sig"><div><b>Verified By:</b> ______________________</div><div><b>HR/Authorized Signature:</b> ______________________</div></div>
+  </div>
+  <button class="np" onclick="print()" style="padding:10px 22px;font-weight:bold">Print</button>
+  </body></html>`);
+  w.document.close();
+});
+
+async function loadEmpAdv(id){
+  const from=new Date(); from.setDate(1); from.setHours(0,0,0,0);
+  const { data, error } = await sb.from("staff_advances").select("*").eq("staff_id",id).gte("created_at",from.toISOString()).order("created_at",{ascending:false});
+  if(error){ $("edAdvList").innerHTML='<div class="mut">'+error.message+'</div>'; return; }
+  const rows=data||[]; const tot=rows.reduce((a,r)=>a+r.amount,0);
+  $("edAdvList").innerHTML=(rows.length?rows.map(r=>'<div class="row"><span class="mut">'+fday(r.created_at)+(r.reason?' · '+r.reason:'')+'</span><b>'+inr(r.amount)+'</b></div>').join(""):'<div class="mut">None this month.</div>')
+    +(rows.length?'<div class="row"><b>Total to deduct</b><b>'+inr(tot)+'</b></div>':'');
+}
+
+// ---------- settings ----------
+$("useHere").addEventListener("click", ()=>{
+  if(!navigator.geolocation) return toast("Location not available on this device");
+  $("useHere").disabled=true;
+  navigator.geolocation.getCurrentPosition(p=>{
+    $("sLat").value=p.coords.latitude.toFixed(6); $("sLng").value=p.coords.longitude.toFixed(6);
+    $("useHere").disabled=false; toast("Location captured — now Save");
+  }, ()=>{ $("useHere").disabled=false; toast("Could not get location — allow permission and try again"); }, {timeout:8000});
+});
+$("saveSet").addEventListener("click", async ()=>{
+  const lat=parseFloat($("sLat").value), lng=parseFloat($("sLng").value), rad=parseInt($("sRad").value)||150;
+  const { error } = await sb.from("staff_settings").update({ shop_lat:isNaN(lat)?null:lat, shop_lng:isNaN(lng)?null:lng, radius_m:rad }).eq("id",1);
+  if(error) return toast(error.message);
+  SET = { shop_lat:lat, shop_lng:lng, radius_m:rad };
+  toast("Settings saved ✓"); loadAtt(); loadLive();
+});
+
+// ---------- nav / misc ----------
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  ["Live","Staff","Att","Inc","Roster","Set"].forEach(p=>$("p"+p).classList.toggle("hide", p!==b.dataset.p));
+  if(b.dataset.p==="Live") loadLive();
+  if(b.dataset.p==="Att") loadAtt();
+  if(b.dataset.p==="Inc") loadInc();
+  if(b.dataset.p==="Roster"){ loadRoster(); loadLeaveReqs(); }
+}));
+$("aPrev").addEventListener("click",()=>{ aM--; if(aM<1){aM=12;aY--;} loadAtt(); });
+$("aNext").addEventListener("click",()=>{ aM++; if(aM>12){aM=1;aY++;} loadAtt(); });
+$("aStaff").addEventListener("change", loadAtt);
+$("rPrev").addEventListener("click",()=>{ rDay.setDate(rDay.getDate()-1); loadRoster(); });
+$("rNext").addEventListener("click",()=>{ rDay.setDate(rDay.getDate()+1); loadRoster(); });
+$("loginBtn").addEventListener("click", login);
+$("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+$("outBtn").addEventListener("click", async ()=>{ await sb.auth.signOut(); location.reload(); });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && !$("vApp").classList.contains("hide")) loadLive(); });
+setInterval(()=>{ if(!document.hidden && !$("vApp").classList.contains("hide") && !$("pLive").classList.contains("hide")) loadLive(); }, 60000);
+
+// boot: reuse existing session if present
+sb.auth.getSession().then(({data})=>{ if(data && data.session) boot(); });
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

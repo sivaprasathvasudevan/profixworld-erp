@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ProFix — Photo & Price</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E11D2A;--orange:#FF6A2B;--ink:#171821;--muted:#6B7280;--line:#E6E8EC;--bg:#F6F7F9;--green:#0F9D58;--grad:linear-gradient(135deg,#FF6A2B,#E11D2A)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px calc(28px + env(safe-area-inset-bottom))}
+/* header */
+.top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:12px 14px}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;flex:0 0 auto}
+.mark svg{width:19px;height:19px;fill:#fff}
+.brand{font-weight:800;font-size:1.05rem}.brand b{color:var(--red)}
+.brand .sub{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin-top:-2px}
+.top-sp{flex:1}
+.lo{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:9px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer}
+/* login */
+.login{max-width:360px;margin:16vh auto 0;padding:0 18px;text-align:center}
+.login .mark{width:52px;height:52px;border-radius:15px;margin:0 auto 14px}
+.login .mark svg{width:28px;height:28px}
+.login h1{font-size:1.35rem;margin:.2rem 0 .1rem}.login p{color:var(--muted);font-size:.9rem;margin:0 0 1.2rem}
+.fld{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font-family:inherit;font-size:1rem;margin-bottom:.7rem;background:#fff}
+.btn{width:100%;border:none;border-radius:12px;padding:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;background:var(--grad);color:#fff}
+.btn:disabled{opacity:.6}
+.err{color:var(--red);font-size:.85rem;margin-top:.5rem;min-height:1em}
+/* search + count */
+.tools{padding:14px 0 6px}
+.search{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:1rem;background:#fff}
+.count{font-size:.8rem;color:var(--muted);margin:.5rem 2px}
+/* product card */
+.pcard{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px;align-items:center}
+.pthumb{width:74px;height:74px;flex:0 0 auto;border-radius:12px;background:#F0F1F4 center/cover no-repeat;position:relative;display:grid;place-items:center;color:#B9BEC7;font-size:1.5rem}
+.pthumb:not(.has)::after{content:"📷"}
+.pmid{flex:1;min-width:0}
+.pname{font-weight:700;font-size:.95rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbrand{font-size:.76rem;color:var(--muted);margin-bottom:.5rem}
+.prow{display:flex;align-items:center;gap:6px}
+.rs{font-weight:800;color:var(--ink)}
+.pprice{width:90px;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-family:inherit;font-size:.95rem;font-weight:700}
+.psave{border:1.5px solid var(--red);color:var(--red);background:#fff;border-radius:10px;padding:8px 14px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer}
+.pstatus{font-size:.74rem;margin-top:.4rem;min-height:1em;color:var(--muted)}
+.pstatus.ok{color:var(--green);font-weight:700}.pstatus.bad{color:var(--red);font-weight:700}
+.pcam{flex:0 0 auto;width:56px;height:56px;border-radius:14px;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:1.5rem;cursor:pointer;box-shadow:0 6px 16px -4px rgba(225,29,42,.4)}
+.pcam:active{transform:scale(.94)}
+.empty{text-align:center;color:var(--muted);padding:2rem 0}
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:24px;font-size:.85rem;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.hide{display:none!important}
+.addnew{width:100%;border:none;background:var(--grad);color:#fff;border-radius:12px;padding:13px;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;margin-bottom:.7rem}
+.scrim{position:fixed;inset:0;background:rgba(20,20,40,.45);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:#fff;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));transform:translateY(110%);transition:.28s cubic-bezier(.2,.9,.3,1.2);max-height:92vh;overflow:auto;max-width:640px;margin:0 auto}
+.sheet.open{transform:none}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sheet-h b{font-size:1.1rem}
+.x{border:none;background:var(--bg);width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer}
+.l{display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin:.55rem 0 .3rem}
+.fld2{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;font-family:inherit;font-size:1rem;background:#fff}
+select.fld2{appearance:none}
+.two{display:flex;gap:10px}.two>div{flex:1}
+.addcam{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--red);border-radius:14px;padding:12px;cursor:pointer;margin-bottom:.3rem;color:var(--red);font-weight:700}
+.addthumb{width:56px;height:56px;border-radius:10px;background:#F0F1F4 center/cover no-repeat;flex:0 0 auto}
+.sheet .btn{margin-top:1.1rem}
+</style>
+</head>
+<body>
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="mark"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></div>
+  <h1>Photo &amp; Price</h1>
+  <p>Sign in to add product photos and prices</p>
+  <input class="fld" id="email" type="email" placeholder="you@profix.com" autocomplete="username">
+  <input class="fld" id="pass" type="password" placeholder="password" autocomplete="current-password">
+  <button class="btn" id="loginBtn" onclick="doLogin()">Sign in</button>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hide">
+  <header class="top"><div class="top-in">
+    <span class="mark"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg></span>
+    <span class="brand">Pro<b>Fix</b><span class="sub">Photo &amp; Price</span></span>
+    <span class="top-sp"></span>
+    <button class="lo" onclick="doLogout()">Sign out</button>
+  </div></header>
+  <div class="wrap">
+    <div class="tools">
+      <button class="addnew" onclick="openAdd()">＋ Add new product</button>
+      <input class="search" id="search" placeholder="Search a product…" oninput="render()">
+      <div class="count" id="count"></div>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<!-- ADD PRODUCT -->
+<div id="addScrim" class="scrim" onclick="closeAdd()"></div>
+<div id="addSheet" class="sheet">
+  <div class="sheet-h"><b>Add new product</b><button class="x" onclick="closeAdd()">✕</button></div>
+  <label class="addcam"><div class="addthumb" id="addThumb"></div><span id="addCamText">📷 Take photo</span><input type="file" accept="image/*" capture="environment" id="addFile" onchange="onAddPhoto(this)" hidden></label>
+  <label class="l">Product name</label><input class="fld2" id="aName" placeholder="e.g. Fast Charger 25W">
+  <label class="l">Brand (optional)</label><input class="fld2" id="aBrand" placeholder="e.g. boAt">
+  <label class="l">Category</label><select class="fld2" id="aCat" onchange="onCatChange()"></select>
+  <div id="aNewCatWrap" class="hide"><label class="l">New category name</label><input class="fld2" id="aNewCat" placeholder="e.g. Power Banks"></div>
+  <div class="two"><div><label class="l">Price ₹</label><input class="fld2" id="aPrice" type="number" inputmode="numeric" placeholder="0"></div><div><label class="l">Stock</label><input class="fld2" id="aStock" type="number" inputmode="numeric" value="10"></div></div>
+  <button class="btn" id="addBtn" onclick="addProduct()">Add product</button>
+  <div class="err" id="addErr"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://toxwbjofyglbyjanxmzv.supabase.co";
+const SUPABASE_KEY="sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const BUCKET="product-photos";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const BOOT=Date.now();
+let PRODUCTS=[], CATS=[];
+
+let toastT;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); }
+function setStatus(card,msg,ok,bad){ const el=card.querySelector(".pstatus"); if(!el) return; el.textContent=msg; el.className="pstatus"+(ok?" ok":bad?" bad":""); }
+
+// ---- auth ----
+async function doLogin(){
+  const email=($("email").value||"").trim(), pass=$("pass").value||"";
+  if(!email||!pass){ $("loginErr").textContent="Enter email and password"; return; }
+  $("loginBtn").disabled=true; $("loginBtn").textContent="Signing in…"; $("loginErr").textContent="";
+  const {error}=await sb.auth.signInWithPassword({email,password:pass});
+  $("loginBtn").disabled=false; $("loginBtn").textContent="Sign in";
+  if(error){ $("loginErr").textContent="Wrong email or password"; return; }
+  showApp();
+}
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+function showApp(){ $("login").classList.add("hide"); $("app").classList.remove("hide"); load(); }
+
+// ---- data ----
+async function load(){
+  const [pr,ct]=await Promise.all([
+    sb.from("store_products").select("id,name,brand,price,stock,image_url").order("name"),
+    sb.from("store_categories").select("id,name").order("name")
+  ]);
+  if(pr.error){ toast("Couldn't load products"); return; }
+  PRODUCTS=pr.data||[]; CATS=ct.data||[]; render();
+}
+function render(){
+  const q=($("search").value||"").trim().toLowerCase();
+  const list=PRODUCTS.filter(p=>!q || (p.name||"").toLowerCase().includes(q) || (p.brand||"").toLowerCase().includes(q));
+  $("count").textContent=list.length+" of "+PRODUCTS.length+" products";
+  if(!list.length){ $("list").innerHTML='<div class="empty">No products match.</div>'; return; }
+  $("list").innerHTML=list.map(p=>{
+    const img=p.image_url?`background-image:url('${esc(p.image_url)}?t=${BOOT}')`:"";
+    return `<div class="pcard" data-id="${p.id}">
+      <div class="pthumb ${p.image_url?'has':''}" style="${img}"></div>
+      <div class="pmid">
+        <div class="pname">${esc(p.name)}</div>
+        <div class="pbrand">${esc(p.brand||"—")}</div>
+        <div class="prow"><span class="rs">₹</span><input class="pprice" type="number" inputmode="numeric" value="${p.price==null?"":p.price}" placeholder="price"><button class="psave" onclick="savePrice('${p.id}',this)">Save</button></div>
+        <div class="pstatus"></div>
+      </div>
+      <label class="pcam" title="Take photo">📷<input type="file" accept="image/*" capture="environment" onchange="onPhoto('${p.id}',this)" hidden></label>
+    </div>`;
+  }).join("");
+}
+
+// ---- save price ----
+async function savePrice(id,btn){
+  const card=btn.closest(".pcard"); const input=card.querySelector(".pprice");
+  const v=parseInt(input.value,10);
+  if(isNaN(v)||v<0){ setStatus(card,"Enter a valid price",false,true); return; }
+  setStatus(card,"Saving…");
+  const {error}=await sb.from("store_products").update({price:v}).eq("id",id);
+  if(error){ setStatus(card,"Failed — check your login",false,true); return; }
+  setStatus(card,"Price saved ✓",true);
+}
+
+// ---- resize/compress a phone photo before upload ----
+function compress(file,maxW=1100,q=0.82){
+  return new Promise((res,rej)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{ let w=img.width,h=img.height; if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+      const c=document.createElement("canvas"); c.width=w; c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      c.toBlob(b=>{ URL.revokeObjectURL(url); b?res(b):rej(new Error("compress")); },"image/jpeg",q); };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error("load")); };
+    img.src=url;
+  });
+}
+
+// ---- take/upload photo ----
+async function onPhoto(id,input){
+  const file=input.files&&input.files[0]; input.value="";
+  if(!file) return;
+  const card=document.querySelector(`.pcard[data-id="${id}"]`);
+  setStatus(card,"Uploading photo…");
+  try{
+    const blob=await compress(file);
+    const path=id+".jpg";
+    const up=await sb.storage.from(BUCKET).upload(path,blob,{upsert:true,contentType:"image/jpeg"});
+    if(up.error) throw up.error;
+    const pub=sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    const {error}=await sb.from("store_products").update({image_url:pub}).eq("id",id);
+    if(error) throw error;
+    const thumb=card.querySelector(".pthumb");
+    thumb.style.backgroundImage=`url('${pub}?t=${Date.now()}')`; thumb.classList.add("has");
+    setStatus(card,"Photo saved ✓",true); toast("Photo added ✓");
+  }catch(err){ setStatus(card,"Upload failed — try again",false,true); }
+}
+
+// ---- add new product ----
+let addPhotoFile=null;
+function openAdd(){
+  addPhotoFile=null;
+  $("aName").value=""; $("aBrand").value=""; $("aPrice").value=""; $("aStock").value="10"; $("aNewCat").value="";
+  $("addThumb").style.backgroundImage=""; $("addCamText").textContent="📷 Take photo";
+  $("aNewCatWrap").classList.add("hide"); $("addErr").textContent="";
+  $("aCat").innerHTML = CATS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("") + `<option value="__new">＋ New category…</option>`;
+  $("addScrim").classList.add("open"); $("addSheet").classList.add("open");
+}
+function closeAdd(){ $("addScrim").classList.remove("open"); $("addSheet").classList.remove("open"); }
+function onCatChange(){ $("aNewCatWrap").classList.toggle("hide", $("aCat").value!=="__new"); }
+function onAddPhoto(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  addPhotoFile=f;
+  $("addThumb").style.backgroundImage=`url('${URL.createObjectURL(f)}')`;
+  $("addCamText").textContent="Change photo";
+}
+async function addProduct(){
+  const name=($("aName").value||"").trim(), price=parseInt($("aPrice").value,10), err=$("addErr"), btn=$("addBtn");
+  if(!name){ err.textContent="Enter a product name"; return; }
+  if(isNaN(price)||price<0){ err.textContent="Enter a valid price"; return; }
+  btn.disabled=true; btn.textContent="Adding…"; err.textContent="";
+  try{
+    let catId=$("aCat").value;
+    if(catId==="__new"){
+      const cn=($("aNewCat").value||"").trim();
+      if(!cn){ err.textContent="Enter the new category name"; btn.disabled=false; btn.textContent="Add product"; return; }
+      const ins=await sb.from("store_categories").insert({name:cn}).select("id").single();
+      if(ins.error) throw new Error("cat"); catId=ins.data.id;
+    }
+    const oid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():null;
+    let imageUrl=null;
+    if(addPhotoFile && oid){
+      const blob=await compress(addPhotoFile);
+      const up=await sb.storage.from(BUCKET).upload(oid+".jpg",blob,{upsert:true,contentType:"image/jpeg"});
+      if(!up.error) imageUrl=sb.storage.from(BUCKET).getPublicUrl(oid+".jpg").data.publicUrl;
+    }
+    const stock=parseInt($("aStock").value,10);
+    const row={...(oid?{id:oid}:{}),name,brand:($("aBrand").value||"").trim()||null,category_id:catId||null,price,stock:isNaN(stock)?10:stock,image_url:imageUrl};
+    const {error}=await sb.from("store_products").insert(row);
+    if(error) throw error;
+    closeAdd(); toast("Product added ✓"); load();
+  }catch(e){
+    err.textContent = (e&&e.message==="cat") ? "Couldn't create the category — add it in Manage, or pick an existing one" : "Couldn't add — check your login";
+    btn.disabled=false; btn.textContent="Add product";
+  }
+}
+
+// ---- boot: skip login if already signed in ----
+(async()=>{ try{ const {data}=await sb.auth.getSession(); if(data&&data.session) showApp(); }catch(_){}
+  $("pass").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); }); })();
+</script>
+</body>
+</html>

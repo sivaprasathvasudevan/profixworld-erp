@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#B45309">
+<link rel="manifest" href="/inventoryapp.webmanifest">
+<link rel="apple-touch-icon" href="/inventoryapp-192.png">
+<title>ProFix Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#F59E0B,#B45309);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--line:#E7E9EE;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:24px}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.top .brand{font-weight:800;font-size:18px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input,select{min-height:44px;font:inherit;font-size:14px;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:0;border-radius:12px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff;padding:0 16px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:36px;font-size:13px;padding:0 12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(20,25,40,.07)}
+.tile .n{font-size:22px;font-weight:800}
+.tile .l{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center;cursor:default}
+.row:last-child{border:0}
+.pill{font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.pill.in{background:#E6F6EF;color:#0E9F6E}.pill.out{background:#FDEBE6;color:#E11D2A}
+.pill.adj{background:#FEF3E2;color:#B45309}.pill.zero{background:#EDEFF5;color:#5A6272}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters>*{flex:1;min-width:130px}
+.hide{display:none!important}
+.skel{height:48px;border-radius:12px;background:linear-gradient(90deg,#EDEFF3 25%,#F7F8FA 50%,#EDEFF3 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--mut);padding:22px 10px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #F59E0B;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9">Inventory</span></div>
+  <button id="installBtn">📲 Install</button>
+  <button id="outBtn" class="hide">Log out</button>
+</header>
+
+<main class="wrap">
+  <section id="vLogin">
+    <div class="card">
+      <h2>Owner sign in</h2>
+      <p class="mut">Inventory is owner-only (Venky · Mani · Siva).</p>
+      <label for="em">Email</label><input id="em" type="email" style="width:100%" autocomplete="username">
+      <label for="pw">Password</label><input id="pw" type="password" style="width:100%" autocomplete="current-password">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn" style="width:100%">Sign in</button>
+    </div>
+  </section>
+
+  <section id="vApp" class="hide">
+    <div class="tiles" id="tiles"></div>
+
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <h2 style="margin:0">⚠ Low stock</h2>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="mut">at or below</span>
+          <input id="lowN" inputmode="numeric" value="3" style="width:64px;min-height:36px">
+        </div>
+      </div>
+      <div id="lowList"><div class="skel"></div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <h2 style="margin:0">📒 Stock movement diary</h2>
+        <button class="btn ghost sm" id="csvBtn">⬇ Export CSV</button>
+      </div>
+      <div class="filters">
+        <input id="fSearch" placeholder="Search product…">
+        <select id="fReason">
+          <option value="">All reasons</option>
+          <option value="po_received">PO received (+)</option>
+          <option value="sale">Sold to customer (−)</option>
+          <option value="sale_reversal">Sale reversal (+)</option>
+          <option value="sl_dispatched">Sold to partner (−)</option>
+          <option value="adjust">Manual adjust</option>
+        </select>
+        <select id="fDays">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+      </div>
+      <div id="sumStrip" class="mut" style="margin-bottom:6px"></div>
+      <div id="moveList"><div class="skel"></div></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY = "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+const toast = m => { const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2600); };
+const inr = n => "₹"+Number(n||0).toLocaleString("en-IN");
+const fdt = d => new Date(d).toLocaleString([], {day:"numeric",month:"short",hour:"numeric",minute:"2-digit"});
+const REASON = {po_received:["PO received","in"], sale:["Sold (store)","out"], sale_reversal:["Sale reversal","in"], sl_dispatched:["Sold to partner","out"], adjust:["Manual adjust","adj"]};
+
+let PRODUCTS=[], MOVES=[];
+
+async function login(){
+  $("loginBtn").disabled=true;
+  const { error } = await sb.auth.signInWithPassword({ email:$("em").value.trim(), password:$("pw").value });
+  $("loginBtn").disabled=false;
+  if(error) return toast(error.message);
+  boot();
+}
+async function boot(){
+  // owner gate: stock_moves is owner-only; a non-owner gets an empty/denied read
+  const probe = await sb.from("stock_moves").select("id").limit(1);
+  if(probe.error){ toast("Owner only — this login doesn't have inventory access"); await sb.auth.signOut(); return; }
+  $("vLogin").classList.add("hide"); $("vApp").classList.remove("hide"); $("outBtn").classList.remove("hide");
+  await loadProducts(); loadMoves();
+}
+
+async function loadProducts(){
+  const { data, error } = await sb.from("store_products").select("id,name,brand,price,stock,partner_id").order("name");
+  if(error) return toast(error.message);
+  PRODUCTS = data||[];
+  const totalUnits = PRODUCTS.reduce((a,p)=>a+(p.stock||0),0);
+  const value = PRODUCTS.reduce((a,p)=>a+(p.stock||0)*(p.price||0),0);
+  const zero = PRODUCTS.filter(p=>!p.stock).length;
+  const partnerSkus = PRODUCTS.filter(p=>p.partner_id).length;
+  $("tiles").innerHTML =
+    '<div class="tile"><div class="n">'+PRODUCTS.length+'</div><div class="l">Products</div></div>'+
+    '<div class="tile"><div class="n">'+totalUnits.toLocaleString("en-IN")+'</div><div class="l">Units in stock</div></div>'+
+    '<div class="tile"><div class="n">'+inr(value)+'</div><div class="l">Stock value (at price)</div></div>'+
+    '<div class="tile"><div class="n">'+zero+'</div><div class="l">Out of stock</div></div>'+
+    '<div class="tile"><div class="n">'+partnerSkus+'</div><div class="l">Partner products</div></div>';
+  renderLow();
+}
+function renderLow(){
+  const n = Number($("lowN").value)||3;
+  const rows = PRODUCTS.filter(p=>(p.stock||0) <= n).sort((a,b)=>(a.stock||0)-(b.stock||0)).slice(0,60);
+  $("lowList").innerHTML = rows.length ? rows.map(p=>
+    '<div class="row"><div><b>'+p.name+'</b><div class="mut">'+(p.brand||'')+' · '+inr(p.price)+'</div></div>'+
+    '<span class="pill '+((p.stock||0)===0?'out':'zero')+'">'+(p.stock||0)+' left</span></div>'
+  ).join("") : '<div class="empty">Nothing at or below '+n+'. 🎉</div>';
+}
+$("lowN").addEventListener("input", renderLow);
+
+async function loadMoves(){
+  $("moveList").innerHTML = '<div class="skel"></div><div class="skel"></div>';
+  const days = Number($("fDays").value)||30;
+  let q = sb.from("stock_moves").select("*")
+    .gte("created_at", new Date(Date.now()-days*864e5).toISOString())
+    .order("created_at",{ascending:false}).limit(400);
+  const r = $("fReason").value; if(r) q = q.eq("reason", r);
+  const { data, error } = await q;
+  if(error) return toast(error.message);
+  MOVES = data||[]; renderMoves();
+}
+function renderMoves(){
+  const byId = id => PRODUCTS.find(p=>p.id===id) || {name:"(deleted product)"};
+  const s = $("fSearch").value.trim().toLowerCase();
+  const rows = MOVES.filter(m=>!s || byId(m.product_id).name.toLowerCase().includes(s));
+  let tin=0,tout=0;
+  rows.forEach(m=>{ if(m.qty>0) tin+=m.qty; else tout+=-m.qty; });
+  $("sumStrip").textContent = rows.length+" movements · IN +"+tin.toLocaleString("en-IN")+" units · OUT −"+tout.toLocaleString("en-IN")+" units";
+  $("moveList").innerHTML = rows.length ? rows.slice(0,200).map(m=>{
+    const [label,cls] = REASON[m.reason]||[m.reason,"zero"];
+    return '<div class="row"><div><b>'+byId(m.product_id).name+'</b><div class="mut">'+fdt(m.created_at)+' · '+label+'</div></div>'+
+      '<span class="pill '+(cls==="in"?"in":cls==="out"?"out":"adj")+'">'+(m.qty>0?"+":"")+m.qty+'</span></div>';
+  }).join("") : '<div class="empty">No movements match. The diary fills as orders deliver, POs arrive, and stock is edited.</div>';
+}
+["fSearch","fReason","fDays"].forEach(id=>$(id).addEventListener("input", ()=>{ id==="fSearch" ? renderMoves() : loadMoves(); }));
+
+$("csvBtn").addEventListener("click", ()=>{
+  const byId = id => (PRODUCTS.find(p=>p.id===id)||{}).name || "";
+  const lines = [["date","product","reason","qty"].join(",")]
+    .concat(MOVES.map(m=>[new Date(m.created_at).toISOString(), '"'+byId(m.product_id).replace(/"/g,'""')+'"', m.reason, m.qty].join(",")));
+  const blob = new Blob([lines.join("\n")], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "profix-stock-moves.csv"; a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$("loginBtn").addEventListener("click", login);
+$("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+$("outBtn").addEventListener("click", async ()=>{ await sb.auth.signOut(); location.reload(); });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && !$("vApp").classList.contains("hide")){ loadProducts(); loadMoves(); } });
+sb.auth.getSession().then(({data})=>{ if(data&&data.session) boot(); });
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

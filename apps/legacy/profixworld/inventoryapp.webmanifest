@@ -1,0 +1,28 @@
+{
+ "name": "ProFix Inventory",
+ "short_name": "Inventory",
+ "start_url": "/inventory.html?src=pwa",
+ "scope": "/inventory.html",
+ "display": "standalone",
+ "background_color": "#F6F7F9",
+ "theme_color": "#F59E0B",
+ "icons": [
+  {
+   "src": "/inventoryapp-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "/inventoryapp-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ],
+ "id": "/inventory.html?v=2026-07",
+ "categories": [
+  "business",
+  "productivity"
+ ]
+}

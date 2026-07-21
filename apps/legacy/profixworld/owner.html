@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E11D2A">
+<link rel="manifest" href="/owner.webmanifest">
+<link rel="apple-touch-icon" href="/owner-192.png">
+<title>ProFix Owner</title>
+<script src="/profix-scan.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#FF6A2B,#E11D2A);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--line:#E7E9EE;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:24px}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.top .brand{font-weight:800;font-size:18px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input{width:100%;min-height:48px;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff;width:100%}
+.btn:disabled{opacity:.55}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.tile{background:#fff;border-radius:14px;padding:13px;box-shadow:0 1px 3px rgba(20,25,40,.07);text-decoration:none;color:var(--ink)}
+.tile .n{font-size:21px;font-weight:800}
+.tile .l{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.tile .warn{color:#B45309}.tile .bad{color:#E11D2A}.tile .ok{color:#0E9F6E}
+.apps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.app{background:#fff;border-radius:16px;padding:14px 8px;box-shadow:0 1px 3px rgba(20,25,40,.07);text-align:center;text-decoration:none;color:var(--ink);position:relative}
+.app .ic{width:44px;height:44px;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
+.app b{font-size:12.5px;display:block}
+.app .badge{position:absolute;top:8px;right:8px;background:#E11D2A;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.hide{display:none!important}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6A2B;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9">Owner</span></div>
+  <button id="scanBtn">📷 Scan</button>
+    <button id="installBtn">📲</button>
+    <button id="outBtn" class="hide">Log out</button>
+</header>
+
+<main class="wrap">
+  <section id="vLogin">
+    <div class="card">
+      <h2>Owner sign in</h2>
+      <p class="mut">One app for the whole company — Venky · Mani · Siva.</p>
+      <label for="em">Email</label><input id="em" type="email" autocomplete="username">
+      <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn">Sign in</button>
+    </div>
+  </section>
+
+  <section id="vApp" class="hide">
+    <div class="mut" id="hello" style="margin:0 2px 10px"></div>
+    <div class="mut" style="font-weight:800;letter-spacing:.5px;font-size:11px;margin:2px 2px 6px">🌐 ONLINE — profixworld.com</div>
+    <div class="tiles" id="tiles"></div>
+    <div class="mut" style="font-weight:800;letter-spacing:.5px;font-size:11px;margin:14px 2px 6px">🏬 OFFLINE — the 3 shops</div>
+    <div class="tiles" id="tilesOff"></div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Open an app</h2>
+      <div class="apps">
+        <a class="app" href="/admin.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#FF6A2B,#E11D2A)">🧰</div><b>Admin</b><span class="badge hide" id="bIssues"></span></a>
+        <a class="app" href="/crm" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#F43F5E,#9F1239)">🔧</div><b>Repair Desk</b></a>
+        <a class="app" href="/hr.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#3B82F6,#1E40AF)">👥</div><b>HR</b></a>
+        <a class="app" href="/trade.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#334155,#0B0E14)">🧾</div><b>Trade</b><span class="badge hide" id="bAppr"></span></a>
+        <a class="app" href="/inventory.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#F59E0B,#B45309)">📦</div><b>Inventory</b><span class="badge hide" id="bLow"></span></a>
+        <a class="app" href="/reports.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#14B8A6,#0F766E)">📊</div><b>Reports</b></a>
+        <a class="app" href="/" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#FB923C,#EA580C)">🛒</div><b>Store</b></a>
+        <a class="app" href="/staff.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#22C55E,#046C4E)">🕐</div><b>Punch Clock</b></a>
+        <a class="app" href="/partner.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#8B5CF6,#5B21B6)">🤝</div><b>Partner</b></a>
+        <a class="app" href="/me.html" target="_blank"><div class="ic" style="background:linear-gradient(135deg,#06B6D4,#0E7490)">🧑‍💼</div><b>Employee</b></a>
+      </div>
+      <p class="mut" style="margin-top:10px">Same login everywhere. Install this page as an app (Chrome ⋮ → Install) — one icon for the whole company.</p>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY = "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+const toast = m => { const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2600); };
+const inr = n => "₹"+Number(n||0).toLocaleString("en-IN");
+
+async function login(){
+  $("loginBtn").disabled=true;
+  const { error } = await sb.auth.signInWithPassword({ email:$("em").value.trim(), password:$("pw").value });
+  $("loginBtn").disabled=false;
+  if(error) return toast(error.message);
+  boot();
+}
+async function boot(){
+  const probe = await sb.from("stock_moves").select("id").limit(1);
+  if(probe.error){ toast("Owner only"); await sb.auth.signOut(); return; }
+  $("vLogin").classList.add("hide"); $("vApp").classList.remove("hide"); $("outBtn").classList.remove("hide");
+  const { data:{ user } } = await sb.auth.getUser();
+  $("hello").textContent = "👋 " + (user && user.email || "");
+  refresh();
+}
+
+async function refresh(){
+  const day = new Date(); day.setHours(0,0,0,0);
+  const iso = day.toISOString();
+  const dayStr = new Date().toISOString().slice(0,10);
+  const [orders, shifts, issues, subs, prods, shops, repairs, roster] = await Promise.all([
+    sb.from("store_orders").select("total,status,created_at").gte("created_at", iso),
+    sb.from("staff_attendance").select("id,clock_out,shop_id").gte("clock_in", iso),
+    sb.from("store_order_issues").select("id").eq("status","open"),
+    sb.from("partner_submissions").select("id").eq("status","pending").is("deleted_at",null),
+    sb.from("store_products").select("stock"),
+    sb.from("profix_shops").select("*").eq("active",true).order("sort"),
+    sb.from("store_repairs").select("id,status,visit_status,assigned_staff_id").gte("created_at", iso),
+    sb.from("staff_roster").select("staff_id,shop_id").eq("day", dayStr)
+  ]);
+  const O = orders.data||[];
+  const delivered = O.filter(o=>o.status==="delivered");
+  const sales = delivered.reduce((a,o)=>a+(o.total||0),0);
+  const onShift = (shifts.data||[]).filter(s=>!s.clock_out).length;
+  const openIssues = (issues.data||[]).length;
+  const pendAppr = (subs.data||[]).length;
+  const lowStock = (prods.data||[]).filter(p=>(p.stock||0)<=3).length;
+
+  $("tiles").innerHTML =
+    '<a class="tile" href="/admin.html" target="_blank"><div class="n">'+O.length+'</div><div class="l">Orders today</div></a>'+
+    '<a class="tile" href="/reports.html" target="_blank"><div class="n ok">'+inr(sales)+'</div><div class="l">Delivered sales</div></a>'+
+    '<a class="tile" href="/hr.html" target="_blank"><div class="n">'+onShift+'</div><div class="l">On shift now</div></a>'+
+    '<a class="tile" href="/admin.html" target="_blank"><div class="n '+(openIssues? 'bad':'')+'">'+openIssues+'</div><div class="l">Open issues</div></a>'+
+    '<a class="tile" href="/trade.html" target="_blank"><div class="n '+(pendAppr? 'warn':'')+'">'+pendAppr+'</div><div class="l">Approvals waiting</div></a>'+
+    '<a class="tile" href="/inventory.html" target="_blank"><div class="n '+(lowStock? 'warn':'')+'">'+lowStock+'</div><div class="l">Low stock (≤3)</div></a>';
+
+  const setBadge=(id,n)=>{ const b=$(id); b.textContent=n; b.classList.toggle("hide", !n); };
+  setBadge("bIssues", openIssues); setBadge("bAppr", pendAppr); setBadge("bLow", lowStock);
+
+  // ---- offline row: per-shop on-shift + rostered, plus visits out ----
+  const SH=(shops.data||[]);
+  const att=(shifts.data||[]);
+  const ros=(roster.data||[]);
+  const R=(repairs.data||[]);
+  const visitsOut = R.filter(r=>r.assigned_staff_id && r.visit_status && r.visit_status!=="collected").length;
+  const repairsToday = R.length;
+  const offTiles = SH.map(s=>{
+    const on = att.filter(a=>!a.clock_out && a.shop_id===s.id).length;
+    const planned = ros.filter(r=>r.shop_id===s.id).length;
+    return '<a class="tile" href="/hr.html" target="_blank"><div class="n '+(planned&&!on?'warn':'')+'">'+on+'<span style="font-size:12px;color:var(--mut)">/'+planned+'</span></div><div class="l">'+s.name+' on shift/planned</div></a>';
+  }).join("");
+  $("tilesOff").innerHTML = offTiles +
+    '<a class="tile" href="/admin.html" target="_blank"><div class="n">'+repairsToday+'</div><div class="l">Repairs booked today</div></a>'+
+    '<a class="tile" href="/hr.html" target="_blank"><div class="n '+(visitsOut?'ok':'')+'">'+visitsOut+'</div><div class="l">🛠 Techs out on visits</div></a>';
+}
+
+document.getElementById("scanBtn").addEventListener("click", ()=>{
+  ProFixScan.open({ title:"Scan a ProFix QR (trade doc, product, order)", onCode:(code)=>{
+    // trade document code like PO-2026-0042 or SL-...
+    let m = code.match(/(PO|SL)-\d{4}-\d{4}/i);
+    if(m){ window.open("/trade.html?q="+encodeURIComponent(m[0].toUpperCase()),"_blank"); return; }
+    // product share link /p/<id> or a raw product id
+    m = code.match(/\/p\/(\d+)/) || code.match(/^(\d{1,7})$/);
+    if(m){ window.open("/#p="+m[1],"_blank"); return; }
+    // a full profixworld URL
+    if(/^https?:\/\//i.test(code)){ window.open(code,"_blank"); return; }
+    alert("Scanned: "+code+"\n(Not a recognised ProFix code)");
+  }});
+});
+$("loginBtn").addEventListener("click", login);
+$("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+$("outBtn").addEventListener("click", async ()=>{ await sb.auth.signOut(); location.reload(); });
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && !$("vApp").classList.contains("hide")) refresh(); });
+setInterval(()=>{ if(!document.hidden && !$("vApp").classList.contains("hide")) refresh(); }, 60000);
+sb.auth.getSession().then(({data})=>{ if(data&&data.session) boot(); });
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

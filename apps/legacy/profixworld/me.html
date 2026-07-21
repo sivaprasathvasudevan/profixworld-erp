@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E7490">
+<link rel="manifest" href="/me.webmanifest">
+<script src="/profix-scan.js"></script>
+<link rel="apple-touch-icon" href="/me-192.png">
+<title>ProFix Me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#06B6D4,#0E7490);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--line:#E7E9EE;--ok:#0E9F6E;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.top .brand{font-weight:800;font-size:18px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:520px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input,select,textarea{width:100%;min-height:48px;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+textarea{min-height:76px}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff;width:100%;padding:0 16px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:38px;font-size:13px;width:auto;padding:0 12px}
+.btn:disabled{opacity:.55}
+.shopBanner{background:linear-gradient(135deg,#0E7490,#155E75);color:#fff;border-radius:var(--r);padding:16px;margin-bottom:14px}
+.shopBanner .l{font-size:12px;font-weight:700;opacity:.85;text-transform:uppercase;letter-spacing:.5px}
+.shopBanner .n{font-size:22px;font-weight:800;margin-top:2px}
+.dialWrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}
+.dial{width:190px;height:190px;border-radius:50%;border:0;cursor:pointer;color:#fff;background:var(--grad);box-shadow:0 12px 30px rgba(6,182,212,.32);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:transform .12s;font:inherit}
+.dial:active{transform:scale(.97)}
+.dial.out{background:linear-gradient(135deg,#1F2430,#3A4152)}
+.dial .big{font-size:19px;font-weight:800}.dial .timer{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}.dial .sub{font-size:12px;opacity:.9}
+.row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.row:last-child{border:0}
+.pill{font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.pill.wait{background:#FEF3E2;color:#B45309}.pill.ok{background:#E6F6EF;color:#0E9F6E}.pill.no{background:#FDEBE6;color:#E11D2A}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.nav button{flex:1;min-height:62px;border:0;background:none;font:inherit;font-size:10.5px;font-weight:800;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;justify-content:center;position:relative}
+.nav button.on{color:#0E7490}.nav .ic{font-size:19px}
+.nav .badge{position:absolute;top:9px;right:24%;background:#E11D2A;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-weight:800;color:#fff;background:#fff}
+.chk.on{background:var(--ok);border-color:var(--ok)}
+.hide{display:none!important}
+.skel{height:50px;border-radius:12px;background:linear-gradient(90deg,#EDEFF3 25%,#F7F8FA 50%,#EDEFF3 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--mut);padding:22px 10px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.sheetBg{position:fixed;inset:0;background:rgba(20,25,40,.45);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.sheetBg.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:.25s;z-index:31;max-width:520px;margin:0 auto;max-height:88vh;overflow:auto}
+.sheet.open{transform:none}
+.handle{width:42px;height:5px;border-radius:99px;background:#D8DBE2;margin:4px auto 12px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #06B6D4;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9" data-t="meTitle">Me</span></div>
+  <div style="display:flex;gap:8px">
+    <button id="langBtn" aria-label="Language">த</button>
+    <button id="installBtn">📲</button>
+    <button id="outBtn" class="hide" data-t="logout">Log out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- LOGIN -->
+  <section id="vLogin">
+    <div class="card">
+      <h2 data-t="loginTitle">Employee sign in</h2>
+      <p class="mut" data-t="loginSub">Your staff code and PIN (same as the punch clock).</p>
+      <label for="code" data-t="codeLbl">Staff code</label>
+      <input id="code" autocapitalize="characters" placeholder="RAVI1">
+      <label for="pin" data-t="pinLbl">PIN</label>
+      <input id="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn" data-t="signIn">Sign in</button>
+    </div>
+  </section>
+
+  <section id="vApp" class="hide">
+
+    <!-- HOME -->
+    <section id="pHome">
+      <div class="shopBanner">
+        <div class="l" data-t="todayAt">Today you are at</div>
+        <div class="n" id="shopName">—</div>
+        <div id="shopLoc" style="font-size:13px;opacity:.9;margin-top:2px"></div>
+      </div>
+      <div class="card">
+        <div class="mut" id="hello" style="margin-bottom:4px"></div>
+        <div class="dialWrap">
+          <button class="dial" id="dial" aria-live="polite">
+            <span class="big" id="dialBig" data-t="clockIn">Clock IN</span>
+            <span class="timer hide" id="dialTimer">0:00:00</span>
+            <span class="sub" id="dialSub"></span>
+          </button>
+        </div>
+        <div class="row"><span data-t="todayHrs">Today's hours</span><b id="todaySecs">0:00</b></div>
+      </div>
+      <div class="card">
+        <h2 data-t="quickReport">Quick daily note</h2>
+        <textarea id="noteBox" data-t-ph="notePh" placeholder="What did you do today? sales, repairs, anything to flag…"></textarea>
+        <div style="height:8px"></div>
+        <button class="btn" id="noteBtn" data-t="addNote">Add note</button>
+      </div>
+    </section>
+
+    <!-- TASKS -->
+    <section id="pTasks" class="hide">
+      <div class="card">
+        <h2 data-t="myTasks">My assignments</h2>
+        <div id="todoList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- VISITS -->
+    <section id="pVisits" class="hide">
+      <div class="card">
+        <h2 data-t="myVisits">My service visits</h2>
+        <p class="mut" data-t="visitHint">Doorstep repairs assigned to you. Update the status as you go — the customer sees it live.</p>
+        <div id="visitList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- LEAVE -->
+    <section id="pLeave" class="hide">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2 style="margin:0" data-t="myLeave">My leave</h2>
+          <button class="btn sm" id="applyBtn" data-t="applyLeave">+ Apply</button>
+        </div>
+        <div id="leaveList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- MORE -->
+    <section id="pMore" class="hide">
+      <div class="card">
+        <h2 data-t="reports">My daily notes history</h2>
+        <div id="notesList"><div class="skel"></div></div>
+      </div>
+      <div class="card">
+        <h2 data-t="help">Help & support</h2>
+        <a class="btn ghost" href="tel:+919597016448" style="margin-bottom:8px">📞 <span data-t="callShop">Call the shop</span></a>
+        <a class="btn ghost" id="waSupport" href="#">💬 <span data-t="waHelp">WhatsApp support</span></a>
+        <div style="margin-top:12px" class="mut" data-t="faq">FAQ: Forgot your PIN? Ask Venky or Mani — they reset it in seconds. Wrong shop shown? Tell Mani to update today's roster.</div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<nav class="nav hide" id="nav">
+  <button data-p="Home" class="on"><span class="ic">🏠</span><span data-t="navHome">Home</span></button>
+  <button data-p="Tasks"><span class="ic">✅</span><span data-t="navTasks">Tasks</span><span class="badge hide" id="bTodo"></span></button>
+  <button data-p="Visits"><span class="ic">🛠</span><span data-t="navVisits">Visits</span><span class="badge hide" id="bVisit"></span></button>
+  <button data-p="Leave"><span class="ic">🌴</span><span data-t="navLeave">Leave</span><span class="badge hide" id="bLeave"></span></button>
+  <button data-p="More"><span class="ic">⋯</span><span data-t="navMore">More</span></button>
+</nav>
+
+<div class="sheetBg" id="sBg"></div>
+<div class="sheet" id="leaveSheet">
+  <div class="handle"></div>
+  <h2 data-t="applyLeave">Apply for leave</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div><label data-t="fromDay">From</label><input id="lvFrom" type="date"></div>
+    <div><label data-t="toDay">To</label><input id="lvTo" type="date"></div>
+  </div>
+  <label data-t="reason">Reason (optional)</label><input id="lvReason">
+  <div style="height:12px"></div>
+  <button class="btn" id="lvSend" data-t="sendReq">Send request</button>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY="sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+const T={
+ en:{meTitle:"Me",logout:"Log out",loginTitle:"Employee sign in",loginSub:"Your staff code and PIN (same as the punch clock).",codeLbl:"Staff code",pinLbl:"PIN",signIn:"Sign in",
+  todayAt:"Today you are at",clockIn:"Clock IN",clockOut:"Clock OUT",onShift:"On shift since",tapIn:"Tap to start your shift",todayHrs:"Today's hours",
+  quickReport:"Quick daily note",notePh:"What did you do today? sales, repairs, anything to flag…",addNote:"Add note",
+  myTasks:"My assignments",myLeave:"My leave",applyLeave:"Apply for leave",reports:"My daily notes history",help:"Help & support",callShop:"Call the shop",waHelp:"WhatsApp support",
+  fromDay:"From",toDay:"To",reason:"Reason (optional)",sendReq:"Send request",
+  navHome:"Home",navTasks:"Tasks",navVisits:"Visits",navLeave:"Leave",navMore:"More",myVisits:"My service visits",visitHint:"Doorstep repairs assigned to you. Update the status as you go — the customer sees it live.",noVisits:"No visits assigned right now.",vOnWay:"On the way",vReached:"Reached",vRepaired:"Repaired",vCollect:"Collected ₹",vAmount:"Amount collected ₹",vDone:"Visit completed ✓",vOtpAsk:"Ask the customer for their 4-digit pickup code:",vOtpBad:"Wrong code — check with the customer",
+  faq:"FAQ: Forgot your PIN? Ask Venky or Mani — they reset it in seconds. Wrong shop shown? Tell Mani to update today's roster.",
+  noTodos:"No assignments right now. 🎉",noLeave:"No leave requests yet.",noNotes:"No notes yet — add one from Home.",
+  pending:"Pending",approved:"Approved",rejected:"Rejected",done:"done",noteAdded:"Note added ✓",leaveSent:"Leave request sent ✓",clockedIn:"Clocked in 🟢",clockedOut:"Clocked out",err:"Something went wrong"},
+ ta:{meTitle:"நான்",logout:"வெளியேறு",loginTitle:"பணியாளர் உள்நுழைவு",loginSub:"உங்கள் குறியீடு மற்றும் PIN (பஞ்ச் கிளாக் போலவே).",codeLbl:"பணியாளர் குறியீடு",pinLbl:"PIN",signIn:"உள்நுழைக",
+  todayAt:"இன்று நீங்கள் இருப்பது",clockIn:"பணி தொடங்கு",clockOut:"பணி முடி",onShift:"பணியில் —",tapIn:"தொடங்க தட்டவும்",todayHrs:"இன்றைய நேரம்",
+  quickReport:"இன்றைய குறிப்பு",notePh:"இன்று என்ன செய்தீர்கள்? விற்பனை, பழுது…",addNote:"குறிப்பு சேர்",
+  myTasks:"என் பணிகள்",myLeave:"என் விடுப்பு",applyLeave:"விடுப்பு கோரிக்கை",reports:"குறிப்புகள் வரலாறு",help:"உதவி",callShop:"கடையை அழைக்க",waHelp:"WhatsApp உதவி",
+  fromDay:"முதல்",toDay:"வரை",reason:"காரணம் (விருப்பம்)",sendReq:"கோரிக்கை அனுப்பு",
+  navHome:"முகப்பு",navTasks:"பணிகள்",navVisits:"சேவை",navLeave:"விடுப்பு",navMore:"மேலும்",myVisits:"என் சேவை வருகைகள்",visitHint:"உங்களுக்கு ஒதுக்கப்பட்ட வீட்டு பழுதுகள். நிலையை புதுப்பிக்கவும்.",noVisits:"இப்போது வருகைகள் இல்லை.",vOnWay:"வழியில்",vReached:"வந்துவிட்டேன்",vRepaired:"சரி செய்யப்பட்டது",vCollect:"வசூல் ₹",vAmount:"வசூல் தொகை ₹",vDone:"முடிந்தது ✓",vOtpAsk:"வாடிக்கையாளரின் 4-இலக்க குறியீட்டைக் கேளுங்கள்:",vOtpBad:"தவறான குறியீடு",
+  faq:"PIN மறந்தீர்களா? வெங்கி அல்லது மணியிடம் கேளுங்கள். தவறான கடை காட்டுகிறதா? மணியிடம் சொல்லுங்கள்.",
+  noTodos:"இப்போது பணிகள் இல்லை. 🎉",noLeave:"விடுப்பு கோரிக்கை இல்லை.",noNotes:"குறிப்புகள் இல்லை.",
+  pending:"காத்திருக்கிறது",approved:"அனுமதிக்கப்பட்டது",rejected:"நிராகரிக்கப்பட்டது",done:"முடிந்தது",noteAdded:"சேர்க்கப்பட்டது ✓",leaveSent:"அனுப்பப்பட்டது ✓",clockedIn:"தொடங்கியது 🟢",clockedOut:"முடிந்தது",err:"பிழை"}
+};
+let lang=localStorage.getItem("px_me_lang")||"en";
+const t=k=>(T[lang]&&T[lang][k])||T.en[k]||k;
+function applyLang(){
+  document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+  document.querySelectorAll("[data-t-ph]").forEach(el=>el.placeholder=t(el.dataset.tPh));
+  document.getElementById("langBtn").textContent=lang==="en"?"த":"EN";
+  if(HOME) render();
+}
+
+const $=id=>document.getElementById(id);
+const toast=m=>{const el=$("toast");el.textContent=m;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),2600);};
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(10);}catch(e){}};
+const hms=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/3600)+":"+String(Math.floor(s%3600/60)).padStart(2,"0");};
+const hmsF=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/3600)+":"+String(Math.floor(s%3600/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");};
+const fdt=d=>new Date(d).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+const fday=d=>new Date(d).toLocaleDateString([],{day:"numeric",month:"short"});
+
+let CODE=localStorage.getItem("px_me_code")||"", PIN=sessionStorage.getItem("px_me_pin")||"";
+let HOME=null, tickTimer=null;
+
+async function rpc(fn,args){const{data,error}=await sb.rpc(fn,args);if(error)throw error;return data;}
+function geo(){return new Promise(res=>{if(!navigator.geolocation)return res({});navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res({}),{timeout:5000,maximumAge:60000});});}
+
+async function login(){
+  const code=$("code").value.trim(),pin=$("pin").value.trim();
+  if(!code||!pin)return toast(t("err"));
+  $("loginBtn").disabled=true;
+  try{ HOME=await rpc("staff_home",{p_code:code,p_pin:pin}); CODE=code;PIN=pin;
+    localStorage.setItem("px_me_code",code);sessionStorage.setItem("px_me_pin",pin); enter();
+  }catch(e){toast(e.message||t("err"));}
+  $("loginBtn").disabled=false;
+}
+function enter(){
+  $("vLogin").classList.add("hide");$("vApp").classList.remove("hide");$("nav").classList.remove("hide");$("outBtn").classList.remove("hide");
+  $("waSupport").href="https://wa.me/919597016448?text="+encodeURIComponent("ProFix staff "+HOME.code+" needs help: ");
+  render(); startTick(); loadTodos(); loadVisits(); loadLeave(); loadNotes();
+}
+function logout(){PIN="";sessionStorage.removeItem("px_me_pin");if(tickTimer)clearInterval(tickTimer);$("pin").value="";location.reload();}
+
+function render(){
+  if(!HOME)return;
+  $("shopName").textContent=HOME.shop_name||"—";
+  $("shopLoc").textContent=HOME.shop_location||"";
+  $("hello").textContent="👋 "+HOME.name+" · "+HOME.role;
+  const open=!!HOME.open_in;
+  const dial=$("dial");
+  dial.classList.toggle("out",open);
+  $("dialBig").textContent=open?t("clockOut"):t("clockIn");
+  $("dialTimer").classList.toggle("hide",!open);
+  $("dialSub").textContent=open?(t("onShift")+" "+fdt(HOME.open_in)):t("tapIn");
+  $("bTodo").textContent=HOME.open_todos; $("bTodo").classList.toggle("hide",!HOME.open_todos);
+  $("bLeave").textContent=HOME.pending_leave; $("bLeave").classList.toggle("hide",!HOME.pending_leave);
+}
+function startTick(){
+  if(tickTimer)clearInterval(tickTimer);
+  const base=Number(HOME.today_seconds||0),at=Date.now();
+  const tick=()=>{
+    const extra=HOME.open_in?(Date.now()-at)/1000:0;
+    $("todaySecs").textContent=hms(base+extra);
+    if(HOME.open_in)$("dialTimer").textContent=hmsF((Date.now()-new Date(HOME.open_in).getTime())/1000);
+  };
+  tick(); tickTimer=setInterval(tick,1000);
+}
+async function refreshHome(){ try{ HOME=await rpc("staff_home",{p_code:CODE,p_pin:PIN}); render(); startTick(); }catch(e){} }
+
+$("dial").addEventListener("click", async ()=>{
+  const dial=$("dial"); dial.disabled=true; buzz();
+  try{
+    const g=await geo();
+    if(HOME.open_in){ await rpc("staff_clock_out",{p_code:CODE,p_pin:PIN,p_lat:g.lat??null,p_lng:g.lng??null}); toast(t("clockedOut")); }
+    else{ await rpc("staff_clock_in_shop",{p_code:CODE,p_pin:PIN,p_lat:g.lat??null,p_lng:g.lng??null,p_device:navigator.userAgent.slice(0,110)}); toast(t("clockedIn")); }
+    await refreshHome();
+  }catch(e){toast(e.message||t("err"));}
+  dial.disabled=false;
+});
+
+$("noteBtn").addEventListener("click", async ()=>{
+  const n=$("noteBox").value.trim(); if(!n)return toast(t("err"));
+  $("noteBtn").disabled=true; buzz();
+  try{ await rpc("staff_add_daily_note",{p_code:CODE,p_pin:PIN,p_note:n}); $("noteBox").value=""; toast(t("noteAdded")); loadNotes(); }
+  catch(e){toast(e.message||t("err"));}
+  $("noteBtn").disabled=false;
+});
+
+async function loadTodos(){
+  try{
+    const rows=await rpc("staff_my_todos",{p_code:CODE,p_pin:PIN})||[];
+    $("todoList").innerHTML=rows.length?rows.map(r=>
+      '<div class="row"><div class="chk '+(r.done?'on':'')+'" data-todo="'+r.id+'" data-done="'+r.done+'" role="checkbox" aria-checked="'+r.done+'" tabindex="0">'+(r.done?'✓':'')+'</div>'+
+      '<div style="flex:1"><b style="'+(r.done?'text-decoration:line-through;opacity:.6':'')+'">'+r.title+'</b>'+(r.detail?'<div class="mut">'+r.detail+'</div>':'')+'</div></div>'
+    ).join(""):'<div class="empty">'+t("noTodos")+'</div>';
+    document.querySelectorAll("[data-todo]").forEach(el=>{
+      const toggle=async()=>{
+        const done=el.dataset.done!=="true";
+        try{ await rpc("staff_toggle_todo",{p_code:CODE,p_pin:PIN,p_id:el.dataset.todo,p_done:done}); loadTodos(); refreshHome(); }
+        catch(e){toast(e.message||t("err"));}
+      };
+      el.addEventListener("click",toggle);
+      el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
+    });
+  }catch(e){$("todoList").innerHTML='<div class="empty">'+t("err")+'</div>';}
+}
+
+async function loadLeave(){
+  try{
+    const rows=await rpc("staff_my_leave",{p_code:CODE,p_pin:PIN})||[];
+    $("leaveList").innerHTML=rows.length?rows.map(r=>{
+      const pill=r.status==="approved"?'<span class="pill ok">'+t("approved")+'</span>':r.status==="rejected"?'<span class="pill no">'+t("rejected")+'</span>':'<span class="pill wait">'+t("pending")+'</span>';
+      return '<div class="row"><div><b>'+fday(r.from_day)+' → '+fday(r.to_day)+'</b><div class="mut">'+(r.reason||'')+(r.decided_note?' · '+r.decided_note:'')+'</div></div>'+pill+'</div>';
+    }).join(""):'<div class="empty">'+t("noLeave")+'</div>';
+  }catch(e){$("leaveList").innerHTML='<div class="empty">'+t("err")+'</div>';}
+}
+
+async function loadNotes(){
+  try{
+    const rows=await rpc("staff_my_daily_notes",{p_code:CODE,p_pin:PIN})||[];
+    $("notesList").innerHTML=rows.length?rows.map(r=>
+      '<div class="row"><div style="flex:1"><b>'+fday(r.day)+'</b><div class="mut">'+r.note+'</div></div></div>'
+    ).join(""):'<div class="empty">'+t("noNotes")+'</div>';
+  }catch(e){$("notesList").innerHTML='<div class="empty">'+t("err")+'</div>';}
+}
+
+// visits
+const VSTEPS=[["on_the_way","vOnWay"],["reached","vReached"],["repaired","vRepaired"],["collected","vCollect"]];
+async function loadVisits(){
+  try{
+    const rows=await rpc("staff_my_visits",{p_code:CODE,p_pin:PIN})||[];
+    const bv=$("bVisit"); bv.textContent=rows.length; bv.classList.toggle("hide",!rows.length);
+    $("visitList").innerHTML=rows.length?rows.map(r=>{
+      const cur=r.visit_status||"assigned";
+      const curIdx=["assigned","on_the_way","reached","repaired","collected"].indexOf(cur);
+      const nxt=VSTEPS.find(([k])=>["assigned","on_the_way","reached","repaired","collected"].indexOf(k)===curIdx+1);
+      const btn=nxt?('<button class="btn sm" data-visit="'+r.id+'" data-next="'+nxt[0]+'">'+t(nxt[1])+'</button>'):'';
+      return '<div class="row" style="align-items:flex-start"><div style="flex:1">'+
+        '<b>'+(r.device||"Device")+' — '+(r.issue||"")+'</b>'+
+        '<div class="mut">'+(r.customer_name||"")+' · <a href="tel:'+(r.phone||"")+'">'+(r.phone||"")+'</a></div>'+
+        (r.address?'<div class="mut">📍 '+r.address+'</div>':'')+
+        '<div class="mut">Status: <b>'+cur.replace(/_/g," ")+'</b></div>'+
+        '</div>'+btn+'</div>';
+    }).join(""):'<div class="empty">'+t("noVisits")+'</div>';
+    document.querySelectorAll("[data-visit]").forEach(b=>b.addEventListener("click", async ()=>{
+      const status=b.dataset.next; let amount=null;
+      if(status==="collected"){
+        const a=prompt(t("vAmount")); if(a===null) return;
+        amount=Number(a)||0;
+        // verify the customer's pickup code first (proof the right person received the device)
+        const otp=prompt(t("vOtpAsk"));
+        if(otp===null){ return; }
+        b.disabled=true; buzz();
+        try{ await rpc("repair_verify_otp_staff",{p_code:CODE,p_pin:PIN,p_repair_id:b.dataset.visit,p_otp:otp.trim()}); }
+        catch(e){ toast(e.message||t("vOtpBad")); b.disabled=false; return; }
+      } else { b.disabled=true; buzz(); }
+      try{ await rpc("staff_update_visit",{p_code:CODE,p_pin:PIN,p_repair_id:b.dataset.visit,p_status:status,p_amount:amount});
+        toast(status==="collected"?t("vDone"):"✓"); loadVisits();
+      }catch(e){ toast(e.message||t("err")); b.disabled=false; }
+    }));
+  }catch(e){ $("visitList").innerHTML='<div class="empty">'+t("err")+'</div>'; }
+}
+
+// leave sheet
+function openSheet(id){$("sBg").classList.add("open");$(id).classList.add("open");}
+function closeSheets(){$("sBg").classList.remove("open");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("open"));}
+$("sBg").addEventListener("click",closeSheets);
+$("applyBtn").addEventListener("click",()=>{$("lvFrom").value="";$("lvTo").value="";$("lvReason").value="";openSheet("leaveSheet");});
+$("lvSend").addEventListener("click", async ()=>{
+  const f=$("lvFrom").value,to=$("lvTo").value;
+  if(!f||!to)return toast(t("err"));
+  $("lvSend").disabled=true; buzz();
+  try{ await rpc("staff_apply_leave",{p_code:CODE,p_pin:PIN,p_from:f,p_to:to,p_reason:$("lvReason").value.trim()}); toast(t("leaveSent")); closeSheets(); loadLeave(); refreshHome(); }
+  catch(e){toast(e.message||t("err"));}
+  $("lvSend").disabled=false;
+});
+
+// nav
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  ["Home","Tasks","Visits","Leave","More"].forEach(p=>$("p"+p).classList.toggle("hide",p!==b.dataset.p));
+  if(b.dataset.p==="Tasks")loadTodos(); if(b.dataset.p==="Visits")loadVisits(); if(b.dataset.p==="Leave")loadLeave(); if(b.dataset.p==="More")loadNotes();
+}));
+$("loginBtn").addEventListener("click",login);
+$("pin").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+$("outBtn").addEventListener("click",logout);
+$("langBtn").addEventListener("click",()=>{lang=lang==="en"?"ta":"en";localStorage.setItem("px_me_lang",lang);applyLang();});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&HOME&&PIN)refreshHome();});
+
+$("code").value=CODE; applyLang();
+if(CODE&&PIN){ rpc("staff_home",{p_code:CODE,p_pin:PIN}).then(h=>{HOME=h;enter();}).catch(()=>{}); }
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

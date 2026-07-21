@@ -1,0 +1,28 @@
+{
+ "name": "ProFix Trade",
+ "short_name": "Trade",
+ "start_url": "/trade.html?src=pwa",
+ "scope": "/trade.html",
+ "display": "standalone",
+ "background_color": "#F6F7F9",
+ "theme_color": "#1F2430",
+ "icons": [
+  {
+   "src": "/trade-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "/trade-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ],
+ "id": "/trade.html?v=2026-07",
+ "categories": [
+  "business",
+  "productivity"
+ ]
+}

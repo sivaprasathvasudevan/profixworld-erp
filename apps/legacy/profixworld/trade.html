@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F2430">
+<link rel="manifest" href="/trade.webmanifest">
+<link rel="apple-touch-icon" href="/trade-192.png">
+<title>ProFix Trade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--grad:linear-gradient(135deg,#FF6A2B,#E11D2A);--ink:#1F2430;--mut:#5A6272;--bg:#F6F7F9;--line:#E7E9EE;--ok:#0E9F6E;--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.top{background:var(--grad);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;display:flex;justify-content:space-between;align-items:center}
+.top .brand{font-weight:800;font-size:18px}
+.top button{background:rgba(255,255,255,.18);border:0;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:7px 12px;border-radius:99px;cursor:pointer}
+.wrap{max-width:680px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(20,25,40,.07);margin-bottom:14px}
+h2{font-size:15px;margin-bottom:10px}
+.mut{color:var(--mut);font-size:13px}
+input,select,textarea{width:100%;min-height:46px;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;background:var(--grad);color:#fff;width:100%;padding:0 16px}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:36px;font-size:13px;width:auto;padding:0 12px}
+.btn.red{background:#fff;color:#E11D2A;border:1.5px solid #F6C6C0}
+.btn:disabled{opacity:.55}
+.row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center;flex-wrap:wrap}
+.row:last-child{border:0}
+.row img{width:52px;height:52px;object-fit:cover;border-radius:10px;background:#EDEFF3;cursor:pointer}
+.pill{font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill.wait{background:#FEF3E2;color:#B45309}.pill.ok{background:#E6F6EF;color:#0E9F6E}.pill.no{background:#FDEBE6;color:#E11D2A}.pill.grey{background:#EDEFF5;color:#5A6272}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.nav button{flex:1;min-height:60px;border:0;background:none;font:inherit;font-size:11px;font-weight:800;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;justify-content:center;position:relative}
+.nav button.on{color:#E11D2A}.nav .ic{font-size:20px}
+.badge{position:absolute;top:8px;right:22%;background:#E11D2A;color:#fff;font-size:10px;font-weight:800;min-width:17px;height:17px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters>*{flex:1;min-width:130px}
+.sheetBg{position:fixed;inset:0;background:rgba(20,25,40,.45);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.sheetBg.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(105%);transition:.25s;z-index:31;max-width:680px;margin:0 auto;max-height:90vh;overflow:auto}
+.sheet.open{transform:none}
+.handle{width:42px;height:5px;border-radius:99px;background:#D8DBE2;margin:4px auto 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.itRow{display:grid;grid-template-columns:2fr 64px 84px 34px;gap:6px;margin-bottom:6px;align-items:center}
+.itRow input,.itRow select{min-height:42px;font-size:13px;padding:6px 8px}
+.itRow button{border:0;background:#FDEBE6;color:#E11D2A;border-radius:10px;min-height:42px;font-weight:800;cursor:pointer}
+.qrBig{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px}
+.qrBig img{width:min(78vw,320px);image-rendering:pixelated}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hide{display:none!important}
+.skel{height:52px;border-radius:12px;background:linear-gradient(90deg,#EDEFF3 25%,#F7F8FA 50%,#EDEFF3 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin-bottom:10px}
+@keyframes sh{to{background-position:-200% 0}}
+.empty{text-align:center;color:var(--mut);padding:24px 10px;font-size:14px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #FF6A2B;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">⚡ ProFix <span style="font-weight:600;opacity:.9">Trade</span></div>
+  <button id="installBtn">📲</button>
+    <button id="outBtn" class="hide">Log out</button>
+</header>
+
+<main class="wrap">
+  <section id="vLogin">
+    <div class="card">
+      <h2>Owner sign in</h2>
+      <p class="mut">Same email &amp; password as your admin app.</p>
+      <label for="em">Email</label><input id="em" type="email" autocomplete="username">
+      <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn">Sign in</button>
+    </div>
+  </section>
+
+  <section id="vApp" class="hide">
+
+    <!-- APPROVALS -->
+    <section id="pApr">
+      <div class="card">
+        <h2>Pending approval</h2>
+        <div id="pendList"><div class="skel"></div></div>
+      </div>
+      <div class="card">
+        <h2>Approval history</h2>
+        <div class="filters">
+          <input id="hSearch" placeholder="Search name / brand…">
+          <select id="hStatus"><option value="">All status</option><option>pending</option><option>approved</option><option>rejected</option></select>
+          <select id="hPartner"><option value="">All partners</option></select>
+        </div>
+        <div id="histList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- PARTNERS -->
+    <section id="pPart" class="hide">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2 style="margin:0">Partners</h2>
+          <button class="btn sm" id="addPartner">+ Add partner</button>
+        </div>
+        <div id="partList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section id="pDocs" class="hide">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2 style="margin:0">Trade documents</h2>
+          <div style="display:flex;gap:6px">
+            <button class="btn ghost sm" id="scanDoc">📷 Scan QR</button>
+            <button class="btn sm" id="addDoc">+ New PO / SL</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input id="dSearch" placeholder="Search code…">
+          <select id="dStatus"><option value="">All status</option><option>issued</option><option>received</option><option>dispatched</option><option>paid</option><option>cancelled</option></select>
+        </div>
+        <div id="docList"><div class="skel"></div></div>
+      </div>
+    </section>
+
+    <!-- BIN -->
+    <section id="pBin" class="hide">
+      <div class="card">
+        <h2>♻️ Recycle bin</h2>
+        <p class="mut" style="margin-bottom:8px">Deleted submissions and documents. Restore, or delete forever.</p>
+        <div id="binList"><div class="skel"></div></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<nav class="nav hide" id="nav">
+  <button data-p="Apr" class="on"><span class="ic">✅</span>Approvals<span class="badge hide" id="aprBadge"></span></button>
+  <button data-p="Part"><span class="ic">🤝</span>Partners</button>
+  <button data-p="Docs"><span class="ic">🧾</span>Documents</button>
+  <button data-p="Bin"><span class="ic">♻️</span>Bin</button>
+</nav>
+
+<div class="sheetBg" id="sBg"></div>
+
+<!-- review sheet -->
+<div class="sheet" id="revSheet">
+  <div class="handle"></div>
+  <h2 id="rvTitle">Review submission</h2>
+  <p class="mut" id="rvMeta"></p>
+  <div id="rvGallery" style="display:flex;gap:8px;overflow-x:auto;padding:4px 0"></div>
+  <label>Description (shown to customers)</label>
+  <textarea id="rvDesc" maxlength="1000" style="min-height:70px"></textarea>
+  <label>Name</label><input id="rvName">
+  <div class="grid2">
+    <div><label>Brand</label><input id="rvBrand"></div>
+    <div><label>Category</label><select id="rvCat"></select></div>
+  </div>
+  <div class="grid2">
+    <div><label>Price ₹</label><input id="rvPrice" inputmode="numeric"></div>
+    <div><label>Stock qty</label><input id="rvQty" inputmode="numeric"></div>
+  </div>
+  <div style="height:12px"></div>
+  <button class="btn" id="rvApprove">Approve &amp; go live</button>
+  <div style="height:8px"></div>
+  <label>Reject reason</label><input id="rvReason" placeholder="e.g. price too high, photo unclear">
+  <button class="btn red" id="rvReject" style="margin-top:8px">Reject</button>
+</div>
+
+<!-- partner sheet -->
+<div class="sheet" id="ptSheet">
+  <div class="handle"></div>
+  <h2 id="ptTitle">Add partner</h2>
+  <label>Contact name</label><input id="ptName">
+  <label>Business name</label><input id="ptBiz">
+  <div class="grid2">
+    <div><label>Phone (login)</label><input id="ptPhone" inputmode="numeric" maxlength="10"></div>
+    <div><label>PIN (4–6 digits)</label><input id="ptPin" inputmode="numeric" maxlength="6" placeholder="blank = keep"></div>
+  </div>
+  <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink)"><input type="checkbox" id="ptActive" checked style="width:20px;min-height:20px"> Active</label>
+  <div style="height:12px"></div>
+  <button class="btn" id="ptSave">Save partner</button>
+</div>
+
+<!-- new doc sheet -->
+<div class="sheet" id="ndSheet">
+  <div class="handle"></div>
+  <h2>New trade document</h2>
+  <div class="grid2">
+    <div><label>Type</label><select id="ndType"><option value="PO">PO — buy from partner</option><option value="SL">SL — sell to partner</option></select></div>
+    <div><label>Partner</label><select id="ndPartner"></select></div>
+  </div>
+  <label>Items <span style="text-transform:none;font-weight:600">(link a product to auto-update stock on receive/dispatch)</span></label>
+  <div id="ndItems"></div>
+  <button class="btn ghost sm" id="ndAdd">+ Add item</button>
+  <div class="grid2">
+    <div><label>GST %</label><select id="ndGst"><option value="0">0 (no GST)</option><option value="5">5</option><option value="12">12</option><option value="18" selected>18</option><option value="28">28</option></select></div>
+    <div><label>Notes (optional)</label><input id="ndNotes"></div>
+  </div>
+  <div class="row"><span class="mut" id="ndSub">Subtotal ₹0 + GST ₹0</span><b id="ndTotal">₹0</b></div>
+  <button class="btn" id="ndSave">Create &amp; get QR</button>
+</div>
+
+<!-- doc detail sheet -->
+<div class="sheet" id="ddSheet">
+  <div class="handle"></div>
+  <h2 id="ddTitle"></h2>
+  <p class="mut" id="ddMeta"></p>
+  <div id="ddItems"></div>
+  <div class="qrBig"><img id="ddQr" alt="Document QR"><div class="mut" id="ddCode"></div></div>
+  <div id="ddActions" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator"></script>
+<script>
+const SB_URL = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_KEY = "sb_publishable_zlEDeh6lBwEvLuWJ5EUbNQ_Hr_pmKO0";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+const $ = id => document.getElementById(id);
+const toast = m => { const el=$("toast"); el.textContent=m; el.classList.add("show"); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("show"),2800); };
+const buzz = () => { try{navigator.vibrate&&navigator.vibrate(10);}catch(e){} };
+const inr = n => "₹"+Number(n||0).toLocaleString("en-IN");
+const fday = d => new Date(d).toLocaleDateString([], {day:"numeric",month:"short",year:"2-digit"});
+
+let PARTNERS=[], CATS=[], PRODUCTS=[], SUBS=[], DOCS=[], curSub=null, curDoc=null, editPt=null;
+
+async function login(){
+  $("loginBtn").disabled=true;
+  const { error } = await sb.auth.signInWithPassword({ email:$("em").value.trim(), password:$("pw").value });
+  $("loginBtn").disabled=false;
+  if(error) return toast(error.message);
+  boot();
+}
+async function boot(){
+  $("vLogin").classList.add("hide"); $("vApp").classList.remove("hide");
+  $("nav").classList.remove("hide"); $("outBtn").classList.remove("hide");
+  await loadBase();
+  loadSubs(); loadDocs();
+  const q = (location.hash.match(/q=([\w-]+)/)||[])[1];
+  if(q){ const {data}=await sb.from("trade_docs").select("*").eq("code",q.toUpperCase()).maybeSingle(); if(data) openDocDetail(data); else toast("Document "+q+" not found"); }
+}
+async function loadBase(){
+  const [p,c,pr] = await Promise.all([
+    sb.from("partner_members").select("*").order("name"),
+    sb.from("store_categories").select("*").order("name"),
+    sb.from("store_products").select("id,name,price,stock").order("name")
+  ]);
+  PARTNERS=p.data||[]; CATS=c.data||[]; PRODUCTS=pr.data||[];
+  renderPartners();
+  $("hPartner").innerHTML='<option value="">All partners</option>'+PARTNERS.map(x=>'<option value="'+x.id+'">'+(x.business_name||x.name)+'</option>').join("");
+  $("ndPartner").innerHTML=PARTNERS.filter(x=>x.active).map(x=>'<option value="'+x.id+'">'+(x.business_name||x.name)+'</option>').join("");
+  $("rvCat").innerHTML='<option value="">— choose —</option>'+CATS.map(x=>'<option value="'+x.id+'">'+x.name+'</option>').join("");
+}
+const ptName = id => { const p=PARTNERS.find(x=>x.id===id); return p ? (p.business_name||p.name) : "?"; };
+
+// ---------- approvals ----------
+async function loadSubs(){
+  const { data, error } = await sb.from("partner_submissions").select("*").is("deleted_at",null).order("created_at",{ascending:false}).limit(200);
+  if(error) return toast(error.message);
+  SUBS=data||[]; renderPending(); renderHist();
+}
+function renderPending(){
+  const pend = SUBS.filter(s=>s.status==="pending");
+  $("aprBadge").textContent=pend.length; $("aprBadge").classList.toggle("hide",!pend.length);
+  $("pendList").innerHTML = pend.length ? pend.map(s=>
+    '<div class="row">'+(s.image_url?'<img src="'+s.image_url+'" alt="" onclick="window.open(this.src)">':'')+
+    '<div style="flex:1"><b>'+s.name+'</b>'+(s.kind==='price_change'?' <span class="pill grey">price change</span>':'')+
+    '<div class="mut">'+ptName(s.partner_id)+' · '+inr(s.price)+' · qty '+s.qty+' · '+fday(s.created_at)+(s.note?'<br>'+s.note:'')+'</div></div>'+
+    '<button class="btn sm" data-rev="'+s.id+'">Review</button></div>'
+  ).join("") : '<div class="empty">Nothing waiting. 🎉</div>';
+  document.querySelectorAll("[data-rev]").forEach(b=>b.addEventListener("click",()=>openReview(b.dataset.rev)));
+}
+function renderHist(){
+  const q=$("hSearch").value.trim().toLowerCase(), st=$("hStatus").value, pt=$("hPartner").value;
+  const rows = SUBS.filter(s=>
+    (!st||s.status===st)&&(!pt||s.partner_id===pt)&&
+    (!q||(s.name+" "+(s.brand||"")).toLowerCase().includes(q)));
+  $("histList").innerHTML = rows.length ? rows.slice(0,80).map(s=>{
+    const pill = s.status==="approved"?'<span class="pill ok">Approved</span>':s.status==="rejected"?'<span class="pill no">Rejected</span>':'<span class="pill wait">Pending</span>';
+    return '<div class="row"><div style="flex:1"><b>'+s.name+'</b>'+(s.kind==='price_change'?' <span class="pill grey">price</span>':'')+
+      '<div class="mut">'+ptName(s.partner_id)+' · '+inr(s.price)+' · '+fday(s.created_at)+
+      (s.reject_reason?' · '+s.reject_reason:'')+'</div></div>'+pill+
+      (s.status!=='pending'?'<button class="btn ghost sm" data-nt="'+s.id+'">📱</button>':'')+
+      '<button class="btn ghost sm" data-del="'+s.id+'">🗑</button></div>';
+  }).join("") : '<div class="empty">No matching history.</div>';
+  document.querySelectorAll("#histList [data-del]").forEach(b=>b.addEventListener("click",()=>softDelSub(b.dataset.del)));
+  document.querySelectorAll("#histList [data-nt]").forEach(b=>b.addEventListener("click",()=>{
+    const s=SUBS.find(x=>x.id===b.dataset.nt); const p=PARTNERS.find(x=>x.id===s.partner_id);
+    if(!p) return toast("Partner not found");
+    const msg = s.status==='approved'
+      ? 'ProFix: "'+s.name+'" is APPROVED ✅ at '+inr(s.price)+(s.kind==='price_change'?' (new price live)':' — now live in the store.')
+      : 'ProFix: "'+s.name+'" was not approved. Reason: '+(s.reject_reason||'—')+'. You can resubmit with changes.';
+    window.open("https://wa.me/91"+p.phone+"?text="+encodeURIComponent(msg));
+  }));
+}
+["hSearch","hStatus","hPartner"].forEach(id=>$(id).addEventListener("input",renderHist));
+async function softDelSub(id){
+  if(!confirm("Move this submission to the recycle bin?")) return;
+  const { error } = await sb.from("partner_submissions").update({deleted_at:new Date().toISOString()}).eq("id",id);
+  if(error) return toast(error.message);
+  toast("Moved to bin"); loadSubs();
+}
+function openReview(id){
+  curSub = SUBS.find(s=>s.id===id); if(!curSub) return;
+  $("rvTitle").textContent = curSub.kind==='price_change' ? "Price change request" : "New product";
+  $("rvMeta").textContent = ptName(curSub.partner_id)+" · "+fday(curSub.created_at)+(curSub.note?' · '+curSub.note:'');
+  const gal = (curSub.images&&curSub.images.length?curSub.images:(curSub.image_url?[curSub.image_url]:[]));
+  $("rvGallery").innerHTML = gal.map(u=>'<img src="'+u+'" alt="" style="height:120px;border-radius:10px;cursor:pointer" onclick="window.open(this.src)">').join("");
+  $("rvDesc").value = curSub.description||"";
+  $("rvName").value=curSub.name; $("rvBrand").value=curSub.brand||"";
+  $("rvPrice").value=curSub.price; $("rvQty").value=curSub.qty; $("rvReason").value="";
+  const isPc = curSub.kind==='price_change';
+  ["rvName","rvBrand","rvQty","rvCat","rvDesc"].forEach(i=>$(i).disabled=isPc);
+  openSheet("revSheet");
+}
+$("rvApprove").addEventListener("click", async ()=>{
+  const price=Number($("rvPrice").value);
+  if(!price||price<=0) return toast("Enter a valid price");
+  if(curSub.kind==='new' && !$("rvCat").value) return toast("Choose a category");
+  $("rvApprove").disabled=true; buzz();
+  const gal = (curSub.images&&curSub.images.length?curSub.images:(curSub.image_url?[curSub.image_url]:null));
+  const { error } = await sb.rpc("admin_approve_submission",{
+    p_sub_id:curSub.id, p_name:$("rvName").value.trim(), p_brand:$("rvBrand").value.trim(),
+    p_price:price, p_qty:Number($("rvQty").value)||0,
+    p_category_id:$("rvCat").value||null, p_image_url:curSub.image_url,
+    p_images:gal, p_description:$("rvDesc").value.trim() });
+  $("rvApprove").disabled=false;
+  if(error) return toast(error.message);
+  toast("Approved — live in the store ✓"); closeSheets(); loadSubs(); loadBase();
+});
+$("rvReject").addEventListener("click", async ()=>{
+  const reason=$("rvReason").value.trim();
+  if(!reason) return toast("Give the partner a reason");
+  $("rvReject").disabled=true; buzz();
+  const { error } = await sb.from("partner_submissions").update({status:"rejected",reviewed_at:new Date().toISOString(),reject_reason:reason}).eq("id",curSub.id);
+  $("rvReject").disabled=false;
+  if(error) return toast(error.message);
+  toast("Rejected — partner can see the reason"); closeSheets(); loadSubs();
+});
+
+// ---------- partners ----------
+function renderPartners(){
+  $("partList").innerHTML = PARTNERS.length ? PARTNERS.map(p=>
+    '<div class="row"><div><b>'+(p.business_name||p.name)+'</b><div class="mut">'+p.name+' · '+p.phone+'</div></div>'+
+    '<div style="display:flex;gap:6px"><span class="pill '+(p.active?'ok':'grey')+'">'+(p.active?'Active':'Off')+'</span>'+
+    '<button class="btn ghost sm" data-pt="'+p.id+'">Edit</button></div></div>'
+  ).join("") : '<div class="empty">No partners yet. Tap + Add partner.</div>';
+  document.querySelectorAll("[data-pt]").forEach(b=>b.addEventListener("click",()=>openPt(b.dataset.pt)));
+}
+function openPt(id){
+  editPt=id||null;
+  const p=PARTNERS.find(x=>x.id===id)||{};
+  $("ptTitle").textContent=id?"Edit partner":"Add partner";
+  $("ptName").value=p.name||""; $("ptBiz").value=p.business_name||"";
+  $("ptPhone").value=p.phone||""; $("ptPin").value="";
+  $("ptPin").placeholder=id?"blank = keep current":"e.g. 4321";
+  $("ptActive").checked=p.active!==false;
+  openSheet("ptSheet");
+}
+$("addPartner").addEventListener("click",()=>openPt(null));
+$("ptSave").addEventListener("click", async ()=>{
+  const name=$("ptName").value.trim(), phone=$("ptPhone").value.trim(), pin=$("ptPin").value.trim();
+  if(!name||!phone) return toast("Name and phone are required");
+  if(!editPt && pin.length<4) return toast("PIN must be at least 4 digits");
+  $("ptSave").disabled=true; buzz();
+  const { error } = await sb.rpc("admin_upsert_partner",{p_id:editPt,p_name:name,p_business:$("ptBiz").value.trim(),p_phone:phone,p_pin:pin||null,p_active:$("ptActive").checked});
+  $("ptSave").disabled=false;
+  if(error) return toast(error.message);
+  toast(editPt?"Partner updated ✓":"Partner added ✓ — share phone + PIN and partner.html link");
+  closeSheets(); loadBase();
+});
+
+// ---------- docs ----------
+async function loadDocs(){
+  const { data, error } = await sb.from("trade_docs").select("*").is("deleted_at",null).order("created_at",{ascending:false}).limit(150);
+  if(error) return toast(error.message);
+  DOCS=data||[]; renderDocs();
+}
+function renderDocs(){
+  const q=$("dSearch").value.trim().toUpperCase(), st=$("dStatus").value;
+  const rows=DOCS.filter(d=>(!st||d.status===st)&&(!q||d.code.includes(q)));
+  $("docList").innerHTML = rows.length ? rows.map(d=>
+    '<div class="row" role="button" tabindex="0" data-dd="'+d.id+'"><div><b>'+d.code+'</b><div class="mut">'+
+    (d.doc_type==='PO'?'Buy from ':'Sell to ')+ptName(d.partner_id)+' · '+fday(d.created_at)+'</div></div>'+
+    '<div style="text-align:right"><b>'+inr(d.total)+'</b><div><span class="pill '+(d.status==='cancelled'?'no':d.status==='issued'?'wait':'ok')+'">'+d.status+'</span></div></div></div>'
+  ).join("") : '<div class="empty">No documents.</div>';
+  document.querySelectorAll("[data-dd]").forEach(el=>{
+    const open=()=>openDocDetail(DOCS.find(d=>d.id===el.dataset.dd));
+    el.addEventListener("click",open);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter")open();});
+  });
+}
+["dSearch","dStatus"].forEach(id=>$(id).addEventListener("input",renderDocs));
+
+// new doc
+function itemRowHTML(){
+  const opts='<option value="">(no link — name only)</option>'+PRODUCTS.map(p=>'<option value="'+p.id+'" data-price="'+p.price+'" data-name="'+p.name.replace(/"/g,'&quot;')+'">'+p.name+'</option>').join("");
+  return '<div class="itRow"><select class="itProd">'+opts+'</select><input class="itQty" inputmode="numeric" placeholder="qty"><input class="itPrice" inputmode="numeric" placeholder="₹"><button type="button" class="itDel">✕</button></div>';
+}
+function ndRecalc(){
+  let sub=0;
+  document.querySelectorAll("#ndItems .itRow").forEach(r=>{
+    sub += (Number(r.querySelector(".itQty").value)||0)*(Number(r.querySelector(".itPrice").value)||0);
+  });
+  const g=Number($("ndGst").value)||0, gst=Math.round(sub*g/100), t=sub+gst;
+  $("ndSub").textContent="Subtotal "+inr(sub)+" + GST("+g+"%) "+inr(gst);
+  $("ndTotal").textContent=inr(t);
+  return t;
+}
+$("ndGst").addEventListener("change", ndRecalc);
+function ndBindRow(r){
+  r.querySelector(".itDel").addEventListener("click",()=>{r.remove();ndRecalc();});
+  r.querySelector(".itProd").addEventListener("change",e=>{
+    const o=e.target.selectedOptions[0];
+    if(o && o.dataset.price) r.querySelector(".itPrice").value=o.dataset.price;
+    ndRecalc();
+  });
+  ["input","change"].forEach(ev=>{ r.querySelector(".itQty").addEventListener(ev,ndRecalc); r.querySelector(".itPrice").addEventListener(ev,ndRecalc); });
+}
+$("ndAdd").addEventListener("click",()=>{ $("ndItems").insertAdjacentHTML("beforeend",itemRowHTML()); ndBindRow($("ndItems").lastElementChild); });
+$("addDoc").addEventListener("click",()=>{
+  if(!PARTNERS.filter(p=>p.active).length) return toast("Add a partner first");
+  $("ndItems").innerHTML=""; $("ndNotes").value=""; $("ndTotal").textContent="₹0";
+  $("ndAdd").click(); openSheet("ndSheet");
+});
+$("ndSave").addEventListener("click", async ()=>{
+  const items=[];
+  document.querySelectorAll("#ndItems .itRow").forEach(r=>{
+    const sel=r.querySelector(".itProd"), qty=Number(r.querySelector(".itQty").value)||0, price=Number(r.querySelector(".itPrice").value)||0;
+    const o=sel.selectedOptions[0];
+    const name = sel.value ? o.dataset.name : (o?o.textContent:"item");
+    if(qty>0&&price>0) items.push({product_id:sel.value||null,name,qty,price});
+  });
+  if(!items.length) return toast("Add at least one item with qty and price");
+  $("ndSave").disabled=true; buzz();
+  try{
+    const {data:code,error:e1}=await sb.rpc("next_trade_code",{p_type:$("ndType").value});
+    if(e1) throw e1;
+    const total=ndRecalc();
+    const {data,error:e2}=await sb.from("trade_docs").insert({code,doc_type:$("ndType").value,partner_id:$("ndPartner").value,items,total,gst_percent:Number($("ndGst").value)||0,notes:$("ndNotes").value.trim()||null}).select().single();
+    if(e2) throw e2;
+    toast(code+" created ✓"); closeSheets(); loadDocs(); openDocDetail(data);
+  }catch(e){ toast(e.message||"Could not create"); }
+  $("ndSave").disabled=false;
+});
+
+function openDocDetail(d){
+  if(!d) return; curDoc=d;
+  $("ddTitle").textContent=d.code+" · "+(d.doc_type==='PO'?'Buy from ':'Sell to ')+ptName(d.partner_id);
+  $("ddMeta").textContent=fday(d.created_at)+" · status: "+d.status+(d.notes?' · '+d.notes:'');
+  const items=Array.isArray(d.items)?d.items:JSON.parse(d.items||"[]");
+  const sub=items.reduce((a,i)=>a+i.qty*i.price,0), g=d.gst_percent||0, gstAmt=Math.round(sub*g/100);
+  $("ddItems").innerHTML=items.map(i=>'<div class="row"><span>'+i.name+' × '+i.qty+(i.product_id?'':' <span class="pill grey">not linked</span>')+'</span><b>'+inr(i.qty*i.price)+'</b></div>').join("")+
+    (g?'<div class="row"><span class="mut">Subtotal</span><span>'+inr(sub)+'</span></div><div class="row"><span class="mut">GST '+g+'%</span><span>'+inr(gstAmt)+'</span></div>':'')+
+    '<div class="row"><b>Total</b><b>'+inr(d.total)+'</b></div>';
+  const qr=qrcode(0,"M"); qr.addData("https://profixworld.com/trade.html#q="+d.code); qr.make();
+  $("ddQr").src=qr.createDataURL(6,8); $("ddCode").textContent=d.code+" — partner can scan this with any camera";
+  const acts=['<button class="btn ghost" id="actNotify">📱 Send to partner on WhatsApp</button>',
+              '<button class="btn ghost" id="actPrint">🖨 Print QR sticker</button>'];
+  if(d.status==='issued'&&d.doc_type==='PO') acts.push('<button class="btn" id="actRecv">📦 Mark received (+stock)</button>');
+  if(d.status==='issued'&&d.doc_type==='SL') acts.push('<button class="btn" id="actDisp">🚚 Mark dispatched (−stock)</button>');
+  if(['received','dispatched'].includes(d.status)) acts.push('<button class="btn ghost" id="actPaid">💰 Mark paid</button>');
+  if(d.status==='issued') acts.push('<button class="btn red" id="actCancel">Cancel document</button>');
+  acts.push('<button class="btn ghost" id="actDel">🗑 Move to bin</button>');
+  $("ddActions").innerHTML=acts.join("");
+  const bind=(id,fn)=>{const b=$(id); if(b) b.addEventListener("click",fn);};
+  bind("actNotify", ()=>{
+    const p=PARTNERS.find(x=>x.id===d.partner_id); if(!p) return toast("Partner not found");
+    const msg="ProFix "+d.code+" ("+(d.doc_type==='PO'?'purchase from you':'sale to you')+")\n"+
+      items.map(i=>"• "+i.name+" × "+i.qty+" = "+inr(i.qty*i.price)).join("\n")+
+      (g?"\nSubtotal "+inr(sub)+" + GST "+g+"% "+inr(gstAmt):"")+
+      "\nTotal: "+inr(d.total)+"\nStatus: "+d.status+
+      "\nView: https://profixworld.com/trade.html#q="+d.code;
+    window.open("https://wa.me/91"+p.phone+"?text="+encodeURIComponent(msg));
+  });
+  bind("actPrint", ()=>{
+    const w=window.open("","_blank","width=420,height=560");
+    w.document.write('<html><head><title>'+d.code+'</title></head><body style="font-family:sans-serif;text-align:center;padding:20px">'+
+      '<h2 style="margin:6px 0">⚡ ProFix</h2><h1 style="margin:6px 0;letter-spacing:1px">'+d.code+'</h1>'+
+      '<div>'+(d.doc_type==='PO'?'Purchase from ':'Sale to ')+ptName(d.partner_id)+' · '+fday(d.created_at)+'</div>'+
+      '<img src="'+$("ddQr").src+'" style="width:280px;margin:14px 0">'+
+      '<div style="text-align:left;max-width:320px;margin:0 auto">'+items.map(i=>'<div>'+i.name+' × '+i.qty+' — '+inr(i.qty*i.price)+'</div>').join("")+'</div>'+
+      (g?'<div>GST '+g+'%: '+inr(gstAmt)+'</div>':'')+
+      '<h3>Total: '+inr(d.total)+'</h3>'+
+      '<div style="font-size:12px;color:#666">Scan with any camera to view this document</div>'+
+      '</body></html>');
+    w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
+  });
+  bind("actRecv", async()=>{ if(!confirm("Add these quantities to stock?"))return; try{const n=await sbr("receive_trade_doc",{p_doc_id:d.id}); toast("Received ✓ stock updated for "+n+" items"); closeSheets(); loadDocs(); loadBase();}catch(e){toast(e.message);} });
+  bind("actDisp", async()=>{ if(!confirm("Reduce stock for these quantities?"))return; try{const n=await sbr("dispatch_trade_doc",{p_doc_id:d.id}); toast("Dispatched ✓ stock updated for "+n+" items"); closeSheets(); loadDocs(); loadBase();}catch(e){toast(e.message);} });
+  bind("actPaid", async()=>{ const{error}=await sb.from("trade_docs").update({status:"paid"}).eq("id",d.id); if(error)return toast(error.message); toast("Marked paid ✓"); closeSheets(); loadDocs(); });
+  bind("actCancel", async()=>{ if(!confirm("Cancel "+d.code+"?"))return; const{error}=await sb.from("trade_docs").update({status:"cancelled"}).eq("id",d.id); if(error)return toast(error.message); toast("Cancelled"); closeSheets(); loadDocs(); });
+  bind("actDel", async()=>{ if(!confirm("Move "+d.code+" to the recycle bin?"))return; const{error}=await sb.from("trade_docs").update({deleted_at:new Date().toISOString()}).eq("id",d.id); if(error)return toast(error.message); toast("Moved to bin"); closeSheets(); loadDocs(); });
+  openSheet("ddSheet");
+}
+async function sbr(fn,args){ const{data,error}=await sb.rpc(fn,args); if(error)throw error; return data; }
+
+// ---------- QR scanner (BarcodeDetector where available, manual fallback) ----------
+$("scanDoc").addEventListener("click", async ()=>{
+  const openByCode = code => {
+    const m = String(code).match(/(PO|SL)-\d{4}-\d{4}/i);
+    if(!m) return toast("Not a ProFix document code");
+    const c = m[0].toUpperCase();
+    const d = DOCS.find(x=>x.code===c);
+    if(d) return openDocDetail(d);
+    sb.from("trade_docs").select("*").eq("code",c).maybeSingle()
+      .then(({data})=> data ? openDocDetail(data) : toast(c+" not found"));
+  };
+  if(!("BarcodeDetector" in window)){
+    const c = prompt("Scanner not supported on this browser.\nType the document code (e.g. PO-2026-0042):");
+    if(c) openByCode(c);
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+    const video = document.createElement("video");
+    video.srcObject = stream; video.setAttribute("playsinline",""); await video.play();
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;background:#000;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px";
+    video.style.cssText = "width:100%;max-height:70vh;object-fit:cover";
+    const stopBtn = document.createElement("button");
+    stopBtn.textContent = "Cancel"; stopBtn.className = "btn ghost"; stopBtn.style.maxWidth = "200px";
+    overlay.appendChild(video); overlay.appendChild(stopBtn); document.body.appendChild(overlay);
+    const det = new BarcodeDetector({formats:["qr_code"]});
+    let live = true;
+    const stop = ()=>{ live=false; stream.getTracks().forEach(t=>t.stop()); overlay.remove(); };
+    stopBtn.addEventListener("click", stop);
+    const tick = async ()=>{
+      if(!live) return;
+      try{
+        const codes = await det.detect(video);
+        if(codes.length){ const v=codes[0].rawValue; stop(); buzz(); openByCode(v); return; }
+      }catch(e){}
+      requestAnimationFrame(tick);
+    };
+    tick();
+  }catch(e){
+    const c = prompt("Camera unavailable. Type the document code:");
+    if(c) openByCode(c);
+  }
+});
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("/sw.js"); }catch(e){} }
+
+// ---------- bin ----------
+async function loadBin(){
+  const [s,d]=await Promise.all([
+    sb.from("partner_submissions").select("*").not("deleted_at","is",null).order("deleted_at",{ascending:false}).limit(80),
+    sb.from("trade_docs").select("*").not("deleted_at","is",null).order("deleted_at",{ascending:false}).limit(80)
+  ]);
+  const subs=s.data||[], docs=d.data||[];
+  const mk=(label,id,tbl)=>'<div style="display:flex;gap:6px"><button class="btn ghost sm" data-res="'+tbl+':'+id+'">Restore</button><button class="btn red sm" data-purge="'+tbl+':'+id+'">Delete forever</button></div>';
+  $("binList").innerHTML = (subs.length||docs.length) ?
+    subs.map(x=>'<div class="row"><div><b>'+x.name+'</b><div class="mut">submission · '+ptName(x.partner_id)+' · deleted '+fday(x.deleted_at)+'</div></div>'+mk(x.name,x.id,'partner_submissions')+'</div>').join("")+
+    docs.map(x=>'<div class="row"><div><b>'+x.code+'</b><div class="mut">document · '+ptName(x.partner_id)+' · deleted '+fday(x.deleted_at)+'</div></div>'+mk(x.code,x.id,'trade_docs')+'</div>').join("")
+    : '<div class="empty">Bin is empty.</div>';
+  document.querySelectorAll("[data-res]").forEach(b=>b.addEventListener("click",async()=>{
+    const [tbl,id]=b.dataset.res.split(":");
+    const{error}=await sb.from(tbl).update({deleted_at:null}).eq("id",id);
+    if(error)return toast(error.message); toast("Restored ✓"); loadBin(); loadSubs(); loadDocs();
+  }));
+  document.querySelectorAll("[data-purge]").forEach(b=>b.addEventListener("click",async()=>{
+    if(!confirm("Delete FOREVER? This cannot be undone."))return;
+    const [tbl,id]=b.dataset.purge.split(":");
+    const{error}=await sb.from(tbl).delete().eq("id",id);
+    if(error)return toast(error.message); toast("Deleted forever"); loadBin();
+  }));
+}
+
+// ---------- sheets / nav / boot ----------
+function openSheet(id){ $("sBg").classList.add("open"); $(id).classList.add("open"); }
+function closeSheets(){ $("sBg").classList.remove("open"); document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("open")); }
+$("sBg").addEventListener("click", closeSheets);
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  ["Apr","Part","Docs","Bin"].forEach(p=>$("p"+p).classList.toggle("hide", p!==b.dataset.p));
+  if(b.dataset.p==="Apr") loadSubs();
+  if(b.dataset.p==="Docs") loadDocs();
+  if(b.dataset.p==="Bin") loadBin();
+}));
+$("loginBtn").addEventListener("click",login);
+$("pw").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+$("outBtn").addEventListener("click",async()=>{await sb.auth.signOut();location.reload();});
+setInterval(()=>{ if(!document.hidden && !$("vApp").classList.contains("hide") && !$("pApr").classList.contains("hide")) loadSubs(); },60000);
+sb.auth.getSession().then(({data})=>{ if(data&&data.session) boot(); });
+
+// ---- install app button (always visible; native prompt when available) ----
+let _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();_deferredInstall=e;});
+document.addEventListener("DOMContentLoaded",()=>{const b=document.getElementById("installBtn");if(b){b.classList.remove("hide");b.addEventListener("click",async()=>{
+  if(_deferredInstall){
+    _deferredInstall.prompt();
+    const {outcome}=await _deferredInstall.userChoice;
+    if(outcome==="accepted") _deferredInstall=null;
+    return;
+  }
+  _pfInstallHelp(); return;
+  /* legacy fallback below (unreachable) */
+  const ua=navigator.userAgent, isStandalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+  if(isStandalone){ alert("Already installed \u2705 \u2014 look for the ProFix icon on your home screen."); return; }
+  const isIOS=/iphone|ipad|ipod/i.test(ua);
+  const isSamsung=/SamsungBrowser/i.test(ua);
+  const isFirefox=/Firefox|FxiOS/i.test(ua);
+  if(isIOS){ alert("To install on iPhone:\n1. Tap the Share button \u2b06 at the bottom of Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"); return; }
+  if(isSamsung){ alert("To install:\nTap the menu \u2630 at the bottom \u2192 \"Add page to\" \u2192 \"Home screen\""); return; }
+  if(isFirefox){ alert("Firefox on Android does not install web apps well. Please open this page in Chrome and tap Install again."); return; }
+  // Default = Chrome/Edge that hasn\u2019t fired beforeinstallprompt yet
+  alert("To install:\n1. Tap the menu \u22ee (top-right)\n2. Choose \"Install app\" or \"Add to Home screen\"\n\nIf you don\u2019t see it, wait 20 seconds after the page loads and try again \u2014 or you may already have it installed (check your home screen).");
+});}});
+
+function _pfInAppBrowser(){
+  var u=navigator.userAgent.toLowerCase();
+  return u.indexOf("; wv")>-1||u.indexOf("fban")>-1||u.indexOf("fbav")>-1||u.indexOf("fb_iab")>-1
+       ||u.indexOf("instagram")>-1||u.indexOf("micromessenger")>-1||u.indexOf("snapchat")>-1;
+}
+function _pfOpenInChrome(){
+  location.href="intent://"+location.host+location.pathname+location.search+"#Intent;scheme=https;package=com.android.chrome;end";
+}
+function _pfInstallHelp(){
+  var u=navigator.userAgent.toLowerCase();
+  if(window.matchMedia("(display-mode: standalone)").matches||navigator.standalone){
+    alert("Already installed \u2705 \u2014 look for the icon on your home screen."); return;
+  }
+  // An in-app browser (WhatsApp, Instagram, Facebook) is a WebView. It can ONLY make a
+  // shortcut, never a real installed app. This is the usual reason people get a shortcut.
+  if(_pfInAppBrowser()){
+    if(u.indexOf("android")>-1){
+      if(confirm("You opened this from inside another app (like WhatsApp).\n\nThat can only make a SHORTCUT \u2014 not a real app icon.\n\nTap OK to reopen in Chrome, then tap the Install button again."))
+        _pfOpenInChrome();
+    } else {
+      alert("You opened this from inside another app (like WhatsApp).\n\nThat can only make a shortcut.\n\nTap the \u2026 menu and choose \"Open in Safari\" (iPhone) or \"Open in Chrome\" (Android), then tap Install again.");
+    }
+    return;
+  }
+  if(u.indexOf("iphone")>-1||u.indexOf("ipad")>-1||u.indexOf("ipod")>-1){
+    alert("To install on iPhone:\n1. Tap Share \u2b06 at the bottom of Safari\n2. Scroll down \u2192 \"Add to Home Screen\"\n3. Tap Add"); return;
+  }
+  if(u.indexOf("samsungbrowser")>-1){
+    alert("To install:\nMenu \u2630 (bottom) \u2192 \"Add page to\" \u2192 \"Home screen\""); return;
+  }
+  if(u.indexOf("firefox")>-1||u.indexOf("fxios")>-1){
+    alert("Firefox cannot install web apps properly.\nPlease open this page in Chrome, then tap Install."); return;
+  }
+  alert("Chrome is not offering the install yet.\n\nAlmost always this means an OLD ProFix app is still on this phone:\n\n1. Long-press EVERY old ProFix icon \u2192 Uninstall\n2. Open profixworld.com/pwa-check \u2192 tap \"Reset ProFix on this phone\"\n3. Close Chrome fully, reopen, try Install again.");
+}
+
+</script>
+</body>
+</html>

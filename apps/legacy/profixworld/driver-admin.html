@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProFix â€” Driver Admin</title>
+<style>
+  :root{--blue:#0f3d5c;--green:#1e8449;--red:#b03a2e;--amber:#8a5a00;--bg:#f2f5f8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:#1a1a1a}
+  header{background:var(--blue);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+  header h1{font-size:17px}
+  main{padding:14px;max-width:860px;margin:0 auto}
+  .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  label{display:block;font-size:13px;color:#555;margin:8px 0 3px}
+  input,select{width:100%;padding:10px;font-size:15px;border:1px solid #c9d6e0;border-radius:8px}
+  button{padding:10px 16px;font-size:14px;font-weight:600;border:0;border-radius:8px;background:var(--blue);color:#fff;margin-top:10px;cursor:pointer}
+  button.go{background:var(--green)} button.warn{background:var(--red)} button.sec{background:#e4ebf1;color:var(--blue)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tabs button{margin:0;background:#e4ebf1;color:var(--blue)}
+  .tabs button.on{background:var(--blue);color:#fff}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#eaf1f7;text-align:left;padding:7px}
+  td{border-bottom:1px solid #eee;padding:7px;vertical-align:top}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:#e4ebf1;color:var(--blue)}
+  .tag.pending{background:#fdf3e7;color:var(--amber)} .tag.active{background:#eaf7ec;color:var(--green)}
+  .tag.blocked,.tag.cancelled,.tag.rejected{background:#fde8e8;color:var(--red)} .tag.dropped{background:#eee;color:#666}
+  .tag.under_review{background:#eef2ff;color:#3b4cca}
+  .muted{font-size:12px;color:#777}
+  .drv{border:1px solid #e4ebf1;border-radius:10px;padding:12px;margin-top:10px}
+  .drvtop{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:flex-start}
+  .drvtop b{font-size:15px}
+  .drvgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin:10px 0;font-size:13px}
+  .drvgrid .full{grid-column:1/-1}
+  .drvgrid .k{display:block;font-size:10px;color:#8a97a3;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+  .drvact{border-top:1px dashed #e0e6ec;padding-top:6px;display:flex;flex-direction:column;gap:8px}
+  .drvact .row{align-items:flex-end}
+  .drvact label{margin:0 0 3px}
+  .drvdocs{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 8px}
+  .drvdocs button{margin:0;padding:6px 12px;font-size:13px}
+  .hidden{display:none}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;opacity:0;transition:.3s;z-index:9}
+  #toast.show{opacity:1}
+  .otp{font-size:16px;font-weight:800;letter-spacing:3px}
+</style>
+</head>
+<body>
+<header><h1>ProFix â€” Driver Admin</h1><span class="muted" style="color:#cdd" id="who"></span></header>
+<main>
+
+<section id="scrLogin">
+  <div class="card" style="max-width:380px;margin:40px auto">
+    <h3>Owner Login</h3>
+    <label>Email</label><input id="em" type="email">
+    <label>Password</label><input id="pw" type="password">
+    <button onclick="login()" style="width:100%">Login</button>
+    <p class="muted" style="margin-top:8px">Owner/Mani accounts only â€” driver data is RLS-walled.</p>
+  </div>
+</section>
+
+<section id="scrApp" class="hidden">
+  <div class="tabs">
+    <button class="on" id="tb0" onclick="tab(0)">Drivers</button>
+    <button id="tb1" onclick="tab(1)">ï¼‹ Create Job</button>
+    <button id="tb2" onclick="tab(2)">Job Board</button>
+    <button id="tb3" onclick="tab(3)">Payouts</button>
+    <button class="sec" onclick="sb.auth.signOut().then(()=>location.reload())" style="margin-left:auto">Logout</button>
+  </div>
+
+  <!-- DRIVERS -->
+  <div id="pane0" class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <h3>Drivers &amp; onboarding</h3>
+      <select id="fltStatus" onchange="renderDrivers()" style="width:auto">
+        <option value="">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="under_review">Under review</option>
+        <option value="active">Active</option>
+        <option value="rejected">Rejected</option>
+        <option value="blocked">Blocked</option>
+      </select>
+    </div>
+    <div class="muted">Review each applicant's details, set an HR status + notes, then <b>Activate</b> (auto-generates Code + PIN and opens WhatsApp). Driver data is RLS-walled â€” owners only.</div>
+    <div id="tblDrivers"></div>
+  </div>
+
+  <!-- CREATE JOB -->
+  <div id="pane1" class="card hidden">
+    <h3>Create Pickup / Drop Job</h3>
+    <div class="row">
+      <div><label>Type</label><select id="jType"><option value="pickup">Device pickup (from customer)</option><option value="drop">Device drop (to customer)</option><option value="return">Return</option><option value="order_delivery">Order delivery (store order)</option><option value="parts_run">Parts run (buy/collect parts)</option><option value="shop_transfer">Shop-to-shop transfer</option></select></div>
+      <div><label>Linked to</label><select id="jRefKind"><option value="store_repair">Doorstep repair</option><option value="store_order">Online order</option><option value="crm_ticket">CRM ticket</option><option value="other">Other</option></select></div>
+      <div><label>Ref ID</label><input id="jRefId" placeholder="ticket/order id"></div>
+    </div>
+    <div class="row">
+      <div><label>Customer name</label><input id="jCust"></div>
+      <div><label>Customer phone</label><input id="jPhone" inputmode="tel"></div>
+    </div>
+    <label>From address</label><input id="jFrom">
+    <label>To address</label><input id="jTo">
+    <div class="row">
+      <div><label>Shop</label><select id="jShop"></select></div>
+      <div><label>Driver fee â‚¹</label><input id="jFee" inputmode="numeric" value="60"></div>
+      <div><label>Assign to (blank = broadcast)</label><select id="jAssign"><option value="">Broadcast â€” first accept wins</option></select></div>
+    </div>
+    <button class="go" onclick="createJob()">Create job + generate OTPs</button>
+    <div id="jobResult" class="card hidden" style="background:#eaf7ec;margin-top:12px"></div>
+  </div>
+
+  <!-- JOB BOARD -->
+  <div id="pane2" class="card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3>Job Board</h3><button class="sec" onclick="loadJobs()">â†» Refresh</button></div>
+    <div style="overflow-x:auto"><table id="tblJobs"></table></div>
+  </div>
+
+  <!-- PAYOUTS -->
+  <div id="pane3" class="card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center"><h3>Driver Payouts</h3><button class="sec" onclick="loadPayouts()">â†» Refresh</button></div>
+    <div style="overflow-x:auto"><table id="tblPay"></table></div>
+  </div>
+</section>
+</main>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL  = "https://toxwbjofyglbyjanxmzv.supabase.co";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRveHdiam9meWdsYnlqYW54bXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2ODkxODEsImV4cCI6MjA5NzI2NTE4MX0.H1C2X7KiPRpx33mLlkfSUSDvRr7hIsrIeWZLBjnH9MQ";
+const sb = supabase.createClient(SB_URL, SB_ANON);
+let drivers=[], shops=[], ownerEmail="";
+const DRV_STATUSES=["pending","under_review","active","rejected","blocked"];
+
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+function tab(i){for(let k=0;k<4;k++){document.getElementById("pane"+k).classList.toggle("hidden",k!==i);document.getElementById("tb"+k).classList.toggle("on",k===i)}
+  if(i===0)loadDrivers(); if(i===1)loadShopOptions(); if(i===2)loadJobs(); if(i===3)loadPayouts()}
+function esc(s){return (s??"").toString().replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]))}
+
+async function login(){
+  const {error}=await sb.auth.signInWithPassword({email:em.value.trim(),password:pw.value});
+  if(error)return toast(error.message);
+  enter();
+}
+async function enter(){
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user)return;
+  ownerEmail=user.email;
+  document.getElementById("who").textContent=user.email;
+  document.getElementById("scrLogin").classList.add("hidden");
+  document.getElementById("scrApp").classList.remove("hidden");
+  loadDrivers();
+}
+
+async function loadDrivers(){
+  const {data,error}=await sb.from("profix_drivers").select("*").order("created_at",{ascending:false});
+  if(error)return toast(error.message+" (owner login required)");
+  drivers=data||[]; renderDrivers();
+}
+function fld(k,v){ return v?`<div><span class="k">${k}</span>${esc(v)}</div>`:""; }
+function statusSelect(id,cur){
+  return `<select id="ds${id}">`+DRV_STATUSES.map(s=>`<option value="${s}"${s===cur?" selected":""}>${s.replace("_"," ")}</option>`).join("")+`</select>`;
+}
+function renderDrivers(){
+  const flt=document.getElementById("fltStatus").value;
+  const list=drivers.filter(d=>!flt||d.status===flt);
+  const box=document.getElementById("tblDrivers");
+  if(!list.length){box.innerHTML=`<p class="muted" style="margin-top:12px">No drivers${flt?" with status â€œ"+flt.replace("_"," ")+"â€":" registered yet"}.</p>`;return}
+  box.innerHTML=list.map(d=>{
+    const veh=[d.vehicle_type,d.vehicle_number].filter(Boolean).join(" Â· ")||d.vehicle||"";
+    const rev=d.reviewed_at?`Reviewed ${new Date(d.reviewed_at).toLocaleDateString()}${d.reviewed_by?" Â· "+esc(d.reviewed_by.split("@")[0]):""}`:"";
+    return `<div class="drv">
+      <div class="drvtop">
+        <div><b>${esc(d.full_name)}</b>
+          <span class="tag ${d.status}">${d.status.replace("_"," ")}</span>${d.available?' <span class="tag active">online</span>':''}
+          <div class="muted">${esc(d.phone)}${d.area?" Â· "+esc(d.area):""}</div></div>
+        <div class="muted" style="text-align:right">#${d.id}<br>${new Date(d.created_at).toLocaleDateString()}</div>
+      </div>
+      <div class="drvgrid">
+        ${fld("Vehicle",veh)}
+        ${fld("Licence",d.license_last4?"â€¦"+d.license_last4:"")}
+        ${fld("UPI",d.upi_id)}
+        ${fld("Emergency",d.emergency_contact)}
+        ${d.address?`<div class="full"><span class="k">Address</span>${esc(d.address)}</div>`:""}
+        ${rev?`<div class="full muted">${rev}</div>`:""}
+      </div>
+      ${(d.id_doc_path||d.photo_path)?`<div class="drvdocs">
+        ${d.id_doc_path?`<button class="sec" onclick="viewDoc('${esc(d.id_doc_path)}')">ðŸ“„ View ID</button>`:''}
+        ${d.photo_path?`<button class="sec" onclick="viewDoc('${esc(d.photo_path)}')">ðŸ–¼ï¸ View photo</button>`:''}
+      </div>`:'<div class="muted" style="margin:2px 0 8px">No documents uploaded.</div>'}
+      <div class="drvact">
+        <div class="row">
+          <div style="min-width:120px"><label>Code</label><input id="dc${d.id}" value="${esc(d.driver_code||"")}" placeholder="PF-DRV-${String(d.id).padStart(3,"0")}"></div>
+          <div style="max-width:90px"><label>PIN</label><input id="dp${d.id}" value="${esc(d.pin||"")}" placeholder="PIN" maxlength="6"></div>
+          <button class="go" onclick="approve(${d.id})" style="flex:0 0 auto">${d.status==='active'?'Save code':'Activate'}</button>
+          ${d.driver_code?`<button class="sec" onclick="waShare(${d.id})" style="flex:0 0 auto">WhatsApp</button>`:''}
+        </div>
+        <div class="row">
+          <div style="max-width:150px"><label>HR status</label>${statusSelect(d.id,d.status)}</div>
+          <div style="flex:2"><label>Review notes</label><input id="dn${d.id}" value="${esc(d.review_notes||"")}" placeholder="verification notesâ€¦"></div>
+          <button class="sec" onclick="saveReview(${d.id})" style="flex:0 0 auto">Save review</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+async function approve(id){
+  const d=drivers.find(x=>x.id===id);
+  // Auto-generate credentials when the owner leaves them blank; typed values still win.
+  let code=document.getElementById("dc"+id).value.trim(), pin=document.getElementById("dp"+id).value.trim();
+  if(!code) code=`PF-DRV-${String(id).padStart(3,"0")}`;
+  if(!pin)  pin=String(Math.floor(1000+Math.random()*9000));
+  const {error}=await sb.from("profix_drivers")
+    .update({driver_code:code,pin,status:"active",reviewed_at:new Date().toISOString(),reviewed_by:ownerEmail}).eq("id",id);
+  if(error)return toast(error.message);
+  // Auto-share credentials on WhatsApp (was a separate manual button).
+  const phone=(d&&d.phone||"").replace(/\D/g,"").slice(-10);
+  if(phone){
+    const msg=`ProFix Driver login%0ACode: ${code}%0APIN: ${pin}%0AApp: https://profixworld.com/driver`;
+    open(`https://wa.me/91${phone}?text=${msg}`);
+    toast("Driver active â€” WhatsApp opened");
+  } else toast(`Driver active â€” Code ${code} / PIN ${pin}`);
+  loadDrivers();
+}
+async function viewDoc(path){
+  // Private bucket â€” mint a short-lived signed URL (owner has storage read policy).
+  const {data,error}=await sb.storage.from("driver-docs").createSignedUrl(path,3600);
+  if(error||!data) return toast("Could not open: "+(error&&error.message||"no url"));
+  open(data.signedUrl,"_blank");
+}
+async function saveReview(id){
+  const d=drivers.find(x=>x.id===id);
+  const status=document.getElementById("ds"+id).value;
+  const notes=document.getElementById("dn"+id).value.trim();
+  if(status==="active" && !(d&&d.driver_code)) return toast("Use Activate to set a Code + PIN before marking active");
+  const patch={status,review_notes:notes||null,reviewed_at:new Date().toISOString(),reviewed_by:ownerEmail};
+  if(status!=="active") patch.available=false;   // only active drivers can be online
+  const {error}=await sb.from("profix_drivers").update(patch).eq("id",id);
+  if(error)return toast(error.message);
+  toast("Review saved â€” "+status.replace("_"," "));
+  loadDrivers();
+}
+function waShare(id){
+  const d=drivers.find(x=>x.id===id); if(!d)return;
+  const msg=`ProFix Driver login%0ACode: ${d.driver_code}%0APIN: ${d.pin}%0AApp: https://profixworld.com/driver`;
+  open(`https://wa.me/91${(d.phone||"").replace(/\D/g,"").slice(-10)}?text=${msg}`);
+}
+
+async function loadShopOptions(){
+  if(!shops.length){
+    const {data}=await sb.from("profix_shops").select("*");
+    shops=data||[];
+  }
+  document.getElementById("jShop").innerHTML=shops.map(s=>`<option value="${s.id}">${esc(s.name||("Shop "+s.id))}</option>`).join("")||"<option value=''>â€”</option>";
+  if(!drivers.length)await loadDrivers();
+  document.getElementById("jAssign").innerHTML='<option value="">Broadcast â€” first accept wins</option>'+
+    drivers.filter(d=>d.status==="active").map(d=>`<option value="${d.id}">${esc(d.full_name)} (${esc(d.driver_code)})</option>`).join("");
+}
+async function createJob(){
+  const fee=Number(jFee.value)||0;
+  const {data,error}=await sb.rpc("driver_job_create",{
+    p_type:jType.value, p_ref_kind:jRefKind.value, p_ref_id:jRefId.value.trim(),
+    p_cust_name:jCust.value.trim(), p_cust_phone:jPhone.value.trim(),
+    p_from:jFrom.value.trim(), p_to:jTo.value.trim(),
+    p_shop:jShop.value?Number(jShop.value):null, p_fee:fee,
+    p_assigned:jAssign.value?Number(jAssign.value):null, p_notes:null});
+  if(error)return toast(error.message);
+  if(!data||!data.ok)return toast("Failed: "+(data&&data.err||"unknown"));
+  const custPh=(jPhone.value||"").replace(/\D/g,"").slice(-10);
+  const r=document.getElementById("jobResult");
+  r.classList.remove("hidden");
+  r.innerHTML=`<b>Job #${data.id} created.</b><br><br>
+    PICKUP OTP (give to the person handing over): <span class="otp">${data.pickup_otp}</span><br>
+    DROP OTP (give to the receiver): <span class="otp">${data.drop_otp}</span><br><br>
+    <button class="sec" onclick="open('https://wa.me/91${custPh}?text=ProFix: your handover OTP is ${data.pickup_otp}. Give it to the driver at pickup.')">WhatsApp pickup OTP to customer</button>
+    <div class="muted" style="margin-top:6px">Drop OTP goes to whoever receives (shop staff or customer) depending on job direction.</div>`;
+  toast("Job created");
+}
+
+async function loadJobs(){
+  const {data,error}=await sb.from("driver_jobs").select("*").order("created_at",{ascending:false}).limit(100);
+  if(error)return toast(error.message);
+  const dn=id=>{const d=drivers.find(x=>x.id===id);return d?esc(d.full_name):(id||"â€”")};
+  if(!drivers.length)await loadDrivers();
+  document.getElementById("tblJobs").innerHTML =
+    "<tr><th>#</th><th>Type / Ref</th><th>Route</th><th>Driver</th><th>Status</th><th>OTPs</th><th>Fee</th><th></th></tr>" +
+    (data||[]).map(j=>`<tr>
+      <td>${j.id}</td>
+      <td>${j.job_type}<br><span class="muted">${esc(j.ref_kind||"")} ${esc(j.ref_id||"")}</span></td>
+      <td>${esc(j.from_addr)} â†’<br>${esc(j.to_addr)}</td>
+      <td>${j.accepted_by?dn(j.accepted_by):(j.assigned_driver?("â†’ "+dn(j.assigned_driver)):"broadcast")}</td>
+      <td><span class="tag ${j.status==='dropped'?'dropped':(j.status==='cancelled'?'cancelled':'active')}">${j.status}</span></td>
+      <td class="muted">P:${j.pickup_otp} D:${j.drop_otp}</td>
+      <td>â‚¹${j.fee}</td>
+      <td>${["open","accepted"].includes(j.status)?`<button class="warn" onclick="cancelJob(${j.id})">Cancel</button>`:""}</td>
+    </tr>`).join("");
+}
+async function cancelJob(id){
+  const {error}=await sb.from("driver_jobs").update({status:"cancelled"}).eq("id",id);
+  if(error)return toast(error.message); loadJobs();
+}
+
+async function loadPayouts(){
+  const {data,error}=await sb.from("driver_payouts").select("*").order("created_at",{ascending:false}).limit(200);
+  if(error)return toast(error.message);
+  if(!drivers.length)await loadDrivers();
+  const dn=id=>{const d=drivers.find(x=>x.id===id);return d?esc(d.full_name):id};
+  document.getElementById("tblPay").innerHTML =
+    "<tr><th>Date</th><th>Driver</th><th>Job</th><th>Amount</th><th>Status</th><th></th></tr>" +
+    (data||[]).map(p=>`<tr>
+      <td>${new Date(p.created_at).toLocaleDateString()}</td>
+      <td>${dn(p.driver_id)}</td><td>#${p.job_id}</td><td>â‚¹${p.amount}</td>
+      <td><span class="tag ${p.status==='paid'?'active':'pending'}">${p.status}</span></td>
+      <td>${p.status==='unpaid'?`<button class="go" onclick="markPaid(${p.id})">Mark paid</button>`:''}</td>
+    </tr>`).join("");
+}
+async function markPaid(id){
+  const {error}=await sb.from("driver_payouts").update({status:"paid",paid_at:new Date().toISOString()}).eq("id",id);
+  if(error)return toast(error.message); loadPayouts();
+}
+
+sb.auth.getUser().then(({data:{user}})=>{ if(user) enter() });
+</script>
+</body>
+</html>
