@@ -24,8 +24,10 @@ app.get('/me', requireAuth, (c) => c.json({ user: c.get('user') }))
 import { entities, sequences, users, roles, audit } from './routes/sysadmin'
 // Phase 2: General Ledger module
 import { gl } from './routes/gl'
+// Phase 3: Inventory + Warehouse module
+import { inventory } from './routes/inventory'
 
-for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit', '/gl']) {
+for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit', '/gl', '/inv']) {
   app.use(p, requireAuth)
   app.use(`${p}/*`, requireAuth)
 }
@@ -35,5 +37,6 @@ app.route('/users', users)
 app.route('/roles', roles)
 app.route('/audit', audit)
 app.route('/gl', gl)
+app.route('/inv', inventory)
 
 export default app
