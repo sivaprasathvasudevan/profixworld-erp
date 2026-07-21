@@ -9,6 +9,8 @@ import { Sales } from './modules/Sales'
 import { Procurement } from './modules/Procurement'
 import { HR } from './modules/HR'
 import { Service } from './modules/Service'
+import { Assets } from './modules/Assets'
+import { Documents } from './modules/Documents'
 
 // The 12 ERP modules. Phase 1 fills in System Administration; later phases fill the rest.
 const MODULES = [
@@ -98,7 +100,9 @@ export function App() {
           {active === 'Procurement & Sourcing' && <Procurement entityId={entityId} />}
           {active === 'HR & Payroll' && <HR entityId={entityId} />}
           {active === 'Service Management' && <Service entityId={entityId} />}
-          {!['System Administration', 'General Ledger', 'Inventory', 'Warehouse', 'Sales & Marketing', 'Procurement & Sourcing', 'HR & Payroll', 'Service Management'].includes(active) &&
+          {active === 'Asset Management' && <Assets entityId={entityId} />}
+          {active === 'Document Management' && <Documents entityId={entityId} />}
+          {!['System Administration', 'General Ledger', 'Inventory', 'Warehouse', 'Sales & Marketing', 'Procurement & Sourcing', 'HR & Payroll', 'Service Management', 'Asset Management', 'Document Management'].includes(active) &&
             <p>This module is built in its phase — see CLAUDE.md and the phase prompts.</p>}
         </section>
       </main>

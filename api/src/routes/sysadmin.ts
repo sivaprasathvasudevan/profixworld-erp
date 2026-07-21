@@ -143,6 +143,129 @@ roles.put('/:id/privileges', requirePriv('sysadmin.roles.write'), async (c) => {
   return c.json({ ok: true })
 })
 
+// ---------------------------------------------------------------- data import/export (Phase 9)
+// CSV export + validated import (dry-run mode) for the master-data whitelist.
+export const dataio = new Hono<Env>()
+
+type IoRow = Record<string, unknown>
+const str = (v: unknown) => (v == null ? '' : String(v).trim())
+const numOr = (v: unknown, dflt: number) => (str(v) === '' || Number.isNaN(Number(v)) ? dflt : Number(v))
+
+const IO_TABLES: Record<string, { seq: string | null; noField: string; required: string[]; columns: string[] }> = {
+  erp_customers: {
+    seq: 'CUST', noField: 'customer_no', required: ['name'],
+    columns: ['customer_no', 'name', 'phone', 'email', 'gstin', 'billing_address', 'shipping_address', 'credit_limit', 'active'],
+  },
+  vendors: {
+    seq: 'VEND', noField: 'vendor_no', required: ['name'],
+    columns: ['vendor_no', 'name', 'phone', 'email', 'gstin', 'address', 'bank_details', 'active'],
+  },
+  items: {
+    seq: 'ITEM', noField: 'item_no', required: ['name', 'item_type'],
+    columns: ['item_no', 'name', 'item_type', 'category', 'uom', 'gst_rate', 'sales_price', 'active'],
+  },
+  employees: {
+    seq: 'EMP', noField: 'employee_no', required: ['display_name', 'join_date'],
+    columns: ['employee_no', 'display_name', 'phone', 'email', 'join_date', 'active'],
+  },
+  ledger_accounts: {
+    seq: null, noField: 'account_no', required: ['account_no', 'name', 'group_code'],  // account_no is provided, not allocated
+    columns: ['account_no', 'name', 'group_code', 'active'],
+  },
+}
+
+function validateIoRow(table: string, r: IoRow, groups: Map<string, string>): string | null {
+  const cfg = IO_TABLES[table]
+  for (const f of cfg.required) if (!str(r[f])) return `${f} required`
+  if (table === 'items' && !['product', 'part', 'service'].includes(str(r.item_type))) {
+    return "item_type must be 'product', 'part' or 'service'"
+  }
+  if (table === 'employees' && !/^\d{4}-\d{2}-\d{2}$/.test(str(r.join_date))) {
+    return 'join_date must look like 2026-07-01'
+  }
+  if (table === 'ledger_accounts' && !groups.has(str(r.group_code))) {
+    return `unknown ledger group code '${str(r.group_code)}'`
+  }
+  return null
+}
+
+function ioPayload(table: string, r: IoRow, no: string, groups: Map<string, string>): IoRow {
+  const active = str(r.active) === '' ? true : !['false', '0', 'no'].includes(str(r.active).toLowerCase())
+  switch (table) {
+    case 'erp_customers': return {
+      customer_no: no, name: str(r.name), phone: str(r.phone) || null, email: str(r.email) || null,
+      gstin: str(r.gstin) || null, billing_address: str(r.billing_address) || null,
+      shipping_address: str(r.shipping_address) || null, credit_limit: numOr(r.credit_limit, 0), active,
+    }
+    case 'vendors': return {
+      vendor_no: no, name: str(r.name), phone: str(r.phone) || null, email: str(r.email) || null,
+      gstin: str(r.gstin) || null, address: str(r.address) || null, bank_details: str(r.bank_details) || null, active,
+    }
+    case 'items': return {
+      item_no: no, name: str(r.name), item_type: str(r.item_type), category: str(r.category) || null,
+      uom: str(r.uom) || 'pcs', gst_rate: numOr(r.gst_rate, 18), sales_price: numOr(r.sales_price, 0), active,
+    }
+    case 'employees': return {
+      employee_no: no, display_name: str(r.display_name), phone: str(r.phone) || null,
+      email: str(r.email) || null, join_date: str(r.join_date), active,
+    }
+    default: return {  // ledger_accounts
+      account_no: no, name: str(r.name), group_id: groups.get(str(r.group_code)), active,
+    }
+  }
+}
+
+dataio.get('/export/:table', requirePriv('sysadmin.dataio.read'), async (c) => {
+  const table = c.req.param('table')
+  const cfg = IO_TABLES[table]
+  if (!cfg) return c.json({ error: `table must be one of: ${Object.keys(IO_TABLES).join(', ')}` }, 400)
+  const sel = table === 'ledger_accounts' ? '*, ledger_groups(code)' : '*'
+  const { data, error } = await db(c.env).from(table).select(sel)
+    .eq('entity_id', c.get('entityId')).order(cfg.noField)
+  if (error) return c.json({ error: error.message }, 500)
+  const rows = ((data ?? []) as unknown as IoRow[]).map((r) =>
+    table === 'ledger_accounts' ? { ...r, group_code: (r.ledger_groups as { code?: string } | null)?.code ?? '' } : r)
+  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  const csv = [cfg.columns.map(esc).join(','), ...rows.map((r) => cfg.columns.map((k) => esc(r[k])).join(','))].join('\n')
+  return c.json({ table, rows: rows.length, csv })
+})
+
+dataio.post('/import/:table', requirePriv('sysadmin.dataio.write'), async (c) => {
+  const table = c.req.param('table')
+  const cfg = IO_TABLES[table]
+  if (!cfg) return c.json({ error: `table must be one of: ${Object.keys(IO_TABLES).join(', ')}` }, 400)
+  const { rows, dryRun } = await c.req.json() as { rows: IoRow[]; dryRun?: boolean }
+  if (!Array.isArray(rows) || !rows.length) return c.json({ error: 'rows (non-empty array) required' }, 400)
+  if (rows.length > 1000) return c.json({ error: 'max 1000 rows per import' }, 400)
+
+  const sb = db(c.env)
+  const groups = new Map<string, string>()
+  if (table === 'ledger_accounts') {
+    const { data: gs, error } = await sb.from('ledger_groups').select('id, code')
+    if (error) return c.json({ error: error.message }, 500)
+    for (const g of gs ?? []) groups.set(g.code, g.id)
+  }
+
+  const results: { row: number; ok: boolean; error?: string; no?: string }[] = []
+  let inserted = 0
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    const invalid = validateIoRow(table, r, groups)
+    if (invalid) { results.push({ row: i + 1, ok: false, error: invalid }); continue }
+    if (dryRun) { results.push({ row: i + 1, ok: true }); continue }
+    let no = str(r[cfg.noField])
+    if (cfg.seq) {  // never trust pasted numbers: masters get sequence-allocated ids (backbone rule 2)
+      const { data, error: seqErr } = await sb.rpc('allocate_number', { p_entity: c.get('entityId'), p_code: cfg.seq })
+      if (seqErr) { results.push({ row: i + 1, ok: false, error: seqErr.message }); continue }
+      no = data as string
+    }
+    const { error } = await sb.from(table).insert({ entity_id: c.get('entityId'), ...ioPayload(table, r, no, groups) })
+    if (error) results.push({ row: i + 1, ok: false, error: error.message })
+    else { inserted++; results.push({ row: i + 1, ok: true, no }) }
+  }
+  return c.json({ dryRun: !!dryRun, total: rows.length, inserted, results })
+})
+
 // ---------------------------------------------------------------- audit
 export const audit = new Hono<Env>()
 

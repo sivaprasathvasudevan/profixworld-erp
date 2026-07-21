@@ -92,3 +92,50 @@ export function computePayrollLine(
   const net = r2(gross + incentives - pf - esi - pt - tds - advanceRecovery)
   return { basic, hra, allowances, gross, pf, esi, pt, tds, incentives: r2(incentives), advanceRecovery: r2(advanceRecovery), net }
 }
+
+// ---- Phase 8: Asset Management ----
+export type DepreciationMethod = 'straight_line' | 'wdv'
+
+export type DepreciableAsset = {
+  cost: number
+  salvageValue: number
+  accumulatedDepreciation: number
+  method: DepreciationMethod
+  ratePercent: number       // WDV annual rate
+  usefulLifeMonths: number  // straight-line life
+}
+
+/**
+ * Reference implementation of one month of depreciation — mirrors public.generate_depreciation
+ * in db/supabase/migrations/00000000000009_assets_dms.sql (keep the two in sync):
+ * straight_line: (cost - salvage) / useful_life_months; wdv: (cost - accumulated) * rate%/12;
+ * capped so accumulated never exceeds (cost - salvage); zero/negative amounts become 0 (skipped).
+ */
+export function computeDepreciationMonth(a: DepreciableAsset): number {
+  const base = r2(a.cost - a.salvageValue)
+  let amount = a.method === 'straight_line'
+    ? (a.usefulLifeMonths > 0 ? r2(base / a.usefulLifeMonths) : 0)
+    : r2((a.cost - a.accumulatedDepreciation) * (a.ratePercent / 100) / 12)
+  if (a.accumulatedDepreciation + amount > base) amount = r2(base - a.accumulatedDepreciation)
+  return amount > 0 ? amount : 0
+}
+
+/** Monthly projection until fully depreciated (max maxMonths rows) — the asset form's schedule preview. */
+export function computeDepreciationSchedule(a: DepreciableAsset, maxMonths = 120) {
+  const rows: { monthNo: number; amount: number; accumulatedAfter: number; bookValueAfter: number }[] = []
+  const base = r2(a.cost - a.salvageValue)
+  let accumulated = a.accumulatedDepreciation
+  for (let m = 1; m <= maxMonths && accumulated < base - 0.005; m++) {
+    const amount = computeDepreciationMonth({ ...a, accumulatedDepreciation: accumulated })
+    if (amount <= 0) break
+    accumulated = r2(accumulated + amount)
+    rows.push({ monthNo: m, amount, accumulatedAfter: accumulated, bookValueAfter: r2(a.cost - accumulated) })
+  }
+  return rows
+}
+
+/** Disposal math — mirrors public.dispose_asset: book value = cost - accumulated, gain/loss = proceeds - book value. */
+export function computeDisposal(cost: number, accumulatedDepreciation: number, proceeds: number) {
+  const bookValue = r2(cost - accumulatedDepreciation)
+  return { bookValue, gainLoss: r2(proceeds - bookValue) }
+}

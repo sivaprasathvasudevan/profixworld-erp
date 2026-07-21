@@ -20,8 +20,8 @@ app.get('/', (c) => c.json({ hello: 'ProFixWorld ERP API', docs: 'see CLAUDE.md'
 // Example protected route — proves JWT validation works end-to-end.
 app.get('/me', requireAuth, (c) => c.json({ user: c.get('user') }))
 
-// Phase 1: System Administration module
-import { entities, sequences, users, roles, audit } from './routes/sysadmin'
+// Phase 1: System Administration module (+ Phase 9 data import/export)
+import { entities, sequences, users, roles, audit, dataio } from './routes/sysadmin'
 // Phase 2: General Ledger module
 import { gl } from './routes/gl'
 // Phase 3: Inventory + Warehouse module
@@ -34,8 +34,11 @@ import { purchase } from './routes/purchase'
 import { hr } from './routes/hr'
 // Phase 7: Service Management module
 import { service } from './routes/service'
+// Phase 8: Asset Management + Document Management modules
+import { assets } from './routes/assets'
+import { dms } from './routes/dms'
 
-for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit', '/gl', '/inv', '/sales', '/purchase', '/hr', '/service']) {
+for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit', '/gl', '/inv', '/sales', '/purchase', '/hr', '/service', '/assets', '/dms', '/dataio']) {
   app.use(p, requireAuth)
   app.use(`${p}/*`, requireAuth)
 }
@@ -50,5 +53,8 @@ app.route('/sales', sales)
 app.route('/purchase', purchase)
 app.route('/hr', hr)
 app.route('/service', service)
+app.route('/assets', assets)
+app.route('/dms', dms)
+app.route('/dataio', dataio)
 
 export default app

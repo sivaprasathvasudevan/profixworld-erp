@@ -9,7 +9,7 @@ type Priv = { code: string; module: string; description?: string }
 type RolePriv = { role_id: string; privilege_code: string }
 type AuditRow = { id: number; table_name: string; record_id: string; action: string; actor_email?: string; at: string; diff: unknown }
 
-const TABS = ['Entities', 'Number sequences', 'Users', 'Roles', 'Audit log'] as const
+const TABS = ['Entities', 'Number sequences', 'Users', 'Roles', 'Audit log', 'Data import/export'] as const
 
 const box: React.CSSProperties = { border: '1px solid #e2e8f0', borderRadius: 8, padding: 16, marginBottom: 16 }
 const th: React.CSSProperties = { textAlign: 'left', padding: '6px 10px', background: '#f1f5f9', fontSize: 13 }
@@ -22,7 +22,7 @@ export function SystemAdministration({ entityId, onEntitiesChanged }: { entityId
   const [err, setErr] = useState('')
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {TABS.map((t) => (
           <button key={t} onClick={() => { setTab(t); setErr('') }}
             style={{ ...btn, background: tab === t ? '#0b1320' : '#e2e8f0', color: tab === t ? '#fff' : '#334155' }}>
@@ -36,6 +36,7 @@ export function SystemAdministration({ entityId, onEntitiesChanged }: { entityId
       {tab === 'Users' && <Users entityId={entityId} setErr={setErr} />}
       {tab === 'Roles' && <Roles entityId={entityId} setErr={setErr} />}
       {tab === 'Audit log' && <Audit entityId={entityId} setErr={setErr} />}
+      {tab === 'Data import/export' && <DataIO entityId={entityId} setErr={setErr} />}
     </div>
   )
 }
@@ -205,6 +206,109 @@ function Roles({ entityId, setErr }: { entityId: string; setErr: (s: string) => 
             <button style={btn} onClick={() => api(`/roles/${sel}/privileges`, { method: 'PUT', body: { privilegeCodes: [...checked] }, entityId }).then(load).catch((e) => setErr(e.message))}>
               Save privileges</button>
           </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------- data import/export (Phase 9)
+const IO_TABLES = ['erp_customers', 'vendors', 'items', 'employees', 'ledger_accounts'] as const
+type IoResult = { row: number; ok: boolean; error?: string; no?: string }
+
+/** Minimal CSV parser with quoted-field handling ("" escapes a quote). First line = headers. */
+function parseCsv(text: string): Record<string, string>[] {
+  const grid: string[][] = []
+  let cell = ''
+  let row: string[] = []
+  let inQuotes = false
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (inQuotes) {
+      if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++ } else inQuotes = false }
+      else cell += ch
+    } else if (ch === '"') inQuotes = true
+    else if (ch === ',') { row.push(cell); cell = '' }
+    else if (ch === '\n') { row.push(cell); grid.push(row); row = []; cell = '' }
+    else if (ch !== '\r') cell += ch
+  }
+  if (cell !== '' || row.length) { row.push(cell); grid.push(row) }
+  const [headers, ...data] = grid
+  if (!headers) return []
+  return data
+    .filter((r) => r.some((c) => c.trim() !== ''))
+    .map((r) => Object.fromEntries(headers.map((h, i) => [h.trim(), r[i] ?? ''])))
+}
+
+function DataIO({ entityId, setErr }: { entityId: string; setErr: (s: string) => void }) {
+  const [table, setTable] = useState<string>(IO_TABLES[0])
+  const [csvText, setCsvText] = useState('')
+  const [results, setResults] = useState<IoResult[]>([])
+  const [summary, setSummary] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const doExport = () =>
+    api<{ csv: string; rows: number }>(`/dataio/export/${table}`, { entityId }).then((d) => {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(new Blob([d.csv], { type: 'text/csv' }))
+      a.download = `${table}.csv`
+      a.click()
+    }).catch((e) => setErr(e.message))
+
+  const runImport = (dryRun: boolean) => {
+    const rows = parseCsv(csvText)
+    if (!rows.length) { setErr('Paste CSV with a header row first (tip: Export CSV gives you the template).'); return }
+    setBusy(true); setErr(''); setResults([]); setSummary('')
+    api<{ inserted: number; results: IoResult[] }>(`/dataio/import/${table}`, { method: 'POST', body: { rows, dryRun }, entityId })
+      .then((d) => {
+        setResults(d.results)
+        const ok = d.results.filter((r) => r.ok).length
+        setSummary(dryRun
+          ? `Dry run: ${ok}/${d.results.length} rows valid — nothing was written.`
+          : `Imported ${d.inserted}/${d.results.length} rows.`)
+      })
+      .catch((e) => setErr(e.message))
+      .finally(() => setBusy(false))
+  }
+
+  return (
+    <div>
+      <div style={box}>
+        <b style={{ fontSize: 14 }}>Export</b>
+        <div style={{ display: 'flex', gap: 8, marginTop: 10, alignItems: 'center' }}>
+          <select style={inp} value={table} onChange={(e) => { setTable(e.target.value); setResults([]); setSummary('') }}>
+            {IO_TABLES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <button style={btn} onClick={doExport}>Export CSV</button>
+          <span style={{ fontSize: 13, color: '#64748b' }}>Entity-filtered. The exported header row doubles as the import template.</span>
+        </div>
+      </div>
+      <div style={box}>
+        <b style={{ fontSize: 14 }}>Import into {table}</b>
+        <p style={{ fontSize: 13, color: '#64748b', margin: '6px 0' }}>
+          Paste CSV below (first line = column headers, quoted fields supported). Numbers like customer/vendor/item/employee no
+          are allocated by the sequence engine — ledger accounts use the provided account_no. Always dry-run first.
+        </p>
+        <textarea style={{ ...inp, width: '100%', boxSizing: 'border-box', minHeight: 140, fontFamily: 'monospace' }}
+          placeholder={'name,phone\n"Sharma Electronics","9876543210"'}
+          value={csvText} onChange={(e) => setCsvText(e.target.value)} />
+        <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+          <button style={{ ...btn, background: '#854d0e' }} disabled={busy || !csvText.trim()} onClick={() => runImport(true)}>Dry run</button>
+          <button style={{ ...btn, background: '#166534' }} disabled={busy || !csvText.trim()} onClick={() => runImport(false)}>Import</button>
+          {summary && <span style={{ fontSize: 13 }}><b>{summary}</b></span>}
+        </div>
+        {results.length > 0 && (
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 10 }}>
+            <thead><tr><th style={th}>Row</th><th style={th}>Result</th><th style={th}>Allocated no</th><th style={th}>Error</th></tr></thead>
+            <tbody>{results.map((r) => (
+              <tr key={r.row}>
+                <td style={td}>{r.row}</td>
+                <td style={{ ...td, color: r.ok ? '#166534' : '#b91c1c' }}>{r.ok ? 'OK' : 'Failed'}</td>
+                <td style={td}>{r.no ?? ''}</td>
+                <td style={td}>{r.error ?? ''}</td>
+              </tr>
+            ))}</tbody>
+          </table>
         )}
       </div>
     </div>

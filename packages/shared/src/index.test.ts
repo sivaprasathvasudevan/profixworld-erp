@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { computePayrollLine, docLineSchema, legalEntitySchema, numberSequenceSchema, payrollPeriod, privilege } from './index'
+import {
+  computeDepreciationMonth, computeDepreciationSchedule, computeDisposal, computePayrollLine,
+  docLineSchema, legalEntitySchema, numberSequenceSchema, payrollPeriod, privilege,
+} from './index'
 
 describe('privilege codes (module.function.action)', () => {
   it('accepts valid codes', () => {
@@ -82,5 +85,62 @@ describe('document line (header/lines backbone rule)', () => {
     expect(ok.success).toBe(true)
     const bad = docLineSchema.safeParse({ lineNo: 1, itemId: null, qty: 1, unitPrice: 0.001, lineAmount: 0.001 })
     expect(bad.success).toBe(false)
+  })
+})
+
+describe('depreciation math (mirrors generate_depreciation SQL)', () => {
+  const sl = { cost: 120000, salvageValue: 12000, accumulatedDepreciation: 0, method: 'straight_line' as const, ratePercent: 15, usefulLifeMonths: 60 }
+  const wdv = { cost: 100000, salvageValue: 0, accumulatedDepreciation: 0, method: 'wdv' as const, ratePercent: 15, usefulLifeMonths: 60 }
+
+  it('straight line: (cost - salvage) / life, constant every month', () => {
+    expect(computeDepreciationMonth(sl)).toBe(1800) // (120000-12000)/60
+    expect(computeDepreciationMonth({ ...sl, accumulatedDepreciation: 54000 })).toBe(1800)
+  })
+
+  it('WDV: declining monthly amount on the reducing book value', () => {
+    expect(computeDepreciationMonth(wdv)).toBe(1250) // 100000 * 15% / 12
+    expect(computeDepreciationMonth({ ...wdv, accumulatedDepreciation: 1250 })).toBe(1234.38) // (100000-1250)*15%/12
+  })
+
+  it('caps so accumulated never exceeds (cost - salvage), then stops', () => {
+    expect(computeDepreciationMonth({ ...sl, accumulatedDepreciation: 107000 })).toBe(1000) // only 1000 left of the 108000 base
+    expect(computeDepreciationMonth({ ...sl, accumulatedDepreciation: 108000 })).toBe(0)
+    const schedule = computeDepreciationSchedule(sl)
+    expect(schedule).toHaveLength(60)
+    expect(schedule[59].accumulatedAfter).toBe(108000)
+    expect(schedule[59].bookValueAfter).toBe(12000) // salvage survives
+  })
+
+  it('schedule preview never exceeds 120 rows (WDV asymptote)', () => {
+    const schedule = computeDepreciationSchedule(wdv)
+    expect(schedule.length).toBeLessThanOrEqual(120)
+    const last = schedule[schedule.length - 1]
+    expect(last.bookValueAfter).toBeGreaterThanOrEqual(0)
+  })
+
+  it('zero-life straight line yields no depreciation instead of dividing by zero', () => {
+    expect(computeDepreciationMonth({ ...sl, usefulLifeMonths: 0 })).toBe(0)
+  })
+})
+
+describe('asset disposal (mirrors dispose_asset SQL)', () => {
+  it('gain when proceeds exceed book value; the voucher balances', () => {
+    const { bookValue, gainLoss } = computeDisposal(120000, 90000, 40000)
+    expect(bookValue).toBe(30000)
+    expect(gainLoss).toBe(10000)
+    // Dr cash 40000 + Dr accdep 90000 = Cr fixed assets 120000 + Cr gain 10000
+    expect(40000 + 90000).toBe(120000 + gainLoss)
+  })
+
+  it('loss when proceeds fall short; the voucher balances', () => {
+    const { bookValue, gainLoss } = computeDisposal(120000, 90000, 25000)
+    expect(bookValue).toBe(30000)
+    expect(gainLoss).toBe(-5000)
+    // Dr cash 25000 + Dr accdep 90000 + Dr loss 5000 = Cr fixed assets 120000
+    expect(25000 + 90000 + -gainLoss).toBe(120000)
+  })
+
+  it('scrapping at exactly book value posts neither gain nor loss', () => {
+    expect(computeDisposal(50000, 20000, 30000).gainLoss).toBe(0)
   })
 })
