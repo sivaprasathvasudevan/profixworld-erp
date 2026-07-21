@@ -8,7 +8,7 @@ export type Bindings = {
   SUPABASE_JWKS_URL: string
   SUPABASE_JWT_ISSUER: string
 }
-export type Variables = { user: AuthUser }
+export type Variables = { user: AuthUser; entityId: string }
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
 
@@ -20,9 +20,16 @@ app.get('/', (c) => c.json({ hello: 'ProFixWorld ERP API', docs: 'see CLAUDE.md'
 // Example protected route — proves JWT validation works end-to-end.
 app.get('/me', requireAuth, (c) => c.json({ user: c.get('user') }))
 
-// Phase 1+ mounts module routers here, each behind requireAuth + privilege checks:
-//   app.route('/entities', entitiesRouter)
-//   app.route('/sequences', sequencesRouter)
-//   ...
+// Phase 1: System Administration module
+import { entities, sequences, users, roles, audit } from './routes/sysadmin'
+for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit']) {
+  app.use(p, requireAuth)
+  app.use(`${p}/*`, requireAuth)
+}
+app.route('/entities', entities)
+app.route('/sequences', sequences)
+app.route('/users', users)
+app.route('/roles', roles)
+app.route('/audit', audit)
 
 export default app
