@@ -28,8 +28,10 @@ import { gl } from './routes/gl'
 import { inventory } from './routes/inventory'
 // Phase 4: Sales & Marketing module
 import { sales } from './routes/sales'
+// Phase 5: Procurement & Sourcing module
+import { purchase } from './routes/purchase'
 
-for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit', '/gl', '/inv', '/sales']) {
+for (const p of ['/entities', '/sequences', '/users', '/roles', '/audit', '/gl', '/inv', '/sales', '/purchase']) {
   app.use(p, requireAuth)
   app.use(`${p}/*`, requireAuth)
 }
@@ -41,5 +43,6 @@ app.route('/audit', audit)
 app.route('/gl', gl)
 app.route('/inv', inventory)
 app.route('/sales', sales)
+app.route('/purchase', purchase)
 
 export default app
