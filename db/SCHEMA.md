@@ -1,8 +1,12 @@
 # ProFixWorld — existing DB schema (project `toxwbjofyglbyjanxmzv`)
 
-> Inventory of the **current live** tables, grouped by domain. This is a starting map for
-> the Phase 0 baseline. The authoritative baseline is the migration produced by
-> `supabase db pull` (pending CLI auth — see README). **Never change the DB outside a migration.**
+> Inventory of the **current live** tables, grouped by domain.
+>
+> **Baseline captured** → `supabase/migrations/00000000000000_remote_baseline.sql`
+> (94 tables · 236 constraints · 45 indexes · 134 functions/RPCs · 10 triggers · 168 policies · 285 grants).
+> Generated Docker-free via the Supabase Management API (`db/extract-baseline.mjs`, run with `pnpm db:baseline`).
+> Regenerate the pg_dump-authoritative version with `pnpm db:pull` once Docker Desktop is installed.
+> **Never change the DB outside a migration.**
 
 ## CRM / Repair desk
 | Table | Notes |

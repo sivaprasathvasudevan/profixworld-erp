@@ -5,7 +5,7 @@ Multi-legal-entity ERP evolving from ProFix CRM + profixworld.com.
 ## Stack (three-tier)
 - Client: React + TypeScript + Vite PWA on Cloudflare Pages (apps/erp is the main shell; legacy single-file PWAs live in apps/legacy)
 - API: Cloudflare Workers + Hono (api/) — ALL writes for ERP documents go through the API using the Supabase service-role key; validates Supabase Auth JWTs
-- DB: Supabase Postgres, project toxwbjofyglbyjanxmzv. All schema changes via supabase CLI migrations in db/migrations. Never change the DB outside a migration file.
+- DB: Supabase Postgres, project toxwbjofyglbyjanxmzv. All schema changes via supabase CLI migrations in db/supabase/migrations. Never change the DB outside a migration file.
 
 ## Backbone rules (apply to every module)
 1. Entity scoping: every transactional table has entity_id → legal_entities.id. Every list/query filters by the selected entity. Branches (old "shops") belong to an entity.
@@ -24,7 +24,7 @@ Multi-legal-entity ERP evolving from ProFix CRM + profixworld.com.
 - `apps/erp` — React+TS+Vite ERP shell (Cloudflare Pages)
 - `apps/legacy` — the current live single-file PWAs, copied as-is (profix-crm/, profixworld/). Deployed unchanged until each domain migrates.
 - `api/` — Cloudflare Workers + Hono. Service-role writes, JWT validation, privilege middleware.
-- `db/` — supabase CLI project; all migrations in `db/migrations`, docs in `db/SCHEMA.md`.
+- `db/` — supabase CLI project; all migrations in `db/supabase/migrations`, docs in `db/SCHEMA.md`.
 - `packages/shared` — Zod schemas + TS types shared by api and erp.
 
 ## Environments

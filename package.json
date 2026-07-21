@@ -9,9 +9,10 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "db:pull": "supabase db pull --schema public,auth --linked",
-    "db:diff": "supabase db diff -f",
-    "db:push": "supabase db push"
+    "db:baseline": "cd db && node extract-baseline.mjs",
+    "db:pull": "supabase --workdir db db pull",
+    "db:diff": "supabase --workdir db db diff -f",
+    "db:push": "supabase --workdir db db push"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

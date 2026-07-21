@@ -28,11 +28,16 @@ pnpm dev:erp                # Vite shell on :5173
 - Secrets: local in `.env` (gitignored); prod via Wrangler secrets / Pages env vars. Never commit `sb_secret_*`.
 
 ## Database (migrations only)
+Supabase project lives in `db/supabase/`; migrations in `db/supabase/migrations/`. Baseline already captured (`00000000000000_remote_baseline.sql`).
+
 ```bash
 # one-time: authenticate + link (needs SUPABASE_ACCESS_TOKEN + DB password)
 supabase login
-supabase link --project-ref toxwbjofyglbyjanxmzv
-pnpm db:pull                # baseline the existing remote schema into db/migrations
+supabase --workdir db link --project-ref toxwbjofyglbyjanxmzv
+
+pnpm db:baseline   # Docker-free schema snapshot via Management API (needs SUPABASE_ACCESS_TOKEN)
+pnpm db:pull       # authoritative pg_dump baseline — needs Docker Desktop
+pnpm db:push       # apply local migrations to remote (no Docker)
 ```
 **Never** change the DB outside a migration file.
 
