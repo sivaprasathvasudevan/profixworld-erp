@@ -7,6 +7,7 @@ import { GeneralLedger } from './modules/GeneralLedger'
 import { Inventory } from './modules/Inventory'
 import { Sales } from './modules/Sales'
 import { Procurement } from './modules/Procurement'
+import { HR } from './modules/HR'
 import { Service } from './modules/Service'
 
 // The 12 ERP modules. Phase 1 fills in System Administration; later phases fill the rest.
@@ -95,8 +96,9 @@ export function App() {
           {(active === 'Inventory' || active === 'Warehouse') && <Inventory entityId={entityId} />}
           {active === 'Sales & Marketing' && <Sales entityId={entityId} />}
           {active === 'Procurement & Sourcing' && <Procurement entityId={entityId} />}
+          {active === 'HR & Payroll' && <HR entityId={entityId} />}
           {active === 'Service Management' && <Service entityId={entityId} />}
-          {!['System Administration', 'General Ledger', 'Inventory', 'Warehouse', 'Sales & Marketing', 'Procurement & Sourcing', 'Service Management'].includes(active) &&
+          {!['System Administration', 'General Ledger', 'Inventory', 'Warehouse', 'Sales & Marketing', 'Procurement & Sourcing', 'HR & Payroll', 'Service Management'].includes(active) &&
             <p>This module is built in its phase — see CLAUDE.md and the phase prompts.</p>}
         </section>
       </main>
